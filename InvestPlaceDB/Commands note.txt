@@ -1,0 +1,17 @@
+﻿Генерация классов по БД:
+Scaffold-DbContext "data source=(local);initial catalog=InvestPlaceDatabase;integrated security=True;MultipleActiveResultSets=True;" Microsoft.EntityFrameworkCore.SqlServer
+Параметры:
+-table Artist,Album
+-UseDatabaseNames
+-DataAnnotations  
+-project
+-force 
+
+Все целиком: 
+Scaffold-DbContext "data source=(local);initial catalog=InvestPlaceDatabase;integrated security=True;MultipleActiveResultSets=True;" Microsoft.EntityFrameworkCore.SqlServer -table ExtendedUser -UseDatabaseNames -DataAnnotations -project InvestPlaceDB
+
+Создание миграции:
+Add-Migration CreateCustomSchema -project InvestPlaceDB
+
+Приминение миграции:	
+Update-Database

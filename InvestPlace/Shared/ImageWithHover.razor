@@ -1,0 +1,31 @@
+﻿@inject IJSRuntime JSRuntime;
+
+
+
+<div class="img-wrapper">
+    <img class="img-full" src="@MainImage" />
+    <img class="img-hover" src="@HoverImage" style="display: @(ShowHover ? "block" : "none");" />
+</div>
+
+
+
+
+
+
+
+
+@code {
+    [Parameter]
+    public string MainImage { get; set; }
+
+    [Parameter]
+    public string HoverImage { get; set; }
+
+    [Parameter]
+    public bool ShowHover { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        var text = await JSRuntime.InvokeAsync<string>("InitImageHovers", null);
+    }
+}

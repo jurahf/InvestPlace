@@ -1,0 +1,50 @@
+﻿@page "/"
+
+@using Services.DTO;
+
+@inject Services.Services.LotService.ILotService lotService
+
+<!-- реклама -->
+
+
+<!-- слайдер карусели -->
+
+<!-- 2 ряда товаров -->
+<div class="row">
+
+    @foreach (var lot in allLots.Take(8))
+    {        
+    <div class="col col-3">
+        <a class="link-text-usual" href="/lot/@lot.Id">
+            <img class="lot-list-img" src="@lot.ImageLink" alt="" />
+            <div class="lot-list-count">@lot.PuzzleCount</div>
+            <div class="lot-list-price">@lot.Price ₽</div>
+
+            <div style="">@lot.Name</div>
+        </a>
+    </div>
+    }
+</div>
+
+
+
+
+<!-- вы участвуете в благотворительности -->
+<div class="row margin-top-50">
+    <div class="col col-12">
+        <p class="text-red">Становясь клиентом Invest Place Вы участвуете в благотворительности.</p>
+    </div>
+</div>
+
+
+
+
+@code { 
+
+    List<LotDto> allLots = new List<LotDto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        allLots = await lotService.GetAllAsync();
+    }
+}

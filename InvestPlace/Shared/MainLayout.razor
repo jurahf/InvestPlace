@@ -1,0 +1,41 @@
+﻿@inherits LayoutComponentBase
+
+@*<div class="sidebar">
+    <NavMenu />
+</div>*@
+
+<div class="main">
+
+    <div class="header-wrapper">
+        <div class="row header">
+            <div class="col col-6">
+                <a href="#"><img src="/images/logo.png" /></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row nav-row">
+        <div class="col col-8">
+            <a href="#" class="active">Личный кабинет</a>
+            <a href="#">Категория товара</a>
+            <a href="#">О нас</a>
+            <a href="#">Частые вопросы</a>
+            <a href="#">Поле покупателей</a>
+        </div>
+
+        <div class="col col-2 offset-2">
+            <a href="/Basket" class="dropright">Корзина</a>
+            <a href="#" class="dropright">Поиск</a>
+        </div>
+    </div>
+
+    <div class="content px-4">
+        @Body
+    </div>
+</div>
+
+
+@code { 
+    
+
+}

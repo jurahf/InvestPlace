@@ -1,0 +1,101 @@
+﻿@page "/Lot/{id:int}"
+
+@using Services.DTO;
+
+@inject NavigationManager NavigationManager
+@inject Services.Services.LotService.ILotService lotService
+
+
+
+<div class="row">
+    <div class="col col-6">
+
+        <!-- картинка и разбивка по пазлам -->
+        <div class="row">
+            <div class="col col-12">
+                <ImageWithHover MainImage="@editedLot.ImageLink" HoverImage="/images/puzzle-net.png" ShowHover="@showNet">
+                </ImageWithHover>
+            </div>
+        </div>
+
+        <!-- купить пазл, цена пазла, сколько уже куплено -->
+        <div class="row margin-top-10">
+            <div class="col col-4">
+                <button class="btn btn-primary" @onclick="Buy">Купить пазл</button>
+            </div>
+
+            <div class="col col-4">
+                <h5 class="text-red">@editedLot.PuzzlePrice руб</h5>
+            </div>
+
+            <div class="col col-4">
+                <button @onclick="ShowNet" class="lot-edit-count-btn">
+                    <div class="lot-edit-count">@editedLot.PuzzleCount</div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- название, описание, ссылка -->
+    <!-- цена -->
+    <div class="col col-6">
+
+        <div class="row">
+            <div class="col col-12">
+                <h4 class="text-red">@editedLot.Name</h4>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col col-12">
+                @editedLot.Description
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col col-12">
+                <a href="@editedLot.SourceLink">@editedLot.SourceLink</a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col col-12">
+                <h3>@editedLot.Price</h3>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private bool showNet = false;
+
+    protected LotDto editedLot = new LotDto();
+
+    protected override void OnInitialized()
+    {
+        editedLot = lotService.GetById(Id);
+    }
+
+    private void ShowNet()
+    {
+        showNet = !showNet;
+    }
+
+    private void Buy()
+    {
+        // TODO:
+        // проверить, авторизован, или нет
+        // добавить товар пользователю
+
+        // перейти в корзину
+        NavigationManager.NavigateTo("Basket");
+    }
+}

@@ -1,0 +1,23 @@
+﻿@page "/Basket/"
+
+<h3>Корзина</h3>
+
+<AuthorizeView>
+    <NotAuthorized>
+        @* TODO: элемент с приглашением авторизации/регистрации *@
+        Войдите, или <a href="/Identity/Account/Register">зарегистрируйтесь</a>, чтобы продолжить.
+    </NotAuthorized>
+
+    <Authorized>
+        А здесь мы нарисуем корзину.
+    </Authorized>
+</AuthorizeView>
+
+
+
+
+@code {
+
+    // TODO: тут именно из кода надо взять пользователя и его корзину, не через параметры
+
+}
