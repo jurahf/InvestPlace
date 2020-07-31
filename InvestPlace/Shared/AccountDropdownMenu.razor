@@ -6,14 +6,35 @@
 
 <AuthorizeView>
     <Authorized>
-        <a class="text-red" href="/Account/Manage">@UserName</a>
+        <a class="text-red dropdown-item" href="/Account/Manage">@UserName</a>
+        <div class="dropdown-divider"></div>
+
+        <a class="dropdown-item" href="#">Кошелёк</a>
+        <div class="dropdown-divider"></div>
+
+        <a class="dropdown-item" href="#">Мои товары</a>
+        <div class="dropdown-divider"></div>
+
+        <a class="dropdown-item" href="#">Участвую в сборе пазлов</a>
+        <div class="dropdown-divider"></div>
+
+        <a class="dropdown-item" href="#">Обмен собранной картинки на товар</a>
+        <div class="dropdown-divider"></div>
+
+        <a class="dropdown-item" href="#">Правила участия</a>
+        <div class="dropdown-divider"></div>
+
+        <a class="dropdown-item" href="#">История операция</a>
+        <div class="dropdown-divider"></div>
+
         <form method="post" action="/Account/LogOut">
             <button type="submit" class="nav-link btn btn-link">Выход</button>
         </form>
     </Authorized>
     <NotAuthorized>
-        <a href="/Account/Login">Войти</a>
-        <a href="/Account/Register">Зарегистрироваться</a>
+        <a class="dropdown-item" href="/Account/Login">Войти</a>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" href="/Account/Register">Зарегистрироваться</a>
     </NotAuthorized>
 </AuthorizeView>
 

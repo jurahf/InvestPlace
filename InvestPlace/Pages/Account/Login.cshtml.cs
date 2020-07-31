@@ -43,15 +43,16 @@ namespace InvestPlace.Pages.Account
 
         public class InputModel
         {
-            [Required]
+            [Required(ErrorMessage = "Электронная почта обязательна")]
             [EmailAddress]
             public string Email { get; set; }
 
-            [Required]
+            [Required(ErrorMessage = "Пароль обязателен")]
+            [Display(Name = "Пароль")]
             [DataType(DataType.Password)]
             public string Password { get; set; }
 
-            [Display(Name = "Remember me?")]
+            [Display(Name = "Запомнить меня")]
             public bool RememberMe { get; set; }
         }
 
@@ -98,7 +99,7 @@ namespace InvestPlace.Pages.Account
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    ModelState.AddModelError(string.Empty, "Не удалось выполнить вход");
                     return Page();
                 }
             }
