@@ -1,5 +1,10 @@
 ﻿@inherits LayoutComponentBase
 
+@using Blazored
+@using Blazored.Modal
+@using Blazored.Modal.Services
+
+@inject IModalService Modal
 
 <div class="main">
 
@@ -34,6 +39,7 @@
 
                 <li class="">
                     <a href="#">Категория товара</a>
+                    <button @onclick="@(() => Modal.Show<Pages.Basket>("Modal Popup Example"))" class="btn btn-primary">Modal test</button>
                 </li>
 
                 <li class="">
@@ -66,6 +72,11 @@
         @Body
     </div>
 </div>
+
+
+<BlazoredModal />
+
+
 
 
 @code {
