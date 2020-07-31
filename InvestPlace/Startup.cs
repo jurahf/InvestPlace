@@ -17,6 +17,8 @@ using InvestPlace.Areas.Identity;
 using InvestPlaceDB;
 using Services.Services.LotService;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.CodeAnalysis.Options;
+using Services.Services.ExtendedUserService;
 
 namespace InvestPlace
 {
@@ -40,13 +42,25 @@ namespace InvestPlace
 #endif
 
             services.AddDbContext<InvestPlaceContext>(options => options.UseSqlServer(connectionString));
-            services.AddDefaultIdentity<ExtendedUser>(options => options.SignIn.RequireConfirmedAccount = false)
-                .AddEntityFrameworkStores<InvestPlaceContext>();
+            services.AddDefaultIdentity<ExtendedUser>(options =>
+                {
+                    options.SignIn.RequireConfirmedAccount = false;
+                    options.Password.RequiredLength = 6;
+                    options.Password.RequireDigit = true;
+                    options.Password.RequireUppercase = false;
+                    options.Password.RequireLowercase = false;
+                    options.Password.RequireNonAlphanumeric = false;
+                    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+1234567890àáâãäå¸æçèéêëìíîïğñòóôõö÷øùúûüışÿÀÁÂÃÄÅ¨ÆÇÈÉÊËÌÍÎÏĞÑÒÓÔÕÖ×ØÙÚÛÜİŞß";
+                })
+                .AddEntityFrameworkStores<InvestPlaceContext>()
+                //.AddPasswordValidator<
+                ;
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<ExtendedUser>>();
 
             services.AddScoped<ILotService, LotService>();
+            services.AddScoped<IExtendedUserService, ExtendedUserService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

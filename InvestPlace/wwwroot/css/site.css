@@ -61,7 +61,7 @@ app {
 }
 
 .text-red {
-    color: #800000;
+    color: #800000 !important;
 }
 
 .header-wrapper {
@@ -140,13 +140,14 @@ a.link-text-usual:hover {
 
 .nav-row {
     background-color: #141414;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-top: 0px;
+    padding-bottom: 0px;
     padding-left: 170px;
     margin-left: 0px;
     margin-right: 0px;
 }
 
+.nav-row li,
 .nav-row a {
     color: white;
     margin-left: 20px;
@@ -157,9 +158,10 @@ a.link-text-usual:hover {
     font-weight: 100;
 }
 
-.nav-row a:first-child {
-    margin-left: -15px;
-}
+.nav-row li:first-child
+.nav-row a:first-child{
+        margin-left: -15px;
+    }
 
 .nav-row a:hover {
     color: white;
@@ -170,6 +172,23 @@ a.link-text-usual:hover {
     border-top: 2px solid #7f0000;
 }
 
+
+
+.nav-row .dropdown-menu {
+    background-color: #959ea4;
+}
+
+.nav-row .dropdown-item:active {
+    background-color: #7d858a;
+}
+
+.nav-row a.dropdown-item {
+    margin: 0;
+}
+
+.nav-row a.dropdown-item:hover {
+    background-color: #7d858a;
+}
 
 
 .main .top-row > a, .main .top-row .btn-link {

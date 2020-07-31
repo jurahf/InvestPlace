@@ -1,8 +1,5 @@
 ﻿@inherits LayoutComponentBase
 
-@*<div class="sidebar">
-    <NavMenu />
-</div>*@
 
 <div class="main">
 
@@ -14,20 +11,56 @@
         </div>
     </div>
 
-    <div class="row nav-row">
-        <div class="col col-8">
-            <a href="#" class="active">Личный кабинет</a>
-            <a href="#">Категория товара</a>
-            <a href="#">О нас</a>
-            <a href="#">Частые вопросы</a>
-            <a href="#">Поле покупателей</a>
-        </div>
 
-        <div class="col col-2 offset-2">
-            <a href="/Basket" class="dropright">Корзина</a>
-            <a href="#" class="dropright">Поиск</a>
+    <nav class="navbar navbar-expand-lg navbar-light nav-row">
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class=" dropdown">
+                    <a class="dropdown-toggle active" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Личный кабинет
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+
+                        <LoginDisplay></LoginDisplay>
+                        <div class="dropdown-divider"></div>
+
+                    </div>
+                </li>
+
+                <li class="">
+                    <a href="#">Категория товара</a>
+                </li>
+
+                <li class="">
+                    <a href="#">О нас</a>
+                </li>
+
+                <li class="">
+                    <a href="#">Частые вопросы</a>
+                </li>
+
+                <li class="">
+                    <a href="#">Поле покупателей</a>
+                </li>
+
+
+                <li class="">
+                    <a href="/Basket" class="dropright">Корзина</a>
+                </li>
+
+                <li class="">
+                    <a href="#" class="dropright">Поиск</a>
+                </li>
+            </ul>
         </div>
-    </div>
+    </nav>
+
+
 
     <div class="content px-4">
         @Body
@@ -35,7 +68,7 @@
 </div>
 
 
-@code { 
-    
+@code {
+
 
 }
