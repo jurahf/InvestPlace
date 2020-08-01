@@ -10,6 +10,7 @@ namespace Services.DTO
         public string Email { get; set; }
         public string InnerName { get; set; }
         public UserRole Role { get; set; }
+        public CashDto Cash { get; set; }
 
         public ExtendedUserDto()
         {
@@ -25,6 +26,7 @@ namespace Services.DTO
                 Email = user.Email,
                 InnerName = user.InnerName,
                 //this.Role = user.R
+                Cash = CashDto.ConvertByCash(user.Cash)
             };
         }
     }

@@ -355,12 +355,23 @@ a.link-text-usual:hover {
 /************************/
 
 
+.inline {
+    display: inline;
+}
 
 
 .margin-top-10 {
     margin-top: 10px;
 }
 
+.margin-top-20 {
+    margin-top: 20px;
+}
+
 .margin-top-50 {
     margin-top: 50px;
+}
+
+.margin-top-120 {
+    margin-top: 120px;
 }

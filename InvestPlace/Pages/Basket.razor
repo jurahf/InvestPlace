@@ -1,17 +1,10 @@
-﻿@page "/Basket/"
+﻿@page "/Basket"
 
-<h3>Корзина</h3>
+<h4>Корзина</h4>
 
-<AuthorizeView>
-    <NotAuthorized>
-        @* TODO: элемент с приглашением авторизации/регистрации *@
-        Войдите, или <a href="/Account/Register">зарегистрируйтесь</a>, чтобы продолжить.
-    </NotAuthorized>
-
-    <Authorized>
-        А здесь мы нарисуем корзину.
-    </Authorized>
-</AuthorizeView>
+<LoginWelcome>
+    <p>А здесь мы нарисуем корзину.</p>
+</LoginWelcome>
 
 
 

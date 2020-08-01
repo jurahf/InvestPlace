@@ -1,0 +1,72 @@
+﻿@page "/Cash"
+
+@using Services.DTO;
+@using Services.Services.ExtendedUserService;
+@inject AuthenticationStateProvider AuthenticationStateProvider;
+@inject IExtendedUserService ExtendedUserService;
+
+
+<LoginWelcome>
+
+    <div class="margin-top-50"></div>
+
+    <div class="row">
+        <div class="col col-2 offset-1 text-center">
+            <img class="" src="/images/icon-cash.png" alt="cash"/>
+            <h4 class="text-red text-center margin-top-20">КОШЕЛЁК</h4>
+        </div>
+
+        <div class="col col-6 offset-3">
+
+            <div class="row">
+                <div class="col col-12">
+                    <!-- баланс -->
+                    <h4 class="inline">Баланс: </h4><h2 class="inline">@(cash?.Summ ?? 0)</h2><h4 class="inline"> руб</h4>
+                </div>
+            </div>
+
+            <div class="row margin-top-120">
+                <div class="col col-12">
+                    <!-- вывод денег -->
+                    <button class="btn btn-primary">Вывод денег</button>
+                </div>
+            </div>
+
+            <div class="row margin-top-20">
+                <div class="col col-12">
+                    <!-- проверить реквизиты -->
+                    <a class="text-red" href="/ManageAccount">Проверить банковские реквизиты</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</LoginWelcome>
+
+
+
+
+@code {
+    CashDto cash = null;
+
+    protected override void OnInitialized()
+    {
+        cash = FindUserCash().Result;
+    }
+
+    private async Task<CashDto> FindUserCash()
+    {
+        CashDto result = null;
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            ExtendedUserDto currentUser = ExtendedUserService.GetByEmail(user.Identity.Name);
+            result = currentUser?.Cash;
+        }
+
+        return result;
+    }
+}

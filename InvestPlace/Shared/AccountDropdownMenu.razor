@@ -1,15 +1,14 @@
-﻿@using InvestPlaceDB;
-@using Services.DTO;
+﻿@using Services.DTO;
 @using Services.Services.ExtendedUserService;
 @inject AuthenticationStateProvider AuthenticationStateProvider;
 @inject IExtendedUserService ExtendedUserService;
 
 <AuthorizeView>
     <Authorized>
-        <a class="text-red dropdown-item" href="/Account/Manage">@UserName</a>
+        <a class="text-red dropdown-item" href="/ManageAccount">@UserName</a>
         <div class="dropdown-divider"></div>
 
-        <a class="dropdown-item" href="#">Кошелёк</a>
+        <a class="dropdown-item" href="/Cash">Кошелёк</a>
         <div class="dropdown-divider"></div>
 
         <a class="dropdown-item" href="#">Мои товары</a>
@@ -51,8 +50,6 @@
 
     private async Task<string> FindUserName()
     {
-        //string email = context.User.Identity.Name;
-
         string result = "";
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
@@ -61,10 +58,6 @@
         {
             ExtendedUserDto currentUser = ExtendedUserService.GetByEmail(user.Identity.Name);
             result = currentUser?.InnerName;
-        }
-        else
-        {
-            result = "";
         }
 
         return result;

@@ -1,0 +1,58 @@
+﻿@page "/ManageAccount"
+
+@using Services.DTO;
+@using Services.Services.ExtendedUserService;
+@inject AuthenticationStateProvider AuthenticationStateProvider;
+@inject IExtendedUserService ExtendedUserService;
+
+
+
+
+<LoginWelcome>
+
+    <div class="margin-top-50"></div>
+
+    <div class="row">
+        <div class="col col-2 offset-1 text-center">
+            <img class="" src="/images/icon-profile.png" alt="profile" />
+            <h4 class="text-red text-center margin-top-20">@user.InnerName</h4>
+        </div>
+    </div>
+
+    <!-- фамилия
+        имя отчество
+        телефон Email
+        
+        Номер счета Корр.счет   
+        Банк получателя ИНН 
+        БИК КПП
+        
+        Адрес
+        
+        Годовой рекламный сбор-->
+
+</LoginWelcome>
+
+
+@code {
+    ExtendedUserDto user = null;
+
+    protected override void OnInitialized()
+    {
+        user = FindUser().Result;
+    }
+
+    private async Task<ExtendedUserDto> FindUser()
+    {
+        ExtendedUserDto result = null;
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            result = ExtendedUserService.GetByEmail(user.Identity.Name);
+        }
+
+        return result;
+    }
+}
