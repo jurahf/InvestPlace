@@ -17,25 +17,156 @@
             <img class="" src="/images/icon-profile.png" alt="profile" />
             <h4 class="text-red text-center margin-top-20">@user.InnerName</h4>
         </div>
+
+        <div class="col col-9">
+
+            <EditForm Model="@user" OnValidSubmit="ValidSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <!-- фамилия -->
+                <div class="row">
+                    <div class="col col-6">
+                        <div class="form-group">
+                            <label class="label">Фамилия</label>
+                            <InputText class="form-control" @bind-Value="user.Surname"></InputText>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- имя отчество -->
+                <div class="row">
+                    <div class="col col-6">
+                        <div class="form-group">
+                            <label class="label">Имя</label>
+                            <InputText class="form-control" @bind-Value="user.InnerName"></InputText>
+                        </div>
+                    </div>
+                    <div class="col col-6">
+                        <div class="form-group">
+                            <label class="label">Отчетво</label>
+                            <InputText class="form-control" @bind-Value="user.Patronymic"></InputText>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- телефон Email -->
+                <div class="row">
+                    <div class="col col-6">
+                        <div class="form-group">
+                            <label class="label">Телефон</label>
+                            <InputText class="form-control" @bind-Value="@user.PhoneNumber" />
+                        </div>
+                    </div>
+                    <div class="col col-6">
+                        <div class="form-group">
+                            <label class="label">E-mail</label>
+                            <InputText class="form-control" @bind-Value="@user.Email" type="email" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- раздел - банковский счет -->
+                <div class="row margin-top-50">
+                    <div class="col col-12">
+                        <p class="text-red">Реквизиты банковского счёта</p>
+                        <hr />
+                    </div>
+                </div>
+
+                <!-- Номер счета Корр.счет -->
+                <div class="row">
+                    <div class="col col-6">
+                        <div class="form-group">
+                            <label class="label">Номер счёта</label>
+                            <InputText class="form-control" @bind-Value="@user.SchetNumber" />
+                        </div>
+                    </div>
+                    <div class="col col-6">
+                        <div class="form-group">
+                            <label class="label">Корр. счёт</label>
+                            <InputText class="form-control" @bind-Value="@user.CorrSchet" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Банк получателя ИНН -->
+                <div class="row">
+                    <div class="col col-6">
+                        <div class="form-group">
+                            <label class="label">Банк получателя</label>
+                            <InputText class="form-control" @bind-Value="@user.Bank" />
+                        </div>
+                    </div>
+                    <div class="col col-6">
+                        <div class="form-group">
+                            <label class="label">ИНН</label>
+                            <InputText class="form-control" @bind-Value="@user.INN" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- БИК КПП -->
+                <div class="row">
+                    <div class="col col-6">
+                        <div class="form-group">
+                            <label class="label">БИК</label>
+                            <InputText class="form-control" @bind-Value="@user.BIK" />
+                        </div>
+                    </div>
+                    <div class="col col-6">
+                        <div class="form-group">
+                            <label class="label">КПП</label>
+                            <InputText class="form-control" @bind-Value="@user.KPP" />
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <!-- раздел - адрес -->
+                <div class="row margin-top-50">
+                    <div class="col col-12">
+                        <p class="text-red">Адрес получения награды</p>
+                        <hr />
+                    </div>
+                </div>
+                <!-- Адрес -->
+                <div class="row">
+                    <div class="col col-12">
+                        <div class="form-group">
+                            <label class="label">Индекс, область/край, город, улица, дом</label>
+                            <InputText class="form-control" @bind-Value="@user.Address" />
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Годовой рекламный сбор-->
+
+
+                <!-- сохранение -->
+                <div class="row margin-top-20">
+                    <div class="col col-12">
+                        <button class="btn btn-secondary" type="submit">Сохранить</button>
+                        <label class="label" style="display:@(showSuccess ? "inline-block": "none")">Данные сохранены.</label>
+                    </div>
+                </div>
+
+            </EditForm>
+        </div>
     </div>
 
-    <!-- фамилия
-        имя отчество
-        телефон Email
-        
-        Номер счета Корр.счет   
-        Банк получателя ИНН 
-        БИК КПП
-        
-        Адрес
-        
-        Годовой рекламный сбор-->
+
 
 </LoginWelcome>
 
 
+
+
 @code {
     ExtendedUserDto user = null;
+    bool showSuccess = false;
 
     protected override void OnInitialized()
     {
@@ -54,5 +185,11 @@
         }
 
         return result;
+    }
+
+    private void ValidSubmit()
+    {
+        showSuccess = false;
+        showSuccess = ExtendedUserService.UpdateUser(user);
     }
 }

@@ -16,6 +16,7 @@ namespace InvestPlaceDB
         public virtual DbSet<Basket> Basket { get; set; }
         public virtual DbSet<Cash> Cash { get; set; }
         public virtual DbSet<CashOperation> CashOperation { get; set; }
+        public virtual DbSet<QueryForOperation> QueryForOperation { get; set; }
         public virtual DbSet<Category> Category { get; set; }
         //public virtual DbSet<ExtendedUser> ExtendedUser { get; set; }
         public virtual DbSet<Lot> Lot { get; set; }

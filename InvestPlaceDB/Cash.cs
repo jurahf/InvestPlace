@@ -11,6 +11,7 @@ namespace InvestPlaceDB
         {
             CashOperation = new HashSet<CashOperation>();
             ExtendedUser = new HashSet<ExtendedUser>();
+            QueryForOperation = new HashSet<QueryForOperation>();
         }
 
         [Key]
@@ -20,7 +21,11 @@ namespace InvestPlaceDB
 
         [InverseProperty("Cash")]
         public virtual ICollection<CashOperation> CashOperation { get; set; }
+
         [InverseProperty("Cash")]
         public virtual ICollection<ExtendedUser> ExtendedUser { get; set; }
+
+        [InverseProperty("Cash")]
+        public virtual ICollection<QueryForOperation> QueryForOperation { get; set; }
     }
 }

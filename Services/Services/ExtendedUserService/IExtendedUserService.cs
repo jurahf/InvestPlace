@@ -9,5 +9,7 @@ namespace Services.Services.ExtendedUserService
     public interface IExtendedUserService
     {
         ExtendedUserDto GetByEmail(string email);
+
+        bool UpdateUser(ExtendedUserDto userDto);
     }
 }

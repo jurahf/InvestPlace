@@ -10,6 +10,7 @@ html {
 
 body {
     background-color: #ededed;
+    margin-bottom: 100px;
 }
 
 a, .btn-link {
@@ -17,30 +18,42 @@ a, .btn-link {
 }
 
 .btn-primary {
+    text-transform: uppercase;
+}
+
+.btn-primary,
+.btn-secondary {
     color: #fff;
     background-color: #800000;
     border-color: #800000;
     border-radius: 0;
-    text-transform: uppercase;
 }
 
-.btn-primary:hover {
+.btn-primary:hover,
+.btn-secondary:hover{
     border-color: #500000;
     background-color: #500000;
 }
 
 
-.btn-primary:not(:disabled):not(.disabled):active:focus, .btn-primary:not(:disabled):not(.disabled).active:focus,
-.show > .btn-primary.dropdown-toggle:focus {
-    background-color: #A00000;
-    border-color: #A00000;
-    box-shadow: 0 0 0 0.2rem rgba(204, 61, 61, 0.5);
-}
+.btn-primary:not(:disabled):not(.disabled):active:focus,
+.btn-primary:not(:disabled):not(.disabled).active:focus,
+.show > .btn-primary.dropdown-toggle:focus,
+.btn-secondary:not(:disabled):not(.disabled):active:focus,
+.btn-secondary:not(:disabled):not(.disabled).active:focus,
+.show > .btn-secondary.dropdown-toggle:focus {
+        background-color: #A00000;
+        border-color: #A00000;
+        box-shadow: 0 0 0 0.2rem rgba(204, 61, 61, 0.5);
+    }
 
-.btn-primary:focus, .btn-primary.focus {
-    box-shadow: none;/* 0 0 0 0.2rem rgba(204, 61, 61, 0.5);*/
-    border-color: #A00000;
-}
+.btn-primary:focus,
+.btn-primary.focus,
+.btn-secondary:focus,
+.btn-secondary.focus {
+        box-shadow: none; /* 0 0 0 0.2rem rgba(204, 61, 61, 0.5);*/
+        border-color: #A00000;
+    }
 
 
 
@@ -353,6 +366,10 @@ a.link-text-usual:hover {
 .img-wrapper {
 }
 /************************/
+
+.label {
+    color: #808080;
+}
 
 
 .inline {
