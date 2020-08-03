@@ -155,7 +155,8 @@ a.link-text-usual:hover {
     background-color: #141414;
     padding-top: 0px;
     padding-bottom: 0px;
-    padding-left: 170px;
+    padding-left: 10em;
+    padding-right: 10em;
     margin-left: 0px;
     margin-right: 0px;
 }
@@ -171,10 +172,12 @@ a.link-text-usual:hover {
     font-weight: 100;
 }
 
-.nav-row li:first-child
-.nav-row a:first-child{
-        margin-left: -15px;
-    }
+.nav-row ul li:first-child,
+.nav-row ul li:first-child a,
+.nav-row a:first-child {
+    margin-left: 0px;
+}
+
 
 .nav-row a:hover {
     color: white;

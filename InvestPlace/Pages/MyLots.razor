@@ -1,0 +1,77 @@
+﻿@page "/MyLots"
+
+@using Services.DTO;
+@using Services.Services.LotService;
+@using Services.Services.ExtendedUserService;
+@inject AuthenticationStateProvider AuthenticationStateProvider;
+@inject ILotService LotService;
+@inject IExtendedUserService ExtendedUserService;
+
+
+
+<LoginWelcome>
+
+    <div class="margin-top-20"></div>
+
+    <div class="row">
+        <div class="col col-3">
+            <h4 class="text-red">Мои товары</h4>
+        </div>
+
+        <div class="col col-6">
+
+        </div>
+
+        <div class="col col-3">
+            <button class="btn btn-primary">Разместить товар</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col col-12">
+            @foreach (var lot in lots)
+            {
+                <p>@lot.Name</p>
+            }
+        </div>
+    </div>
+
+</LoginWelcome>
+
+
+
+
+
+
+
+
+
+@code {
+
+    List<LotDto> lots = new List<LotDto>();
+
+    protected override void OnInitialized()
+    {
+        lots = FindLots().Result;
+    }
+
+    private async Task<List<LotDto>> FindLots()
+    {
+        ExtendedUserDto extendedUser = null;
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            extendedUser = ExtendedUserService.GetByEmail(user.Identity.Name);
+        }
+
+        List<LotDto> result = new List<LotDto>();
+        if (extendedUser != null)
+        {
+            result = LotService.GetByUser(extendedUser);
+        }
+
+        return result;
+    }
+}
