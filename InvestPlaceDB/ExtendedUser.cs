@@ -14,12 +14,9 @@ namespace InvestPlaceDB
             LotCreateModerator = new HashSet<Lot>();
             PazzleBuyer = new HashSet<Pazzle>();
             PazzleChangeModerator = new HashSet<Pazzle>();
-            SellerNavigation = new HashSet<Seller>();
             CashQueryModerator = new HashSet<QueryForOperation>();
+            LotSeller = new HashSet<Lot>();
         }
-
-
-        public int? SellerId { get; set; }
 
         public int? BasketId { get; set; }
 
@@ -66,12 +63,12 @@ namespace InvestPlaceDB
         [InverseProperty("ExtendedUser")]
         public virtual Cash Cash { get; set; }
 
-        [ForeignKey(nameof(SellerId))]
-        [InverseProperty("ExtendedUser")]
-        public virtual Seller Seller { get; set; }
 
         [InverseProperty(nameof(Lot.CompleteModerator))]
         public virtual ICollection<Lot> LotCompleteModerator { get; set; }
+
+        [InverseProperty(nameof(Lot.Seller))]
+        public virtual ICollection<Lot> LotSeller { get; set; }
 
         [InverseProperty(nameof(Lot.CreateModerator))]
         public virtual ICollection<Lot> LotCreateModerator { get; set; }
@@ -81,9 +78,6 @@ namespace InvestPlaceDB
 
         [InverseProperty(nameof(Pazzle.ChangeModerator))]
         public virtual ICollection<Pazzle> PazzleChangeModerator { get; set; }
-
-        [InverseProperty("ContractModerator")]
-        public virtual ICollection<Seller> SellerNavigation { get; set; }
 
         [InverseProperty(nameof(QueryForOperation.CashQueryModerator))]
         public virtual ICollection<QueryForOperation> CashQueryModerator { get; set; }

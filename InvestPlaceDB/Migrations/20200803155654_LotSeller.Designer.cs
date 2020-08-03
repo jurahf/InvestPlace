@@ -4,14 +4,16 @@ using InvestPlaceDB;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace InvestPlaceDB.Migrations
 {
     [DbContext(typeof(InvestPlaceContext))]
-    partial class InvestPlaceContextModelSnapshot : ModelSnapshot
+    [Migration("20200803155654_LotSeller")]
+    partial class LotSeller
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

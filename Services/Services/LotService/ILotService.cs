@@ -11,5 +11,7 @@ namespace Services.Services.LotService
         Task<List<LotDto>> GetAllAsync();
 
         LotDto GetById(int id);
+
+        List<LotDto> GetByUser(ExtendedUserDto user);
     }
 }

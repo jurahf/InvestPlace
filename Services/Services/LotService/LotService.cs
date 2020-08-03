@@ -28,5 +28,12 @@ namespace Services.Services.LotService
         {
             return new LotDto(db.Lot.FirstOrDefault(x => x.Id == id));
         }
+
+        public List<LotDto> GetByUser(ExtendedUserDto user)
+        {
+            return db.Lot.Where(x => x.SellerId == user.Id).Select(x => new LotDto(x)).ToList();
+        }
+
+
     }
 }
