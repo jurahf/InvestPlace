@@ -3,6 +3,7 @@
 @using Services.DTO;
 @using Services.Services.LotService;
 @using Services.Services.ExtendedUserService;
+@using System.IO; 
 
 @inject AuthenticationStateProvider AuthenticationStateProvider;
 @inject ILotService LotService;
@@ -22,10 +23,14 @@
 
         <div class="row">
             <div class="col col-6">
+
                 <!-- место для загрузки картинки -->
-                <div class="load-img conteiner-for-centered text-gray-light">
-                    <h5>Перетащите картинку товара сюда</h5>
+                <div class="dropzone text-gray-light">
+                    <h5 class="text-center">Перетащите картинку товара сюда или нажмите для выбора файла</h5>
+                    <InputFile dropclass="load-img" OnChange="HandleFileSelected"></InputFile>
                 </div>
+                <h6 class="text-danger">@fileErrorText</h6>
+
             </div>
 
             <div class="col col-6">
@@ -55,5 +60,46 @@
 
 
 @code {
+    const int MaxFileSizeMb = 2;
+    const int MaxFileSizeBytes = MaxFileSizeMb * 1024 * 1024;
+    string fileErrorText = "";
+
+    async void HandleFileSelected(IFileListEntry[] files)
+    {
+        fileErrorText = "";
+        var file = files.FirstOrDefault();
+
+        List<string> acceptedFileTypes = new List<string>() { "image/png", "image/jpeg", "image/gif" };
+        if (file != null)
+        {
+            if (file.Size > MaxFileSizeBytes)
+            {
+                fileErrorText = $"Размер файла не должен превышать {MaxFileSizeMb} Мб";
+            }
+
+            if (!acceptedFileTypes.Contains(file.Type))
+            {
+                fileErrorText = "Файл должен иметь расширение png, jpg или gif";
+            }
+
+            // принимаем файл, загружаем его на сервер, и отображаем по ссылке
+            if (string.IsNullOrEmpty(fileErrorText))
+            {
+                var ms = new MemoryStream();
+                await file.Data.CopyToAsync(ms);
+                byte[] bytes = ms.GetBuffer(); // В общем-то этот массив байт надо отправить на сервер и получить ссылку в ответ
+                // использовать сервис (не контроллер), можно асинхронно
+
+                //var content = new MultipartFormDataContent
+                //{
+                //    { new ByteArrayContent(ms.GetBuffer()), "\"upload\"", file.Name }
+                //};
+
+                //// TODO: принимаем file (загружаем на сервер) и показываем его в окне как картинку
+                //await client.PostAsync("upload", content);
+            }
+        }
+    }
+
 
 }
