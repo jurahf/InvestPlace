@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace Services.DTO
 {
@@ -18,22 +19,55 @@ namespace Services.DTO
         public decimal PuzzlePrice { get { return Math.Round(Price / EpicSettings.PuzzlePerLot, 2, MidpointRounding.ToEven); } }
         public int PuzzleCount { get; set; }
 
+        public PriceRangeDto PriceRange { get; set; }
+
         public LotDto()
         {
         }
 
-        public LotDto(Lot lot)
+        public static LotDto ConvertFromLot(Lot lot, InvestPlaceContext db)
         {
-            if (lot == null)
-                return; // а не return null?
+            LotDto result = new LotDto();
 
-            this.Id = lot.Id;
-            this.Name = lot.Name;
-            this.Description = lot.Description;
-            this.SourceLink = lot.SourceLink;
-            this.ImageLink = lot.ImageLink;
-            this.Price = lot.Price ?? 0;
-            this.PuzzleCount = lot.Pazzle.Count();
+            if (lot == null)
+                return result; // а не return null?
+
+            result.Id = lot.Id;
+            result.Name = lot.Name;
+            result.Description = lot.Description;
+            result.SourceLink = lot.SourceLink;
+            result.ImageLink = lot.ImageLink;
+            result.Price = lot.Price ?? 0;
+            result.PuzzleCount = lot.Pazzle.Count();
+
+            // TODO: разобраться и удалить этот костыль
+            if (lot.PriceRange == null && lot.PriceRangeId != null)
+            {
+                lot.PriceRange = db.PriceRange.Find(lot.PriceRangeId);
+                db.Update(lot);
+                //db.SaveChanges();
+            }
+
+            result.PriceRange = PriceRangeDto.ConvertFromPriceRange(lot.PriceRange);
+
+            return result;
         }
+
+
+        public override bool Equals(object obj)
+        {
+            PriceRangeDto other = obj as PriceRangeDto;
+
+            if (other == null)
+                return false;
+
+            return Id == other.Id;
+        }
+
+        public override int GetHashCode()
+        {
+            return Id.GetHashCode();
+        }
+
     }
 }

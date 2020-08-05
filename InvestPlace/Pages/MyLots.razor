@@ -3,6 +3,8 @@
 @using Services.DTO;
 @using Services.Services.LotService;
 @using Services.Services.ExtendedUserService;
+
+@inject NavigationManager NavigationManager;
 @inject AuthenticationStateProvider AuthenticationStateProvider;
 @inject ILotService LotService;
 @inject IExtendedUserService ExtendedUserService;
@@ -23,18 +25,79 @@
         </div>
 
         <div class="col col-3">
-            <button class="btn btn-primary">Разместить товар</button>
+            <button class="btn btn-primary" @onclick="NewLotClick">Разместить товар</button>
         </div>
     </div>
 
-    <div class="row">
+
+    <div class="row margin-top-20">
         <div class="col col-12">
-            @foreach (var lot in lots)
-            {
-                <p>@lot.Name</p>
-            }
+            <h6>Диапазон цены</h6>
+            <hr />
         </div>
     </div>
+
+    <!-- по каждому ценовому диапазону -->
+    @foreach (var gr in lots.GroupBy(x => x.PriceRange).OrderBy(x => x.Key.Minimum))
+    {
+        <!-- сначала строка с первыми товарами -->
+        <div class="row">
+            <div class="col col-2 conteiner-for-centered">
+                <h6 class="text-center text-red">@gr.Key.Minimum - @gr.Key.Maximum руб</h6>
+            </div>
+
+            @foreach (var lot in lots.Take(5))
+            {
+                <div class="col col-2">
+                    <a class="link-text-usual" href="/lot/@lot.Id">
+                        <img class="lot-my-img" src="@lot.ImageLink" alt="" />
+                        <div class="lot-my-count">@lot.PuzzleCount</div>
+                        <div class="lot-my-price">@lot.Price ₽</div>
+
+                        <div class="lot-my-caption">@lot.Name</div>
+                    </a>
+                </div>
+            }
+        </div>
+
+
+        <!-- а потом уже и остальные строки на раскрывающейся панели -->
+        <div class="row">
+            <div class="col col-2 offset-5">
+                <a class="" data-toggle="collapse" href="#collapseGroup_@gr.Key.Id" role="button" aria-expanded="false" aria-controls="collapseExample">
+                    <img width="145" src="/images/horizontal-arrow.png" />
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col col-12">
+
+                <div class="collapse" id="collapseGroup_@gr.Key.Id">
+                    <div class="card card-body background-color-body">
+                        <div class="row">
+                        @foreach (var lot in gr.Skip(5))
+                        {
+                            <div class="col col-2">
+                                <a class="link-text-usual" href="/lot/@lot.Id">
+                                    <img class="lot-my-img" src="@lot.ImageLink" alt="" />
+                                    <div class="lot-my-count">@lot.PuzzleCount</div>
+                                    <div class="lot-my-price">@lot.Price ₽</div>
+
+                                    <div class="lot-my-caption">@lot.Name</div>
+                                </a>
+                            </div>
+                        }
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    }
+
+
+
 
 </LoginWelcome>
 
@@ -48,7 +111,7 @@
 
 @code {
 
-    List<LotDto> lots = new List<LotDto>();
+        List<LotDto> lots = new List<LotDto>();
 
     protected override void OnInitialized()
     {
@@ -74,4 +137,10 @@
 
         return result;
     }
+
+    protected void NewLotClick()
+    {
+        NavigationManager.NavigateTo("NewLot");
+    }
+
 }

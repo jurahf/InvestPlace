@@ -1,0 +1,59 @@
+﻿@page "/NewLot"
+
+@using Services.DTO;
+@using Services.Services.LotService;
+@using Services.Services.ExtendedUserService;
+
+@inject AuthenticationStateProvider AuthenticationStateProvider;
+@inject ILotService LotService;
+@inject IExtendedUserService ExtendedUserService;
+
+
+    <LoginWelcome>
+
+        <div class="margin-top-20"></div>
+
+        <div class="row">
+            <div class="col col-3">
+                <h4 class="text-red">Разместить товар</h4>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col col-6">
+                <!-- место для загрузки картинки -->
+                <div class="load-img conteiner-for-centered text-gray-light">
+                    <h5>Перетащите картинку товара сюда</h5>
+                </div>
+            </div>
+
+            <div class="col col-6">
+                <!-- параметры товара -->
+                <!-- стоимость пазла -->
+                <!-- воспользоваться скидкой -->
+            </div>
+        </div>
+
+
+        <!-- список товаров для покупки пазлов -->
+        <div class="row">
+
+        </div>
+
+        <!-- рекламный сбор -->
+        <div class="row">
+
+        </div>
+
+
+    </LoginWelcome>
+
+
+
+
+
+
+@code {
+
+}

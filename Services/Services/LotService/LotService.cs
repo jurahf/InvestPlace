@@ -21,17 +21,17 @@ namespace Services.Services.LotService
         public Task<List<LotDto>> GetAllAsync()
         {
             return Task.FromResult(
-                db.Lot.Select(x => new LotDto(x)).ToList());
+                db.Lot.Select(x => LotDto.ConvertFromLot(x, db)).ToList());
         }
 
         public LotDto GetById(int id)
         {
-            return new LotDto(db.Lot.FirstOrDefault(x => x.Id == id));
+            return LotDto.ConvertFromLot(db.Lot.FirstOrDefault(x => x.Id == id), db);
         }
 
         public List<LotDto> GetByUser(ExtendedUserDto user)
         {
-            return db.Lot.Where(x => x.SellerId == user.Id).Select(x => new LotDto(x)).ToList();
+            return db.Lot.Where(x => x.SellerId == user.Id).Select(x => LotDto.ConvertFromLot(x, db)).ToList();
         }
 
 

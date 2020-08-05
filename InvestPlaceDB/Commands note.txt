@@ -15,3 +15,6 @@ Add-Migration CreateCustomSchema -project InvestPlaceDB
 
 Приминение миграции:	
 Update-Database
+
+Накатить/откатить до миграции:
+Update-Database -Migration MigrationName

@@ -22,6 +22,7 @@ namespace InvestPlaceDB
         public virtual DbSet<Lot> Lot { get; set; }
         public virtual DbSet<LotCategory> LotCategory { get; set; }
         public virtual DbSet<Pazzle> Pazzle { get; set; }
+        public virtual DbSet<PriceRange> PriceRange { get; set; }
 
         public InvestPlaceContext(DbContextOptions options)
             : base(options)
