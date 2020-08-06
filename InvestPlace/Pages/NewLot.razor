@@ -3,56 +3,69 @@
 @using Services.DTO;
 @using Services.Services.LotService;
 @using Services.Services.ExtendedUserService;
-@using System.IO; 
+@using Services.Services.FileService;
+@using System.Timers;
+
 
 @inject AuthenticationStateProvider AuthenticationStateProvider;
 @inject ILotService LotService;
 @inject IExtendedUserService ExtendedUserService;
+@inject IFileService FileService;
 
 
-    <LoginWelcome>
+<LoginWelcome>
 
-        <div class="margin-top-20"></div>
+    <div class="margin-top-20"></div>
 
-        <div class="row">
-            <div class="col col-3">
-                <h4 class="text-red">Разместить товар</h4>
-            </div>
+    <div class="row">
+        <div class="col col-3">
+            <h4 class="text-red">Разместить товар</h4>
         </div>
+    </div>
 
 
-        <div class="row">
-            <div class="col col-6">
+    <div class="row">
+        <div class="col col-6">
 
-                <!-- место для загрузки картинки -->
+            <!-- место для загрузки картинки -->
+            @if (!string.IsNullOrEmpty(imageLink))
+            {
+                <img class="img-full" src="@imageLink" />
+                <button class="btn btn-link text-danger" type="button" @onclick="@RemoveFile">
+                    <small class="align-text-bottom">Удалить</small>
+                </button>
+            }
+            else
+            {
                 <div class="dropzone text-gray-light">
                     <h5 class="text-center">Перетащите картинку товара сюда или нажмите для выбора файла</h5>
                     <InputFile dropclass="load-img" OnChange="HandleFileSelected"></InputFile>
                 </div>
-                <h6 class="text-danger">@fileErrorText</h6>
+            }
 
-            </div>
-
-            <div class="col col-6">
-                <!-- параметры товара -->
-                <!-- стоимость пазла -->
-                <!-- воспользоваться скидкой -->
-            </div>
+            <h6 class="text-danger">@fileErrorText</h6>
         </div>
 
-
-        <!-- список товаров для покупки пазлов -->
-        <div class="row">
-
+        <div class="col col-6">
+            <!-- параметры товара -->
+            <!-- стоимость пазла -->
+            <!-- воспользоваться скидкой -->
         </div>
-
-        <!-- рекламный сбор -->
-        <div class="row">
-
-        </div>
+    </div>
 
 
-    </LoginWelcome>
+    <!-- список товаров для покупки пазлов -->
+    <div class="row">
+
+    </div>
+
+    <!-- рекламный сбор -->
+    <div class="row">
+
+    </div>
+
+
+</LoginWelcome>
 
 
 
@@ -60,45 +73,95 @@
 
 
 @code {
-    const int MaxFileSizeMb = 2;
-    const int MaxFileSizeBytes = MaxFileSizeMb * 1024 * 1024;
-    string fileErrorText = "";
+    protected const int MaxFileSizeMb = 2;
+    protected const int MaxFileSizeBytes = MaxFileSizeMb * 1024 * 1024;
+    protected string fileErrorText = "";
+    protected string imageLink = "";
+    protected ExtendedUserDto extendedUser = null;
+    private System.Threading.Timer timer;
 
-    async void HandleFileSelected(IFileListEntry[] files)
+
+    protected override void OnInitialized()
     {
+        extendedUser = FindUser().Result;
+    }
+
+    private async Task<ExtendedUserDto> FindUser()
+    {
+        ExtendedUserDto extendedUser = null;
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            extendedUser = ExtendedUserService.GetByEmail(user.Identity.Name);
+        }
+
+        return extendedUser;
+    }
+
+    protected void RemoveFile()
+    {
+        imageLink = "";
+        // с сервера при этом не удаляем ?
+    }
+
+    protected async void HandleFileSelected(IFileListEntry[] files)
+    {
+        imageLink = "";
         fileErrorText = "";
         var file = files.FirstOrDefault();
 
+        try
+        {
+            if (file != null)
+            {
+                await UploadFile(file)
+                    .ContinueWith((t, o) =>
+                    {
+                        InvokeAsync(() =>
+                        {
+                            imageLink = t.Result;
+                            this.StateHasChanged(); // чтобы перерисовалось view (из асинхронного вызова оно не может)
+                        });
+                    }, TaskContinuationOptions.ExecuteSynchronously);
+            }
+        }
+        catch (ArgumentException aex)
+        {
+            fileErrorText = aex.Message;
+        }
+        catch (Exception ex)
+        {
+            fileErrorText = $"Непредвиденная ошибка при загрузке файла: {ex.Message}";
+        }
+    }
+
+    private async Task<string> UploadFile(IFileListEntry file)
+    {
         List<string> acceptedFileTypes = new List<string>() { "image/png", "image/jpeg", "image/gif" };
         if (file != null)
         {
             if (file.Size > MaxFileSizeBytes)
             {
-                fileErrorText = $"Размер файла не должен превышать {MaxFileSizeMb} Мб";
+                throw new ArgumentException($"Размер файла не должен превышать {MaxFileSizeMb} Мб");
             }
 
             if (!acceptedFileTypes.Contains(file.Type))
             {
-                fileErrorText = "Файл должен иметь расширение png, jpg или gif";
+                throw new ArgumentException("Файл должен иметь расширение png, jpg или gif");
             }
 
             // принимаем файл, загружаем его на сервер, и отображаем по ссылке
             if (string.IsNullOrEmpty(fileErrorText))
             {
-                var ms = new MemoryStream();
-                await file.Data.CopyToAsync(ms);
-                byte[] bytes = ms.GetBuffer(); // В общем-то этот массив байт надо отправить на сервер и получить ссылку в ответ
-                // использовать сервис (не контроллер), можно асинхронно
+                string ext = file.Type.Substring(file.Type.IndexOf('/') + 1);
 
-                //var content = new MultipartFormDataContent
-                //{
-                //    { new ByteArrayContent(ms.GetBuffer()), "\"upload\"", file.Name }
-                //};
-
-                //// TODO: принимаем file (загружаем на сервер) и показываем его в окне как картинку
-                //await client.PostAsync("upload", content);
+                return await FileService.UploadFileAndGetLinkAsync(UploadFileType.LotImage, ext, file.Data, extendedUser);
             }
         }
+
+        return "";
     }
 
 
