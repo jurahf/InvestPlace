@@ -23,25 +23,35 @@ namespace Services.Services.LotService
         public Task<List<LotDto>> GetAllAsync()
         {
             return Task.FromResult(
-                db.Lot.Select(x => LotDto.ConvertFromLot(x, db)).ToList());
+                db.Lot
+                .Include(x => x.PriceRange)
+                .Select(x => LotDto.ConvertFromLot(x))
+                .ToList());
         }
 
         public List<LotDto> GetActual(bool actual)
         {
             return db.Lot
+                .Include(x => x.PriceRange)
                 .Where(x => (x.CompleteDate == null) == actual)
-                .Select(x => LotDto.ConvertFromLot(x, db))
+                .Select(x => LotDto.ConvertFromLot(x))
                 .ToList();
         }
 
         public LotDto GetById(int id)
         {
-            return LotDto.ConvertFromLot(db.Lot.FirstOrDefault(x => x.Id == id), db);
+            return LotDto.ConvertFromLot(db.Lot
+                .Include(x => x.PriceRange)
+                .FirstOrDefault(x => x.Id == id));
         }
 
         public List<LotDto> GetByUser(ExtendedUserDto user)
         {
-            return db.Lot.Where(x => x.SellerId == user.Id).Select(x => LotDto.ConvertFromLot(x, db)).ToList();
+            return db.Lot
+                .Include(x => x.PriceRange)
+                .Where(x => x.SellerId == user.Id)
+                .Select(x => LotDto.ConvertFromLot(x))
+                .ToList();
         }
 
 

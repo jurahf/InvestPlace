@@ -1,6 +1,15 @@
 ﻿@inherits LayoutComponentBase
 
 
+@using Services.DTO;
+@using Services.Services.ExtendedUserService;
+@using Services.Services.BasketService;
+
+
+@inject AuthenticationStateProvider AuthenticationStateProvider;
+@inject IExtendedUserService ExtendedUserService;
+@inject IBasketService BasketService
+
 <div class="main">
 
     <div class="header-wrapper">
@@ -50,7 +59,11 @@
 
             <ul class="navbar-nav float-right">
                 <li>
-                    <a href="/Basket" class="dropright">Корзина</a>
+                    <a href="/Basket" class="dropright">Корзина</a> 
+                    @if (inBasketCount > 0)
+                    {
+                        <span class="badge badge-danger">@inBasketCount</span>
+                    }
                 </li>
 
                 <li>
@@ -61,14 +74,65 @@
     </nav>
 
 
-
-    <div class="content px-4">
-        @Body
-    </div>
+    <CascadingValue Value="BasketCountChange">
+        <div class="content px-4">
+            @Body
+        </div>
+    </CascadingValue>
 </div>
 
 
 @code {
 
+    protected ExtendedUserDto user = null;
+    protected int inBasketCount = 0;
+
+    protected override void OnInitialized()
+    {
+        user = FindUser().Result;
+        UpdateBasketCount();
+
+        base.OnInitialized();
+    }
+
+    private async Task<ExtendedUserDto> FindUser()
+    {
+        ExtendedUserDto result = null;
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            result = ExtendedUserService.GetByEmail(user.Identity.Name);
+        }
+
+        return result;
+    }
+
+    // это чтобы можно было обновить корзину с конкретных страниц
+    EventCallback _BasketCountChange = EventCallback.Empty;
+    EventCallback BasketCountChange
+    {
+        get
+        {
+            if (_BasketCountChange.Equals(EventCallback.Empty))
+                _BasketCountChange = EventCallback.Factory.Create(this, UpdateBasketCount);
+            return _BasketCountChange;
+        }
+    }
+
+    private void UpdateBasketCount()
+    {
+        inBasketCount = GetBasketLotCount(user);
+    }
+
+    private int GetBasketLotCount(ExtendedUserDto user)
+    {
+        BasketDto basket = BasketService.GetBasketByUser(user);
+        if (basket == null || !basket.Puzzles.Any())
+            return 0;
+
+        return basket.Puzzles.GroupBy(x => x.LotId).Count();
+    }
 
 }

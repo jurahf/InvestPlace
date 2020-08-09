@@ -38,9 +38,10 @@ namespace Services.DTO
 
         public LotDto()
         {
+            Categories = new List<CategoryDto>();
         }
 
-        public static LotDto ConvertFromLot(Lot lot, InvestPlaceContext db)
+        public static LotDto ConvertFromLot(Lot lot)
         {
             LotDto result = new LotDto();
 
@@ -53,22 +54,28 @@ namespace Services.DTO
             result.SourceLink = lot.SourceLink;
             result.ImageLink = lot.ImageLink;
             result.Price = lot.Price ?? 0;
-            result.PuzzleCount = lot.Pazzle.Count();
+            result.PuzzleCount = lot.Pazzle.Count(x => x.BuyDate != null);
             result.Categories = lot.LotCategory.Select(x => CategoryDto.ConvertFromCategory(x.Category)).ToList();
-
-            // TODO: разобраться и удалить этот костыль
-            if (lot.PriceRange == null && lot.PriceRangeId != null)
-            {
-                lot.PriceRange = db.PriceRange.Find(lot.PriceRangeId);
-                db.Update(lot);
-                //db.SaveChanges();
-            }
-
             result.PriceRange = PriceRangeDto.ConvertFromPriceRange(lot.PriceRange);
 
             return result;
         }
 
+
+        public override bool Equals(object obj)
+        {
+            LotDto other = obj as LotDto;
+
+            if (other == null)
+                return false;
+
+            return Id == other.Id;
+        }
+
+        public override int GetHashCode()
+        {
+            return Id.GetHashCode();
+        }
 
     }
 }

@@ -47,9 +47,13 @@ namespace InvestPlaceDB
         [ForeignKey(nameof(BasketId))]
         [InverseProperty("Pazzle")]
         public virtual Basket Basket { get; set; }
+
+
         [ForeignKey(nameof(BuyerId))]
         [InverseProperty(nameof(ExtendedUser.PazzleBuyer))]
         public virtual ExtendedUser Buyer { get; set; }
+
+
         [ForeignKey(nameof(ChangeModeratorId))]
         [InverseProperty(nameof(ExtendedUser.PazzleChangeModerator))]
         public virtual ExtendedUser ChangeModerator { get; set; }

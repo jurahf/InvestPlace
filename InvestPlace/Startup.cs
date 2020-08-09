@@ -15,6 +15,7 @@ using Services.Services.ExtendedUserService;
 using InvestPlace.Identity;
 using Services.Services.FileService;
 using Services.Services.CategoryService;
+using Services.Services.BasketService;
 
 namespace InvestPlace
 {
@@ -59,6 +60,7 @@ namespace InvestPlace
             services.AddScoped<IExtendedUserService, ExtendedUserService>();
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<IBasketService, BasketService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

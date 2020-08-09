@@ -1,9 +1,14 @@
 ﻿@page "/Lot/{id:int}"
 
 @using Services.DTO;
+@using Services.Services.ExtendedUserService;
+@using Services.Services.BasketService;
 
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider;
 @inject Services.Services.LotService.ILotService lotService
+@inject IExtendedUserService ExtendedUserService;
+@inject IBasketService BasketService;
 
 
 
@@ -22,6 +27,7 @@
         <div class="row margin-top-10">
             <div class="col col-4">
                 <button class="btn btn-primary" @onclick="Buy">Купить пазл</button>
+                <h6 class="text-danger">@buyErrorText</h6>
             </div>
 
             <div class="col col-4">
@@ -75,8 +81,11 @@
     [Parameter]
     public int Id { get; set; }
 
-    private bool showNet = false;
+    [CascadingParameter]
+    public EventCallback BasketCountChange { get; set; }
 
+    private bool showNet = false;
+    protected string buyErrorText = "";
     protected LotDto editedLot = new LotDto();
 
     protected override void OnInitialized()
@@ -91,11 +100,43 @@
 
     private void Buy()
     {
-        // TODO:
-        // проверить, авторизован, или нет
-        // добавить товар пользователю
+        buyErrorText = "";
 
-        // НЕ перейти в корзину
-        NavigationManager.NavigateTo("Basket");
+        // проверить, авторизован, или нет
+        ExtendedUserDto user = FindUser().Result;
+        if (user == null)
+        {
+            buyErrorText = "Для покупки необходимо выполнить <a href='/Account/Login'>вход</a>";
+            return;
+        }
+
+        try
+        {
+            // добавить товар пользователю
+            BasketDto basket = BasketService.AddToBasket(user, editedLot);
+            BasketCountChange.InvokeAsync(null);
+        }
+        catch (Exception ex)
+        {
+            buyErrorText = ex.Message; // TODO: лучше возвращать специальный объект с результатом операции
+        }
     }
+
+
+    private async Task<ExtendedUserDto> FindUser()
+    {
+        ExtendedUserDto result = null;
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            result = ExtendedUserService.GetByEmail(user.Identity.Name);
+        }
+
+        return result;
+    }
+
+
+
 }

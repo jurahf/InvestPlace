@@ -6,6 +6,11 @@ namespace Services
 {
     public static class EpicSettings
     {
+        public const int MaxPuzzleX = 20;
+
+        public const int MaxPuzzleY = 15;
+
+
         /// <summary>
         /// Сколько пазлов в одном лоте
         /// </summary>

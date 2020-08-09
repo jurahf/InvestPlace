@@ -1,16 +1,129 @@
 ﻿@page "/Basket"
 
-<h4>Корзина</h4>
+@using Services.DTO;
+@using Services.Services.LotService;
+@using Services.Services.ExtendedUserService;
+@using Services.Services.BasketService;
 
-<LoginWelcome>
-    <p>А здесь мы нарисуем корзину.</p>
-</LoginWelcome>
+@inject NavigationManager NavigationManager;
+@inject AuthenticationStateProvider AuthenticationStateProvider;
+@inject ILotService LotService;
+@inject IExtendedUserService ExtendedUserService;
+@inject IBasketService BasketService;
+
+
+    <LoginWelcome>
+        <div class="margin-top-20"></div>
+
+        <div class="row">
+            <div class="col col-12">
+                <h4 class="text-red">Корзина</h4>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col col-8">
+
+                <!-- таблица с лотами в корзине -->
+                <table class="table margin-top-50 text-center">
+                    <thead>
+                        <tr>
+                            <th scope="col" colspan="3">Товар</th>
+                            <th scope="col">Цена</th>
+                            <th scope="col">Количество</th>
+                            <th scope="col">Итого</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var group in puzzles.GroupBy(x => x.Lot))
+                        {
+                            <tr class="">
+                                <td><button class="del-row-btn"></button></td>
+                                <td><img src="@group.Key.ImageLink" width="124" height="100" /></td>
+                                <td>@group.Key.Name</td>
+                                <td class="text-red">@group.Key.PuzzlePrice ₽</td>
+                                <td>
+                                    <button class="row-btn-minus"></button> 
+                                    <img class="row-img-count" src="/images/puzzle-detail-white.png" />
+                                    @group.Count()
+                                    <button class="row-btn-plus"></button>
+                                </td>
+                                <td class="text-red">@(group.Key.PuzzlePrice * group.Count()) ₽</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- оформление заказа -->
+            <div class="col col-4 margin-top-50 text-center">
+                <h4>Сумма заказов</h4>
+                <hr/>
+                <h2 class="text-red">@(summ.ToString("N2")) ₽</h2>
+
+                <button class="btn btn-primary margin-top-120">Оформить заказ</button>
+            </div>
+        </div>
+
+
+
+
+        <!-- продолжить покупки -->
+        <div class="row margin-top-120">
+            <div class="col col-12">
+                <button class="btn btn-primary" @onclick="GoBack">&lt; Продолжить покупки</button>
+            </div>
+        </div>
+
+    </LoginWelcome>
 
 
 
 
 @code {
 
-    // TODO: тут именно из кода надо взять пользователя и его корзину, не через параметры
+    ExtendedUserDto user = null;
+    List<PuzzleDto> puzzles = new List<PuzzleDto>();
+    decimal summ;
 
+
+    protected override void OnInitialized()
+    {
+        user = FindUser().Result;
+
+        // по пользователю надо получить корзину со всеми пазлами и лотами
+        puzzles = FindPuzzles(user);
+    }
+
+
+    private async Task<ExtendedUserDto> FindUser()
+    {
+        ExtendedUserDto result = null;
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            result = ExtendedUserService.GetByEmail(user.Identity.Name);
+        }
+
+        return result;
+    }
+
+
+    private List<PuzzleDto> FindPuzzles(ExtendedUserDto user)
+    {
+        BasketDto basket = BasketService.GetBasketByUser(user);
+        summ = basket.Puzzles.Sum(x => x.Lot.PuzzlePrice);
+        return basket.Puzzles;
+    }
+
+
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/");
+    }
 }
