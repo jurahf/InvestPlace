@@ -14,6 +14,7 @@ using Services.Services.LotService;
 using Services.Services.ExtendedUserService;
 using InvestPlace.Identity;
 using Services.Services.FileService;
+using Services.Services.CategoryService;
 
 namespace InvestPlace
 {
@@ -57,6 +58,7 @@ namespace InvestPlace
             services.AddScoped<ILotService, LotService>();
             services.AddScoped<IExtendedUserService, ExtendedUserService>();
             services.AddScoped<IFileService, FileService>();
+            services.AddScoped<ICategoryService, CategoryService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

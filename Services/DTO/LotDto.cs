@@ -5,19 +5,34 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
+using System.ComponentModel.DataAnnotations;
 
 namespace Services.DTO
 {
     public class LotDto
     {
         public int Id { get; set; }
+        
+        [Required(ErrorMessage = "Название обязательно для заполнения")]
         public string Name { get; set; }
+
         public string Description { get; set; }
+
         public string ImageLink { get; set; }
+
+        [Required(ErrorMessage = "Адрес интернет-магазина обязателен для заполнения")]
+        [Url(ErrorMessage = "Введите url-адрес")]
         public string SourceLink { get; set; }
+
+        [Required(ErrorMessage = "Цена обязательна для заполнения")]
+        [Range(1.0, 2_000_000.0, ErrorMessage = "Цена должна быть числом от 1 до 2 000 000")]
         public decimal Price { get; set; }
-        public decimal PuzzlePrice { get { return Math.Round(Price / EpicSettings.PuzzlePerLot, 2, MidpointRounding.ToEven); } }
+
+        public decimal PuzzlePrice { get { return Math.Round(Price / EpicSettings.PuzzleCostDelimeter, 2, MidpointRounding.ToEven); } }
+
         public int PuzzleCount { get; set; }
+
+        public List<CategoryDto> Categories { get; set; }
 
         public PriceRangeDto PriceRange { get; set; }
 
@@ -39,6 +54,7 @@ namespace Services.DTO
             result.ImageLink = lot.ImageLink;
             result.Price = lot.Price ?? 0;
             result.PuzzleCount = lot.Pazzle.Count();
+            result.Categories = lot.LotCategory.Select(x => CategoryDto.ConvertFromCategory(x.Category)).ToList();
 
             // TODO: разобраться и удалить этот костыль
             if (lot.PriceRange == null && lot.PriceRangeId != null)
@@ -53,21 +69,6 @@ namespace Services.DTO
             return result;
         }
 
-
-        public override bool Equals(object obj)
-        {
-            PriceRangeDto other = obj as PriceRangeDto;
-
-            if (other == null)
-                return false;
-
-            return Id == other.Id;
-        }
-
-        public override int GetHashCode()
-        {
-            return Id.GetHashCode();
-        }
 
     }
 }

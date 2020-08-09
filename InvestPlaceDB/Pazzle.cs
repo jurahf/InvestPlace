@@ -12,12 +12,36 @@ namespace InvestPlaceDB
         public int X { get; set; }
         public int Y { get; set; }
         public bool? Winner { get; set; }
+
+        /// <summary>
+        /// Обменян на товар
+        /// </summary>
         public bool? Changed { get; set; }
+
+        /// <summary>
+        /// Дата и время обмена на товар
+        /// </summary>
         [Column(TypeName = "datetime")]
         public DateTime? ChangeDate { get; set; }
+
+        /// <summary>
+        /// Модератор, осуществивший обмен
+        /// </summary>
         public int? ChangeModeratorId { get; set; }
+
         public int? BasketId { get; set; }
+
+        /// <summary>
+        /// Дата и время покупки пазла
+        /// </summary>
+        [Column(TypeName = "datetime")]
+        public DateTime? BuyDate { get; set; }
+
+        /// <summary>
+        /// Покупатель
+        /// </summary>
         public int? BuyerId { get; set; }
+
         public int? LotId { get; set; }
 
         [ForeignKey(nameof(BasketId))]

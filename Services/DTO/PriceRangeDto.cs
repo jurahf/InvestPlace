@@ -25,5 +25,22 @@ namespace Services.DTO
 
             return result;
         }
+
+        public override bool Equals(object obj)
+        {
+            PriceRangeDto other = obj as PriceRangeDto;
+
+            if (other == null)
+                return false;
+
+            return Id == other.Id;
+        }
+
+        public override int GetHashCode()
+        {
+            return Id.GetHashCode();
+        }
+
+
     }
 }

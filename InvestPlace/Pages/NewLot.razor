@@ -1,16 +1,19 @@
 ﻿@page "/NewLot"
 
 @using Services.DTO;
+@using Services.Services;
 @using Services.Services.LotService;
 @using Services.Services.ExtendedUserService;
 @using Services.Services.FileService;
-@using System.Timers;
+@using Services.Services.CategoryService;
 
 
+@inject NavigationManager NavigationManager;
 @inject AuthenticationStateProvider AuthenticationStateProvider;
 @inject ILotService LotService;
 @inject IExtendedUserService ExtendedUserService;
 @inject IFileService FileService;
+@inject ICategoryService CategoryService;
 
 
 <LoginWelcome>
@@ -24,46 +27,126 @@
     </div>
 
 
-    <div class="row">
-        <div class="col col-6">
+    <EditForm Model="newLot" OnValidSubmit="ValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
 
-            <!-- место для загрузки картинки -->
-            @if (!string.IsNullOrEmpty(imageLink))
-            {
-                <img class="img-full" src="@imageLink" />
-                <button class="btn btn-link text-danger" type="button" @onclick="@RemoveFile">
-                    <small class="align-text-bottom">Удалить</small>
-                </button>
-            }
-            else
-            {
-                <div class="dropzone text-gray-light">
-                    <h5 class="text-center">Перетащите картинку товара сюда или нажмите для выбора файла</h5>
-                    <InputFile dropclass="load-img" OnChange="HandleFileSelected"></InputFile>
+        <div class="row">
+            <div class="col col-6">
+
+                <!-- место для загрузки картинки -->
+                @if (!string.IsNullOrEmpty(imageLink))
+                {
+                    <img class="img-full" src="@imageLink" />
+                    <button class="btn btn-link text-danger" type="button" @onclick="@RemoveFile">
+                        <small class="align-text-bottom">Удалить</small>
+                    </button>
+                }
+                else
+                {
+                    <div class="dropzone text-gray-light">
+                        <h5 class="text-center">Перетащите картинку товара сюда или нажмите для выбора файла</h5>
+                        <InputFile dropclass="load-img" OnChange="HandleFileSelected"></InputFile>
+                    </div>
+                }
+
+                <h6 class="text-danger">@fileErrorText</h6>
+            </div>
+
+
+            <div class="col col-6">
+
+                <!-- параметры товара - категория, название, адрес сайта товара, цена в интернет-магазине, описание -->
+                <div class="row">
+                    <div class="col col-12">
+                        <div class="form-group">
+                            <label class="label">Категория</label>
+                            <InputSelect class="form-control" @bind-Value="selectedCategory">
+                                    <option value="0">Не выбрано</option>
+                                @foreach (var cat in categories)
+                                {
+                                    <option value="@cat.Id">@cat.Name</option>
+                                }
+                            </InputSelect>
+                        </div>
+                    </div>
                 </div>
-            }
 
-            <h6 class="text-danger">@fileErrorText</h6>
+                <div class="row">
+                    <div class="col col-12">
+                        <div class="form-group">
+                            <label class="label">Название товара</label>
+                            <InputText class="form-control" @bind-Value="newLot.Name"></InputText>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col col-12">
+                        <div class="form-group">
+                            <label class="label">Адрес сайта товара</label>
+                            <InputText class="form-control" @bind-Value="newLot.SourceLink"></InputText>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col col-12">
+                        <div class="form-group">
+                            <label class="label">Цена в интернет-магазине</label>
+                            <!-- если сделать просто bind-Value, то не сможем обработать событие на изменение -->
+                            <InputNumber class="form-control" Value="newLot.Price" ValueExpression="() => newLot.Price" ValueChanged="(decimal v) => PriceValueChanged(v)"></InputNumber>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col col-12">
+                        <div class="form-group">
+                            <label class="label">Краткое описание товара</label>
+                            <InputTextArea class="form-control" @bind-Value="newLot.Description"></InputTextArea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- стоимость пазла -->
+                <div class="row">
+                    <div class="col col-12">
+                        <h6 class="text-gray">Стоимость одного пазла: <span class="text-red">@newLot.PuzzlePrice руб</span></h6>
+                    </div>
+                </div>
+
+                <!-- воспользоваться скидкой -->
+                @*<div class="row">
+                    <div class="col col-12">
+                        <button class="btn btn-primary disabled">Воспользоваться скидкой</button>
+                    </div>
+                </div>*@
+            </div>
         </div>
 
-        <div class="col col-6">
-            <!-- параметры товара -->
-            <!-- стоимость пазла -->
-            <!-- воспользоваться скидкой -->
+
+        <!-- список товаров для покупки пазлов -->
+        <div class="margin-top-20">
+            <h6>Помочь коллегам в сборе пазла в данном диапазоне цены</h6>
+            <LotRowsByPriceRange Lots="actualRangeredLots" />
         </div>
-    </div>
+
+        <!-- рекламный сбор -->
+        <div class="row">
+
+        </div>
 
 
-    <!-- список товаров для покупки пазлов -->
-    <div class="row">
-
-    </div>
-
-    <!-- рекламный сбор -->
-    <div class="row">
-
-    </div>
-
+        <!-- сохранить товар -->
+        <div class="row margin-top-20">
+            <div class="col col-12">
+                <button class="btn btn-secondary" type="submit">Сохранить</button>
+                <br/>
+                <h6 class="text-danger">@saveErrorText</h6>
+            </div>
+        </div>
+    </EditForm>
 
 </LoginWelcome>
 
@@ -76,14 +159,28 @@
     protected const int MaxFileSizeMb = 2;
     protected const int MaxFileSizeBytes = MaxFileSizeMb * 1024 * 1024;
     protected string fileErrorText = "";
+    protected string saveErrorText = "";
     protected string imageLink = "";
+    protected string selectedCategory = "0";
+    protected List<CategoryDto> categories = new List<CategoryDto>();
     protected ExtendedUserDto extendedUser = null;
-    private System.Threading.Timer timer;
+    protected List<LotDto> actualLots = new List<LotDto>();
+    protected List<LotDto> actualRangeredLots = new List<LotDto>();
+    protected LotDto newLot;
 
 
     protected override void OnInitialized()
     {
+        newLot = new LotDto();
+        categories = FindCategories();
         extendedUser = FindUser().Result;
+        actualLots = LotService.GetActual(true);
+        actualRangeredLots = actualLots.GroupBy(x => x.PriceRange).FirstOrDefault().ToList();
+    }
+
+    private List<CategoryDto> FindCategories()
+    {
+        return CategoryService.GetAll();
     }
 
     private async Task<ExtendedUserDto> FindUser()
@@ -162,6 +259,43 @@
         }
 
         return "";
+    }
+
+    private void PriceValueChanged(decimal value)
+    {
+        newLot.Price = value;
+
+        // определим, какой подходит ценовой диапазон 
+        // отобразим строку товаров именно по этому диапазону
+        actualRangeredLots = actualLots.GroupBy(x => x.PriceRange)
+            .FirstOrDefault(x => x.Key.Minimum <= newLot.PuzzlePrice && newLot.PuzzlePrice <= x.Key.Maximum)
+            ?.ToList() ?? new List<LotDto>();
+    }
+
+
+    protected void ValidSubmit()
+    {
+        saveErrorText = "";
+
+        // проверяем картинку
+        if (string.IsNullOrEmpty(imageLink))
+        {
+            fileErrorText = "Должно быть выбрано изображение";
+            return;
+        }
+
+        newLot.ImageLink = imageLink;
+
+        OperationResult result = LotService.CreateLot(newLot, extendedUser, new List<int>() { int.Parse(selectedCategory) });
+
+        if (result.Success)
+        {
+            NavigationManager.NavigateTo("/MyLots");
+        }
+        else
+        {
+            saveErrorText = result.ErrorText;
+        }
     }
 
 

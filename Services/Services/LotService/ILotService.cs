@@ -10,8 +10,12 @@ namespace Services.Services.LotService
     {
         Task<List<LotDto>> GetAllAsync();
 
+        List<LotDto> GetActual(bool actual);
+
         LotDto GetById(int id);
 
         List<LotDto> GetByUser(ExtendedUserDto user);
+
+        OperationResult CreateLot(LotDto lot, ExtendedUserDto creator, List<int> categoriesId);
     }
 }
