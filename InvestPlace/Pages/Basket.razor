@@ -40,15 +40,18 @@
                         @foreach (var group in puzzles.GroupBy(x => x.Lot))
                         {
                             <tr class="">
-                                <td><button class="del-row-btn"></button></td>
+                                <td><button class="del-row-btn" @onclick="() => DeleteRow(user, group.Key)"></button></td>
                                 <td><img src="@group.Key.ImageLink" width="124" height="100" /></td>
                                 <td>@group.Key.Name</td>
                                 <td class="text-red">@group.Key.PuzzlePrice ₽</td>
                                 <td>
-                                    <button class="row-btn-minus"></button> 
-                                    <img class="row-img-count" src="/images/puzzle-detail-white.png" />
-                                    @group.Count()
-                                    <button class="row-btn-plus"></button>
+                                    <div class="basket-count-wrapper">
+                                        <button class="row-btn-minus" @onclick="() => DeletePuzzle(user, group.Key)"></button> 
+                                        <div class="basket-count">
+                                            <span>@group.Count()</span>
+                                        </div>
+                                        <button class="row-btn-plus" @onclick="() => AddPuzzle(user, group.Key)"></button>
+                                    </div>
                                 </td>
                                 <td class="text-red">@(group.Key.PuzzlePrice * group.Count()) ₽</td>
                             </tr>
@@ -63,7 +66,10 @@
                 <hr/>
                 <h2 class="text-red">@(summ.ToString("N2")) ₽</h2>
 
-                <button class="btn btn-primary margin-top-120">Оформить заказ</button>
+                <button class="btn btn-primary margin-top-120 @(summ > 0 ? "" : "disabled")" @onclick="() => DoOrder(user)">Оформить заказ</button>
+                <div class="margin-top-20"></div>
+                <h6 class="text-danger">@errorText</h6>
+                <h6 class="text-success">@sucessText</h6>
             </div>
         </div>
 
@@ -84,9 +90,14 @@
 
 @code {
 
+    [CascadingParameter]
+    public EventCallback BasketCountChange { get; set; }
+
     ExtendedUserDto user = null;
     List<PuzzleDto> puzzles = new List<PuzzleDto>();
     decimal summ;
+    string errorText = "";
+    string sucessText = "";
 
 
     protected override void OnInitialized()
@@ -115,6 +126,9 @@
 
     private List<PuzzleDto> FindPuzzles(ExtendedUserDto user)
     {
+        if (user == null)
+            return new List<PuzzleDto>();
+
         BasketDto basket = BasketService.GetBasketByUser(user);
         summ = basket.Puzzles.Sum(x => x.Lot.PuzzlePrice);
         return basket.Puzzles;
@@ -126,4 +140,52 @@
     {
         NavigationManager.NavigateTo("/");
     }
+
+
+    private void DeleteRow(ExtendedUserDto user, LotDto lot)
+    {
+        DoServiceAction(s => s.RemoveFromBasket(user, lot, true));
+    }
+
+    private void AddPuzzle(ExtendedUserDto user, LotDto lot)
+    {
+        DoServiceAction(s => s.AddToBasket(user, lot));
+    }
+
+    private void DeletePuzzle(ExtendedUserDto user, LotDto lot)
+    {
+        DoServiceAction(s => s.RemoveFromBasket(user, lot, false));
+    }
+
+    public void DoOrder(ExtendedUserDto user)
+    {
+        // TODO: надо подтверждение
+        DoServiceAction(s => s.Buy(user));
+
+        if (string.IsNullOrEmpty(errorText))
+            sucessText = "Заказ успешно оформлен";
+    }
+
+
+    private void DoServiceAction(Action<IBasketService> action)
+    {
+        sucessText = "";
+        errorText = "";
+
+        try
+        {
+            action(BasketService);
+
+            // обновим паззлы (количество и сумму)
+            puzzles = FindPuzzles(user);
+            // обновим бейджик у корзины
+            BasketCountChange.InvokeAsync(null);
+        }
+        catch (Exception ex)
+        {
+            errorText = $"Произошла ошибка: {ex.Message}";
+        }
+    }
+
+
 }

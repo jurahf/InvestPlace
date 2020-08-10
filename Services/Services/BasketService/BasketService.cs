@@ -99,7 +99,7 @@ namespace Services.Services.BasketService
         }
 
 
-        public BasketDto RemoveFromBasket(ExtendedUserDto userDto, LotDto lotDto)
+        public BasketDto RemoveFromBasket(ExtendedUserDto userDto, LotDto lotDto, bool allByLot)
         {
             ExtendedUser user = db.Find<ExtendedUser>(userDto.Id);
             if (user == null)
@@ -114,16 +114,22 @@ namespace Services.Services.BasketService
             if (basket == null)
                 throw new ArgumentException("У пользователя не найдена корзина");
 
-            Pazzle puzzleForDel = basket.Pazzle.FirstOrDefault(x => x.LotId == lot.Id/* && x.BuyDate == null*/); // все, которые в корзине - не куплены
-            if (puzzleForDel == null)
-                throw new ArgumentException("Данного товара нет в корзине пользователя");
 
-            lock (lockObject)
+            Pazzle puzzleForDel = null;
+            do
             {
-                basket.Pazzle.Remove(puzzleForDel);
-                lot.Pazzle.Remove(puzzleForDel);
-                db.Pazzle.Remove(puzzleForDel);     // может быть только этого достаточно
-            }
+                puzzleForDel = basket.Pazzle.FirstOrDefault(x => x.LotId == lot.Id/* && x.BuyDate == null*/); // все, которые в корзине - не куплены
+
+                lock (lockObject)
+                {
+                    if (puzzleForDel != null)
+                    {
+                        basket.Pazzle.Remove(puzzleForDel);
+                        lot.Pazzle.Remove(puzzleForDel);
+                        db.Pazzle.Remove(puzzleForDel);     // может быть только этого достаточно
+                    }
+                }
+            } while (allByLot && puzzleForDel != null);
 
             basket.LastOperationDate = DateTime.Now;
             db.SaveChanges();

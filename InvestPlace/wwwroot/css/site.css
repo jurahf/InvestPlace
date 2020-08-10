@@ -25,6 +25,11 @@ a, .btn-link {
     text-transform: uppercase;
 }
 
+.btn-primary.disabled,
+.btn-secondary.disabled {
+    background-color: #808080;
+}
+
 .btn-primary,
 .btn-secondary {
     color: #fff;
@@ -127,10 +132,36 @@ table.text-center td {
 
 .row-btn-minus {
     background-image: url('/images/icon-minus.png');
+    margin-right: 40px;
+}
+
+.row-btn-minus:hover {
+    background-image: url('/images/icon-minus-dark.png');
 }
 
 .row-btn-plus {
     background-image: url('/images/icon-plus.png');
+}
+
+.row-btn-plus:hover {
+    background-image: url('/images/icon-plus-dark.png');
+}
+
+.basket-count-wrapper {
+    position: relative;
+}
+
+.basket-count {
+    background-image: url('../images/puzzle-detail-white.png');
+    background-repeat: no-repeat;
+    top: calc(50% - 34px);
+    left: calc(50% - 39px);
+    position: absolute;
+    width: 78px;
+    height: 68px;
+    line-height: 68px;
+    font-size: 16px;
+    text-align: center;
 }
 
 

@@ -5,12 +5,12 @@
 @foreach (var gr in Lots.GroupBy(x => x.PriceRange).OrderBy(x => x.Key.Minimum))
 {
     <!-- сначала строка с первыми товарами -->
-    <div class="row">
+    <div class="row margin-top-20">
         <div class="col col-2 conteiner-for-centered">
             <h6 class="text-center text-red">@gr.Key.Minimum - @gr.Key.Maximum руб</h6>
         </div>
 
-        @foreach (var lot in Lots.Take(5))
+        @foreach (var lot in gr.Take(5))
         {
             <div class="col col-2">
                 <a class="link-text-usual" href="/lot/@lot.Id">

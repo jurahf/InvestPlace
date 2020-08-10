@@ -27,7 +27,7 @@
         <div class="row margin-top-10">
             <div class="col col-4">
                 <button class="btn btn-primary" @onclick="Buy">Купить пазл</button>
-                <h6 class="text-danger">@buyErrorText</h6>
+                <h6 class="text-danger">@((MarkupString)buyErrorText)</h6>
             </div>
 
             <div class="col col-4">
