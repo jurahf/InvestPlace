@@ -1,4 +1,4 @@
-﻿@page "/MyLots"
+﻿@page "/MyPuzzles"
 
 @using Services.DTO;
 @using Services.Services.LotService;
@@ -16,16 +16,8 @@
     <div class="margin-top-20"></div>
 
     <div class="row">
-        <div class="col col-3">
-            <h4 class="text-red">Мои товары</h4>
-        </div>
-
-        <div class="col col-6">
-
-        </div>
-
-        <div class="col col-3">
-            <button class="btn btn-primary" @onclick="NewLotClick">Разместить товар</button>
+        <div class="col col-12">
+            <h4 class="text-red">Участвую в сборе пазлов</h4>
         </div>
     </div>
 
@@ -74,15 +66,11 @@
         List<LotDto> result = new List<LotDto>();
         if (extendedUser != null)
         {
-            result = LotService.GetByUserSell(extendedUser);
+            result = LotService.GetByUserBuy(extendedUser);
         }
 
         return result;
     }
 
-    protected void NewLotClick()
-    {
-        NavigationManager.NavigateTo("NewLot");
-    }
 
 }

@@ -48,12 +48,22 @@ namespace Services.Services.LotService
                 .FirstOrDefault(x => x.Id == id));
         }
 
-        public List<LotDto> GetByUser(ExtendedUserDto user)
+        public List<LotDto> GetByUserSell(ExtendedUserDto user)
         {
             return db.Lot
                 .Include(x => x.PriceRange)
                 .Include(x => x.Pazzle)
                 .Where(x => x.SellerId == user.Id)
+                .Select(x => LotDto.ConvertFromLot(x))
+                .ToList();
+        }
+
+        public List<LotDto> GetByUserBuy(ExtendedUserDto user)
+        {
+            return db.Lot
+                .Include(x => x.PriceRange)
+                .Include(x => x.Pazzle)
+                .Where(x => x.Pazzle.Any(p => p.BuyerId == user.Id))
                 .Select(x => LotDto.ConvertFromLot(x))
                 .ToList();
         }

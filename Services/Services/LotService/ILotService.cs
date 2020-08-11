@@ -14,7 +14,9 @@ namespace Services.Services.LotService
 
         LotDto GetById(int id);
 
-        List<LotDto> GetByUser(ExtendedUserDto user);
+        List<LotDto> GetByUserSell(ExtendedUserDto user);
+
+        List<LotDto> GetByUserBuy(ExtendedUserDto user);
 
         OperationResult CreateLot(LotDto lot, ExtendedUserDto creator, List<int> categoriesId);
     }
