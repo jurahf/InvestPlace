@@ -25,6 +25,7 @@ namespace Services.Services.LotService
             return Task.FromResult(
                 db.Lot
                 .Include(x => x.PriceRange)
+                .Include(x => x.Pazzle)
                 .Select(x => LotDto.ConvertFromLot(x))
                 .ToList());
         }
@@ -33,6 +34,7 @@ namespace Services.Services.LotService
         {
             return db.Lot
                 .Include(x => x.PriceRange)
+                .Include(x => x.Pazzle)
                 .Where(x => (x.CompleteDate == null) == actual)
                 .Select(x => LotDto.ConvertFromLot(x))
                 .ToList();
@@ -42,6 +44,7 @@ namespace Services.Services.LotService
         {
             return LotDto.ConvertFromLot(db.Lot
                 .Include(x => x.PriceRange)
+                .Include(x => x.Pazzle)
                 .FirstOrDefault(x => x.Id == id));
         }
 
@@ -49,6 +52,7 @@ namespace Services.Services.LotService
         {
             return db.Lot
                 .Include(x => x.PriceRange)
+                .Include(x => x.Pazzle)
                 .Where(x => x.SellerId == user.Id)
                 .Select(x => LotDto.ConvertFromLot(x))
                 .ToList();

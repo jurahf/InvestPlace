@@ -1,0 +1,83 @@
+﻿@page "/History"
+
+@using Services.DTO;
+@using Services.Services.ExtendedUserService;
+@using Services.Services.CashService;
+
+@inject AuthenticationStateProvider AuthenticationStateProvider;
+@inject IExtendedUserService ExtendedUserService;
+@inject ICashService CashService;
+
+
+<LoginWelcome>
+
+    <div class="margin-top-20"></div>
+
+    <div class="row">
+        <div class="col col-12">
+            <h4 class="text-red">История операций</h4>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col col-12">
+            <table class="table">
+                <tbody>
+                    @foreach (var op in operations.OrderByDescending(x => x.Date))
+                    {
+                        <tr>
+                            <td>@(operations.OrderByDescending(x => x.Date).ToList().IndexOf(op) + 1)</td>
+                            <td>@op.Comment</td>
+                            <td class="@(op.Summ < 0 ? "text-danger" : "text-success")">@op.Summ</td>
+                            <td>@op.Date.ToString("dd.MM.yyyy (hh:mm)")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</LoginWelcome>
+
+
+
+
+@code {
+
+        ExtendedUserDto user = null;
+        List<CashOperationDto> operations = new List<CashOperationDto>();
+
+    protected override void OnInitialized()
+    {
+        user = FindUser().Result;
+        operations = FindOperations(user);
+    }
+
+    private List<CashOperationDto> FindOperations(ExtendedUserDto user)
+    {
+        if (user == null)
+        {
+            return new List<CashOperationDto>();
+        }
+        else
+        {
+            return CashService.GetHistoryByUser(user);
+        }
+    }
+
+
+    private async Task<ExtendedUserDto> FindUser()
+    {
+        ExtendedUserDto result = null;
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            result = ExtendedUserService.GetByEmail(user.Identity.Name);
+        }
+
+        return result;
+    }
+
+}

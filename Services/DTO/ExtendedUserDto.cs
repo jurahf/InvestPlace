@@ -75,6 +75,21 @@ namespace Services.DTO
                 Cash = CashDto.ConvertByCash(user.Cash),
             };
         }
+
+        public override bool Equals(object obj)
+        {
+            ExtendedUserDto other = obj as ExtendedUserDto;
+
+            if (other == null)
+                return false;
+
+            return Id == other.Id;
+        }
+
+        public override int GetHashCode()
+        {
+            return Id.GetHashCode();
+        }
     }
 
     public enum UserRole

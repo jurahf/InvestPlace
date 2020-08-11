@@ -143,7 +143,10 @@ namespace Services.Services.BasketService
         /// </summary>
         public void Buy(ExtendedUserDto userDto)
         {
-            ExtendedUser user = db.Find<ExtendedUser>(userDto.Id);
+            ExtendedUser user = db.Users
+                .Include(x => x.Cash)
+                .Include(x => x.Basket)
+                .FirstOrDefault(x => x.Id == userDto.Id);
             if (user == null)
                 throw new ArgumentException("Пользователь не найден");
             if (user.Basket == null)
@@ -151,34 +154,40 @@ namespace Services.Services.BasketService
             if (user.Cash == null)
                 throw new ArgumentException("У пользователя нет кошелька");
 
-            lock (lockObject)
+            using (var transaction = db.Database.BeginTransaction())
             {
-                decimal summ = user.Basket.Pazzle.Sum(x => (x.Lot.Price ?? 0) / EpicSettings.PuzzleCostDelimeter);
-                if (summ > user.Cash.Summ)
-                    throw new Exception("Недостаточно средств");
 
-                CashOperation operation = new CashOperation()
+                lock (lockObject)
                 {
-                    Cash = user.Cash,
-                    Comment = "Покупка пазлов",
-                    Summ = -summ,
-                    Date = DateTime.Now
-                };
+                    decimal summ = user.Basket.Pazzle.Sum(x => (x.Lot.Price ?? 0) / EpicSettings.PuzzleCostDelimeter);
+                    if (summ > user.Cash.Summ)
+                        throw new Exception("Недостаточно средств");
 
-                db.CashOperation.Add(operation);
-                user.Cash.Summ -= summ;
+                    CashOperation operation = new CashOperation()
+                    {
+                        Cash = user.Cash,
+                        Comment = "Покупка пазлов",
+                        Summ = -summ,
+                        Date = DateTime.Now
+                    };
+
+                    db.CashOperation.Add(operation);
+                    user.Cash.Summ -= summ;
+                }
+
+                foreach (var puzzle in user.Basket.Pazzle)
+                {
+                    puzzle.Buyer = user;
+                    puzzle.BuyDate = DateTime.Now;
+                }
+
+                user.Basket.Pazzle.Clear();
+                db.Basket.Remove(user.Basket);
+
+                db.SaveChanges();
+
+                transaction.Commit();
             }
-
-            foreach (var puzzle in user.Basket.Pazzle)
-            {
-                puzzle.Buyer = user;
-                puzzle.BuyDate = DateTime.Now;
-            }
-
-            user.Basket.Pazzle.Clear();
-            db.Basket.Remove(user.Basket);
-
-            db.SaveChanges();
         }
 
 
