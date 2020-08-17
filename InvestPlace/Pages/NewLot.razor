@@ -61,9 +61,24 @@
                     <div class="col col-12">
                         <div class="form-group">
                             <label class="label">Категория</label>
+                            <InputSelect class="form-control" @bind-Value="parentCategory">
+                                <option value="0">Не выбрано</option>
+                                @foreach (var cat in categories.Where(x => x.Parent == null).OrderBy(x => x.Name))
+                                {
+                                    <option value="@cat.Id">@cat.Name</option>
+                                }
+                            </InputSelect>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col col-12">
+                        <div class="form-group">
+                            <label class="label">Подкатегория</label>
                             <InputSelect class="form-control" @bind-Value="selectedCategory">
-                                    <option value="0">Не выбрано</option>
-                                @foreach (var cat in categories)
+                                <option value="0">Не выбрано</option>
+                                @foreach (var cat in categories.Where(x => x.Parent != null && $"{x.Parent.Id}" == parentCategory).OrderBy(x => x.Name))
                                 {
                                     <option value="@cat.Id">@cat.Name</option>
                                 }
@@ -118,10 +133,10 @@
 
                 <!-- воспользоваться скидкой -->
                 @*<div class="row">
-                    <div class="col col-12">
-                        <button class="btn btn-primary disabled">Воспользоваться скидкой</button>
-                    </div>
-                </div>*@
+            <div class="col col-12">
+                <button class="btn btn-primary disabled">Воспользоваться скидкой</button>
+            </div>
+        </div>*@
             </div>
         </div>
 
@@ -156,14 +171,17 @@
 
 
 @code {
+    [CascadingParameter]
+    protected ExtendedUserDto user { get; set; }
+
     protected const int MaxFileSizeMb = 2;
     protected const int MaxFileSizeBytes = MaxFileSizeMb * 1024 * 1024;
     protected string fileErrorText = "";
     protected string saveErrorText = "";
     protected string imageLink = "";
+    protected string parentCategory = "0";
     protected string selectedCategory = "0";
     protected List<CategoryDto> categories = new List<CategoryDto>();
-    protected ExtendedUserDto extendedUser = null;
     protected List<LotDto> actualLots = new List<LotDto>();
     protected List<LotDto> actualRangeredLots = new List<LotDto>();
     protected LotDto newLot;
@@ -173,7 +191,6 @@
     {
         newLot = new LotDto();
         categories = FindCategories();
-        extendedUser = FindUser().Result;
         actualLots = LotService.GetActual(true);
         actualRangeredLots = actualLots.GroupBy(x => x.PriceRange).FirstOrDefault().ToList();
     }
@@ -181,20 +198,6 @@
     private List<CategoryDto> FindCategories()
     {
         return CategoryService.GetAll();
-    }
-
-    private async Task<ExtendedUserDto> FindUser()
-    {
-        ExtendedUserDto extendedUser = null;
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        if (user.Identity.IsAuthenticated)
-        {
-            extendedUser = ExtendedUserService.GetByEmail(user.Identity.Name);
-        }
-
-        return extendedUser;
     }
 
     protected void RemoveFile()
@@ -209,19 +212,30 @@
         fileErrorText = "";
         var file = files.FirstOrDefault();
 
+
         try
         {
             if (file != null)
             {
-                await UploadFile(file)
+                Task task = UploadFile(file)
                     .ContinueWith((t, o) =>
                     {
                         InvokeAsync(() =>
                         {
                             imageLink = t.Result;
                             this.StateHasChanged(); // чтобы перерисовалось view (из асинхронного вызова оно не может)
-                        });
-                    }, TaskContinuationOptions.ExecuteSynchronously);
+                            });
+                    }, TaskContinuationOptions.ExecuteSynchronously)
+                    .ContinueWith((t, o) =>
+                    {
+                        while (!t.IsCompleted) { }
+
+                        if (t.Status == TaskStatus.Faulted)
+                        {
+                        }
+                    }, TaskContinuationOptions.OnlyOnFaulted);
+
+                await task;
             }
         }
         catch (ArgumentException aex)
@@ -254,7 +268,7 @@
             {
                 string ext = file.Type.Substring(file.Type.IndexOf('/') + 1);
 
-                return await FileService.UploadFileAndGetLinkAsync(UploadFileType.LotImage, ext, file.Data, extendedUser);
+                return await FileService.UploadFileAndGetLinkAsync(UploadFileType.LotImage, ext, file.Data, user);
             }
         }
 
@@ -286,7 +300,7 @@
 
         newLot.ImageLink = imageLink;
 
-        OperationResult result = LotService.CreateLot(newLot, extendedUser, new List<int>() { int.Parse(selectedCategory) });
+        OperationResult result = LotService.CreateLot(newLot, user, new List<int>() { int.Parse(selectedCategory) });
 
         if (result.Success)
         {

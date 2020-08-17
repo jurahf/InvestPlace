@@ -48,25 +48,18 @@
 
 
 @code {
+    [CascadingParameter]
+    protected ExtendedUserDto user { get; set; }
+
     CashDto cash = null;
 
     protected override void OnInitialized()
     {
-        cash = FindUserCash().Result;
+        cash = FindUserCash(user);
     }
 
-    private async Task<CashDto> FindUserCash()
+    private CashDto FindUserCash(ExtendedUserDto user)
     {
-        CashDto result = null;
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        if (user.Identity.IsAuthenticated)
-        {
-            ExtendedUserDto currentUser = ExtendedUserService.GetByEmail(user.Identity.Name);
-            result = currentUser?.Cash;
-        }
-
-        return result;
+        return user?.Cash;
     }
 }

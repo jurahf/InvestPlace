@@ -5,7 +5,6 @@
 @using Services.Services.BasketService;
 
 @inject NavigationManager NavigationManager
-@inject AuthenticationStateProvider AuthenticationStateProvider;
 @inject Services.Services.LotService.ILotService lotService
 @inject IExtendedUserService ExtendedUserService;
 @inject IBasketService BasketService;
@@ -84,6 +83,9 @@
     [CascadingParameter]
     public EventCallback BasketCountChange { get; set; }
 
+    [CascadingParameter]
+    protected ExtendedUserDto user { get; set; }
+
     private bool showNet = false;
     protected string buyErrorText = "";
     protected LotDto editedLot = new LotDto();
@@ -103,7 +105,6 @@
         buyErrorText = "";
 
         // проверить, авторизован, или нет
-        ExtendedUserDto user = FindUser().Result;
         if (user == null)
         {
             buyErrorText = "Для покупки необходимо выполнить <a href='/Account/Login'>вход</a>";
@@ -122,20 +123,6 @@
         }
     }
 
-
-    private async Task<ExtendedUserDto> FindUser()
-    {
-        ExtendedUserDto result = null;
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        if (user.Identity.IsAuthenticated)
-        {
-            result = ExtendedUserService.GetByEmail(user.Identity.Name);
-        }
-
-        return result;
-    }
 
 
 

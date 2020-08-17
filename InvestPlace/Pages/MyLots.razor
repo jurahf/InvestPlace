@@ -2,12 +2,9 @@
 
 @using Services.DTO;
 @using Services.Services.LotService;
-@using Services.Services.ExtendedUserService;
 
 @inject NavigationManager NavigationManager;
-@inject AuthenticationStateProvider AuthenticationStateProvider;
 @inject ILotService LotService;
-@inject IExtendedUserService ExtendedUserService;
 
 
 
@@ -52,29 +49,22 @@
 
 
 @code {
+    [CascadingParameter]
+    protected ExtendedUserDto user { get; set; }
 
     List<LotDto> lots = new List<LotDto>();
 
     protected override void OnInitialized()
     {
-        lots = FindLots().Result;
+        lots = FindLots(user);
     }
 
-    private async Task<List<LotDto>> FindLots()
+    private List<LotDto> FindLots(ExtendedUserDto user)
     {
-        ExtendedUserDto extendedUser = null;
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        if (user.Identity.IsAuthenticated)
-        {
-            extendedUser = ExtendedUserService.GetByEmail(user.Identity.Name);
-        }
-
         List<LotDto> result = new List<LotDto>();
-        if (extendedUser != null)
+        if (user != null)
         {
-            result = LotService.GetByUserSell(extendedUser);
+            result = LotService.GetByUserSell(user);
         }
 
         return result;

@@ -44,12 +44,13 @@
 
 @code {
 
-        ExtendedUserDto user = null;
-        List<CashOperationDto> operations = new List<CashOperationDto>();
+    [CascadingParameter]
+    protected ExtendedUserDto user { get; set; }
+
+    List<CashOperationDto> operations = new List<CashOperationDto>();
 
     protected override void OnInitialized()
     {
-        user = FindUser().Result;
         operations = FindOperations(user);
     }
 
@@ -63,21 +64,6 @@
         {
             return CashService.GetHistoryByUser(user);
         }
-    }
-
-
-    private async Task<ExtendedUserDto> FindUser()
-    {
-        ExtendedUserDto result = null;
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        if (user.Identity.IsAuthenticated)
-        {
-            result = ExtendedUserService.GetByEmail(user.Identity.Name);
-        }
-
-        return result;
     }
 
 }

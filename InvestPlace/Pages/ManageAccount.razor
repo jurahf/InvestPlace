@@ -2,7 +2,8 @@
 
 @using Services.DTO;
 @using Services.Services.ExtendedUserService;
-@inject AuthenticationStateProvider AuthenticationStateProvider;
+
+
 @inject IExtendedUserService ExtendedUserService;
 
 
@@ -165,26 +166,13 @@
 
 
 @code {
-    ExtendedUserDto user = null;
+    [CascadingParameter]
+    protected ExtendedUserDto user { get; set; }
+
     bool showSuccess = false;
 
     protected override void OnInitialized()
     {
-        user = FindUser().Result;
-    }
-
-    private async Task<ExtendedUserDto> FindUser()
-    {
-        ExtendedUserDto result = null;
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        if (user.Identity.IsAuthenticated)
-        {
-            result = ExtendedUserService.GetByEmail(user.Identity.Name);
-        }
-
-        return result;
     }
 
     private void ValidSubmit()

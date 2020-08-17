@@ -74,10 +74,12 @@
     </nav>
 
 
-    <CascadingValue Value="BasketCountChange">
-        <div class="content px-4">
-            @Body
-        </div>
+    <CascadingValue Value="user">
+        <CascadingValue Value="BasketCountChange">
+            <div class="content px-4">
+                @Body
+            </div>
+        </CascadingValue>
     </CascadingValue>
 </div>
 

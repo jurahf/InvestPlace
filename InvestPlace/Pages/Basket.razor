@@ -93,7 +93,9 @@
     [CascadingParameter]
     public EventCallback BasketCountChange { get; set; }
 
-    ExtendedUserDto user = null;
+    [CascadingParameter]
+    protected ExtendedUserDto user { get; set; }
+
     List<PuzzleDto> puzzles = new List<PuzzleDto>();
     decimal summ;
     string errorText = "";
@@ -102,25 +104,8 @@
 
     protected override void OnInitialized()
     {
-        user = FindUser().Result;
-
         // по пользователю надо получить корзину со всеми пазлами и лотами
         puzzles = FindPuzzles(user);
-    }
-
-
-    private async Task<ExtendedUserDto> FindUser()
-    {
-        ExtendedUserDto result = null;
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        if (user.Identity.IsAuthenticated)
-        {
-            result = ExtendedUserService.GetByEmail(user.Identity.Name);
-        }
-
-        return result;
     }
 
 

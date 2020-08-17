@@ -11,18 +11,20 @@ namespace Services.DTO
 
         public string Name { get; set; }
 
+        public CategoryDto Parent { get; set; }
+
         public static CategoryDto ConvertFromCategory(Category category)
         {
             CategoryDto dto = new CategoryDto();
 
             if (category == null)
-                return dto;
+                return null;        // !
 
             dto.Id = category.Id;
             dto.Name = category.Name;
+            dto.Parent = ConvertFromCategory(category.Parent);
 
             return dto;
         }
-
     }
 }

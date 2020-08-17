@@ -1,4 +1,5 @@
 ﻿using InvestPlaceDB;
+using Microsoft.EntityFrameworkCore;
 using Services.DTO;
 using System;
 using System.Collections.Generic;
@@ -18,7 +19,10 @@ namespace Services.Services.ExtendedUserService
 
         public ExtendedUserDto GetByEmail(string email)
         {
-            return ExtendedUserDto.ConvertByUser(db.Users.SingleOrDefault(x => x.Email == email));
+            return ExtendedUserDto.ConvertByUser(
+                db.Users
+                .Include(u => u.Cash)
+                .SingleOrDefault(x => x.Email == email));
         }
 
         public bool UpdateUser(ExtendedUserDto dto)
