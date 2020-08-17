@@ -66,7 +66,7 @@
                 <hr/>
                 <h2 class="text-red">@(summ.ToString("N2")) ₽</h2>
 
-                <button class="btn btn-primary margin-top-120 @(summ > 0 ? "" : "disabled")" @onclick="() => DoOrder(user)">Оформить заказ</button>
+                <button class="btn btn-primary margin-top-120 @(summ > 0 ? "" : "disabled")" @onclick="() => DoOrder(user)">Оплатить (спишется с кошелька)</button>
                 <div class="margin-top-20"></div>
                 <h6 class="text-danger">@errorText</h6>
                 <h6 class="text-success">@sucessText</h6>

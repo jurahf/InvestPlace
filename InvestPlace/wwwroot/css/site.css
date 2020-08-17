@@ -237,7 +237,32 @@ table.text-center td {
 
 /****************************************/
 
+/******** поле покупателей *******************************/
 
+.field-cell img {
+    width: 70px;
+    height: 55px;
+}
+
+td.field-cell {
+    height: 55px;
+    width: 70px;
+    padding: 0;
+}
+
+td.field-cell h6 {
+    color: #c9b1b1;
+    text-shadow: 2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 1px 1px #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
+    font-size: 18px;
+    position: absolute;
+    left: 40px;
+    top: 30px;
+}
+
+.field-cell-inner {
+    position: relative;
+}
+/***************************************/
 /* страница Мои товары */
 .lot-my-img {
     width: 123px;

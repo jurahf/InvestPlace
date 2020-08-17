@@ -154,5 +154,28 @@ namespace Services.Services.LotService
         }
 
 
+        public List<LotDto> GetBuyerField()
+        {
+            var allCompleted = db.Lot
+                .Include(x => x.PriceRange)
+                .Include(x => x.Pazzle)
+                .Where(x => x.CompleteDate != null && x.CompleteDate.Value.Date < DateTime.Today); // завершенные на вчерашний день
+
+            // каждые 300 - одно поле покупателей
+            int mod = allCompleted.Count() % EpicSettings.LotPerBuyerField;
+
+            if (mod == 0)
+                return new List<LotDto>();
+            else
+            {
+                return allCompleted.OrderByDescending(x => x.CompleteDate)
+                    .Take(mod)
+                    .Select(x => LotDto.ConvertFromLot(x))
+                    .OrderBy(x => x.CompleteDate)
+                    .ToList();
+            }
+        }
+
+
     }
 }

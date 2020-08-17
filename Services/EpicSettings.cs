@@ -11,6 +11,12 @@ namespace Services
         public const int MaxPuzzleY = 15;
 
 
+        public const int MaxBuyerFieldX = 15;
+        public const int MaxBuyerFieldY = 20;
+
+        public const int LotPerBuyerField = 300;
+
+
         /// <summary>
         /// Сколько пазлов в одном лоте
         /// </summary>

@@ -1,0 +1,54 @@
+﻿@page "/BuyerField"
+
+@using Services;
+@using Services.DTO;
+
+@inject Services.Services.LotService.ILotService lotService
+
+
+
+
+<h4 class="text-red">Поле покупателей</h4>
+<h5 class="text-gray">@DateTime.Today.ToString("dd/MM/yyyy")</h5>
+
+<table class="table table-bordered">
+    <tbody>
+
+        @for (int row = 0; row < EpicSettings.MaxBuyerFieldY; row++)
+        {
+            <tr>
+                @for (int col = 0; col < EpicSettings.MaxBuyerFieldX; col++)
+                {
+                    <td class="field-cell">
+                        <div class="field-cell-inner">
+                            @if (col + (row * EpicSettings.MaxBuyerFieldX) < allLots.Count)
+                            {
+                                <a href="/Lot/@allLots.OrderBy(x => x.CompleteDate).ElementAt(col + (row * EpicSettings.MaxBuyerFieldX))?.Id">
+                                    <img src="@allLots.OrderBy(x => x.CompleteDate).ElementAt(col + (row * EpicSettings.MaxBuyerFieldX))?.ImageLink" />
+                                </a>
+                            }
+                            <h6>@(col + 1 + (row * EpicSettings.MaxBuyerFieldX))</h6>
+                        </div>
+                    </td>
+                }
+            </tr>
+        }
+
+    </tbody>
+</table>
+
+
+
+
+
+@code {
+
+
+    List<LotDto> allLots = new List<LotDto>();
+
+    protected override void OnInitialized()
+    {
+        allLots = lotService.GetBuyerField();
+    }
+
+}

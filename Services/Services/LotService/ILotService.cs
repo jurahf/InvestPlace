@@ -19,5 +19,7 @@ namespace Services.Services.LotService
         List<LotDto> GetByUserBuy(ExtendedUserDto user);
 
         OperationResult CreateLot(LotDto lot, ExtendedUserDto creator, List<int> categoriesId);
+
+        List<LotDto> GetBuyerField();
     }
 }

@@ -36,6 +36,8 @@ namespace Services.DTO
 
         public PriceRangeDto PriceRange { get; set; }
 
+        public DateTime? CompleteDate { get; set; }
+
         public LotDto()
         {
             Categories = new List<CategoryDto>();
@@ -57,6 +59,7 @@ namespace Services.DTO
             result.PuzzleCount = lot.Pazzle.Count(x => x.BuyDate != null);
             result.Categories = lot.LotCategory.Select(x => CategoryDto.ConvertFromCategory(x.Category)).ToList();
             result.PriceRange = PriceRangeDto.ConvertFromPriceRange(lot.PriceRange);
+            result.CompleteDate = lot.CompleteDate;
 
             return result;
         }
