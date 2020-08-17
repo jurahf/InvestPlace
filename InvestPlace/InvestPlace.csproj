@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\images\Lots\" />
+    <Folder Include="wwwroot\font-awersome\" />
   </ItemGroup>
 
   <ItemGroup>

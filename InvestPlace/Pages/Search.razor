@@ -1,0 +1,113 @@
+﻿@page "/Search"
+
+@using Services.DTO;
+
+@inject IJSRuntime JSRuntime;
+@inject Services.Services.LotService.ILotService lotService
+
+<div class="row">
+    <div class="col col-12">
+        <h4 class="text-red">Поиск товаров</h4>
+    </div>
+</div>
+
+
+<EditForm Model="searchParams">
+
+    <div class="row">
+        <div class="col col-12">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1"><i class="fas fa-search"></i></span>
+                </div>
+                <InputText type="text" class="form-control" placeholder="Название или категория товара" aria-label="Search" aria-describedby="basic-addon1" @bind-Value="searchParams.Text" />
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col col-5">
+            <form class="form-inline slider-wrapper" id="slider-wrapper">
+
+                <div class="form-group">
+                    <InputNumber type="number" class="form-control input-min" id="inputMin" disabled Value="searchParams.MinPrice" ValueExpression="() => searchParams.MinPrice" ValueChanged="(int val) => MinValChanged(val)" />
+                </div>
+
+                <div class="form-group mx-sm-3 mb-2">
+                    <input id="ex2" type="text" class="span2" value="" data-slider-min="@searchParams.MinPrice" data-slider-max="@searchParams.MaxPrice" data-slider-step="10" data-slider-value="[@searchParams.MinPrice,@searchParams.MaxPrice]" data-slider-handle="square" />
+                </div>
+
+                <div class="form-group">
+                    <input type="number" class="form-control input-max" id="inputMax" disabled @bind-value="searchParams.MaxPrice">
+                </div>
+
+            </form>
+        </div>
+
+        <div class="col col-7">
+            @foreach (var lot in allLots)
+            {
+                <div class="row">
+                    <div class="col col-4">
+                        <div class="search-card">
+                            <a href="/lot/@lot.Id">
+                                <img src="@lot.ImageLink" />
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="col col-8">
+                        <div class="search-desc">
+                            <h6>@lot.Name</h6>
+                            <a class="text-red" href="@lot.SourceLink" target="_blank">@lot.SourceLink</a>
+                            <h6 class="search-price">@lot.PuzzlePrice</h6>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+    </div>
+
+</EditForm>
+
+
+
+
+@code {
+
+    private LotSearchParams searchParams = null;
+    private List<LotDto> allLots = new List<LotDto>();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        allLots = await lotService.GetAllAsync();       // TODO: надо ли получать тут все? может лучше по параметрам поиска?
+
+        searchParams = new LotSearchParams();
+        searchParams.MinPrice = (int)allLots.Min(x => x.PriceRange.Minimum);
+        searchParams.MaxPrice = (int)allLots.Max(x => x.PriceRange.Maximum);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        //if (firstRender)
+        {
+            await JSRuntime.InvokeAsync<string>("initSlider", "ex2", "slider-wrapper");
+        }
+    }
+
+    protected void MinValChanged(int val)
+    {
+    }
+
+    public class LotSearchParams
+    {
+        public string Text { get; set; }
+        public int MinPrice { get; set; }
+        public int MaxPrice { get; set; }
+    }
+}
+
+

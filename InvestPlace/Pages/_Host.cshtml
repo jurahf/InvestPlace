@@ -14,6 +14,8 @@
     <base href="~/" />
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link href="css/site.css" rel="stylesheet" />
+    <link href="font-awersome/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/slider/bootstrap-slider-min.css" />
 </head>
 <body>
     <app>
@@ -38,6 +40,11 @@
             crossorigin="anonymous"></script>
 
 
+    <script type="text/javascript" src="js/popper.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_content/BlazorInputFile/inputfile.js"></script>
+    <script src="slider/bootstrap-slider.min.js"></script>
+
     <script>
         function InitImageHovers() {
             $('.img-wrapper').each(function (index) {
@@ -50,12 +57,20 @@
                 $(this).find('.img-hover').position(pos.left, pos.top);
             });
         }
+
+   
+        function initSlider(sliderId, wrapperId) {
+            $("#" + sliderId).slider({});
+
+            $('#' + sliderId).change(function () {
+                var min = $('#' + wrapperId + ' .tooltip-min .tooltip-inner').text();
+                var max = $('#' + wrapperId + ' .tooltip-max .tooltip-inner').text();
+
+                $('#' + wrapperId + ' .input-min').val(min);
+                $('#' + wrapperId + ' .input-max').val(max);
+            });
+        }
     </script>
-
-    <script type="text/javascript" src="js/popper.min.js"></script>
-    <script type="text/javascript" src="js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="_content/BlazorInputFile/inputfile.js"></script>
-
 
 </body>
 </html>

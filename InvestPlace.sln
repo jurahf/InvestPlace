@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InvestPlaceDB", "InvestPlac
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Services", "Services\Services.csproj", "{770CEBEF-4EC6-49A4-AAF5-29F47711C94E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoadFromExcel", "LoadFromExcel\LoadFromExcel.csproj", "{4F5FD333-6C08-473D-87BA-A5DC2DA43E42}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LoadFromExcel", "LoadFromExcel\LoadFromExcel.csproj", "{4F5FD333-6C08-473D-87BA-A5DC2DA43E42}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

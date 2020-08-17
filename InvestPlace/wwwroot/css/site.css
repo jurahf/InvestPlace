@@ -214,6 +214,30 @@ table.text-center td {
 
 
 
+/* страница поиска */
+
+.search-card img {
+    width: 167px;
+    height: 127px;
+    margin-bottom: 20px;
+}
+
+.search-desc {
+    overflow-wrap: anywhere !important;
+}
+
+.search-price {
+    padding-left: 5px;
+    padding-right: 5px;
+    background-color: #800000;
+    color: white;
+    font-size: 16px;
+    width: fit-content;
+}
+
+/****************************************/
+
+
 /* страница Мои товары */
 .lot-my-img {
     width: 123px;
@@ -560,3 +584,37 @@ a.link-text-usual:hover {
 .margin-top-120 {
     margin-top: 120px;
 }
+
+
+/******** slider *********************/
+
+.slider.slider-horizontal .slider-track .slider-selection,
+.slider .slider-track .slider-selection {
+    background: #c3615a;
+    height: 4px;
+}
+
+.slider.slider-horizontal .slider-track .slider-track-low,
+.slider.slider-horizontal .slider-track .slider-track-high {
+    background: black;
+    height: 2px;
+}
+
+.slider-track {
+    background-color: #ededed;
+    margin-top: unset !important;
+    height: unset !important;
+}
+
+.slider-handle {
+    background: #f6f6f6 !important;
+    border-radius: 2px !important;
+    border: 1px solid #aaaaaa !important;
+}
+
+.slider-wrapper .input-min,
+.slider-wrapper .input-max {
+    max-width: 85px;
+}
+
+/*******************************/
