@@ -20,7 +20,7 @@
                 <div class="input-group-prepend">
                     <span class="input-group-text" id="basic-addon1"><i class="fas fa-search"></i></span>
                 </div>
-                <InputText type="text" class="form-control" placeholder="Название или категория товара" aria-label="Search" aria-describedby="basic-addon1" @bind-Value="searchParams.Text" />
+                <InputText type="text" class="form-control" placeholder="Название или категория товара" aria-label="Search" aria-describedby="basic-addon1" Value="@searchParams.Text" ValueExpression="() => searchParams.Text" ValueChanged="(string s) => SearchTextChanged(s)"/>
             </div>
         </div>
     </div>
@@ -31,7 +31,8 @@
             <form class="form-inline slider-wrapper" id="slider-wrapper">
 
                 <div class="form-group">
-                    <InputNumber type="number" class="form-control input-min" id="inputMin" disabled Value="searchParams.MinPrice" ValueExpression="() => searchParams.MinPrice" ValueChanged="(int val) => MinValChanged(val)" />
+                    <!-- на самом деле bind здесь не работает. Значение в инпуте меняется через js (от слайдера) и потом отправляется в MinValChanged -->
+                    <InputNumber type="number" class="form-control input-min" id="inputMin" disabled @bind-Value="searchParams.MinPrice" />
                 </div>
 
                 <div class="form-group mx-sm-3 mb-2">
@@ -46,7 +47,7 @@
         </div>
 
         <div class="col col-7">
-            @foreach (var lot in allLots)
+            @foreach (var lot in searchedLots)
             {
                 <div class="row">
                     <div class="col col-4">
@@ -79,6 +80,8 @@
 
     private LotSearchParams searchParams = null;
     private List<LotDto> allLots = new List<LotDto>();
+    private List<LotDto> searchedLots = new List<LotDto>();
+    private DotNetObjectReference<Search> objRef;
 
 
     protected override async Task OnInitializedAsync()
@@ -88,18 +91,74 @@
         searchParams = new LotSearchParams();
         searchParams.MinPrice = (int)allLots.Min(x => x.PriceRange.Minimum);
         searchParams.MaxPrice = (int)allLots.Max(x => x.PriceRange.Maximum);
+
+        searchedLots = allLots.Select(x => x).ToList();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         //if (firstRender)
         {
-            await JSRuntime.InvokeAsync<string>("initSlider", "ex2", "slider-wrapper");
+            if (objRef == null)
+                objRef = DotNetObjectReference.Create(this);
+
+            await JSRuntime.InvokeAsync<string>("initSlider", "ex2", "slider-wrapper", objRef);
         }
     }
 
-    protected void MinValChanged(int val)
+    [JSInvokable]
+    public void MinValChanged(string minStr)
     {
+        if (int.TryParse(minStr, out int min))
+        {
+            searchParams.MinPrice = min;
+            DoSearch();
+        }
+    }
+
+    [JSInvokable]
+    public void MaxValChanged(string maxStr)
+    {
+        if (int.TryParse(maxStr, out int max))
+        {
+            searchParams.MaxPrice = max;
+            DoSearch();
+        }
+    }
+
+    public void SearchTextChanged(string text)
+    {
+        searchParams.Text = text;
+        DoSearch();
+    }
+
+    public void KeyPress(KeyboardEventArgs args)
+    {
+        // TODO: учитывать надо delete, backspace и т.д.
+        // в компоненте -  @onkeypress="KeyPress" 
+        if (args.Key.Length == 1)
+        {
+            searchParams.Text += args.Key;
+        }
+    }
+
+    private void DoSearch()
+    {
+        // TODO: добавить задержку по времени, а то больно быстро параметры меняются
+
+        var res = allLots
+            .Where(x => x.PuzzlePrice >= searchParams.MinPrice)
+            .Where(x => x.PuzzlePrice <= searchParams.MaxPrice);
+
+        if (!string.IsNullOrWhiteSpace(searchParams.Text))
+        {
+            string searchText = searchParams.Text.ToLower();
+            res = res.Where(x => x.Name.ToLower().Contains(searchText)
+                || x.Categories.Any(x => x.Name.ToLower().Contains(searchText)));
+        }
+
+        searchedLots = res.ToList();
+        this.StateHasChanged();
     }
 
     public class LotSearchParams

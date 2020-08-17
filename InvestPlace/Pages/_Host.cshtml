@@ -46,6 +46,8 @@
     <script src="slider/bootstrap-slider.min.js"></script>
 
     <script>
+
+        // выхывается из компонента ImageWithHover
         function InitImageHovers() {
             $('.img-wrapper').each(function (index) {
                 var height = $(this).find('.img-full').height();
@@ -58,16 +60,22 @@
             });
         }
 
-   
-        function initSlider(sliderId, wrapperId) {
+
+        // вызывается со страницы Search
+        function initSlider(sliderId, wrapperId, objRef) {
             $("#" + sliderId).slider({});
 
             $('#' + sliderId).change(function () {
                 var min = $('#' + wrapperId + ' .tooltip-min .tooltip-inner').text();
                 var max = $('#' + wrapperId + ' .tooltip-max .tooltip-inner').text();
 
+                // если менять только так, то биндинга значений в blazor не сработает
                 $('#' + wrapperId + ' .input-min').val(min);
                 $('#' + wrapperId + ' .input-max').val(max);
+
+                // поэтому еще так
+                objRef.invokeMethodAsync('MinValChanged', min);
+                objRef.invokeMethodAsync('MaxValChanged', max);
             });
         }
     </script>
