@@ -83,13 +83,16 @@ namespace InvestPlace.Pages.Account
                 {
                     UserName = Input.Email,
                     Email = Input.Email,
-                    InnerName = Input.Name,
+                    InnerName = Input.Name,                    
                 };
-
+                
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+
+                    // TODO: надо бы тоже выдавать ошибку, если не получится, и вообще в одной транзакции с созданием
+                    await _userManager.AddToRoleAsync(user, ExtendedRole.NORMAL);
 
                     // Подтверждение по почте
                     //var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);

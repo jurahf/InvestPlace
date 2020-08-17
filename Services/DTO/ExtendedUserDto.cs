@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Text;
 
 namespace Services.DTO
@@ -39,7 +40,7 @@ namespace Services.DTO
 
         public string CorrSchet { get; set; }
 
-        public UserRole Role { get; set; }
+        public string Role { get; set; }
 
         public CashDto Cash { get; set; }
 
@@ -49,7 +50,7 @@ namespace Services.DTO
         {
         }
 
-        public static ExtendedUserDto ConvertByUser(ExtendedUser user/*, ExtendedRole role*/)
+        public static ExtendedUserDto ConvertByUser(ExtendedUser user, IList<string> roles = null)
         {
             if (user == null)
                 return null;
@@ -57,7 +58,7 @@ namespace Services.DTO
             return new ExtendedUserDto()
             {
                 Id = user.Id,
-                //this.Role = user.R
+                Role = roles != null ? string.Join(", ", roles) : "",
                 InnerName = user.InnerName,
                 Surname = user.Surname,
                 Patronymic = user.Patronymic,
@@ -92,10 +93,5 @@ namespace Services.DTO
         }
     }
 
-    public enum UserRole
-    {
-        Usual,
-        Moderator,
-        Admin
-    }
+
 }

@@ -1,20 +1,30 @@
 ﻿using InvestPlaceDB;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Services.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Services.Services.ExtendedUserService
 {
     public class ExtendedUserService : IExtendedUserService
     {
         private InvestPlaceContext db;
+        private AuthenticationStateProvider authenticationStateProvider;
+        private UserManager<ExtendedUser> userManager;
 
-        public ExtendedUserService(InvestPlaceContext db)
+        public ExtendedUserService(
+            InvestPlaceContext db,
+            AuthenticationStateProvider authenticationStateProvider,
+            UserManager<ExtendedUser> userManager)
         {
             this.db = db;
+            this.authenticationStateProvider = authenticationStateProvider;
+            this.userManager = userManager;
         }
 
         public ExtendedUserDto GetByEmail(string email)
@@ -59,6 +69,44 @@ namespace Services.Services.ExtendedUserService
             }
         }
 
+
+        public async Task<IList<string>> GetRoles(ExtendedUser user)
+        {
+            if (user == null)
+                return new List<string>();
+
+            IList<string> result = new List<string>();
+            Task<IList<string>> task = userManager.GetRolesAsync(user);
+
+            try
+            {
+                result = await task;
+            }
+            catch (Exception ex)
+            {
+            }
+
+            return result;
+        }
+
+        private async Task<List<string>> GetRoleOfCurrentUser()
+        {
+            var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+            var u = authState.User;
+            var claims = authState.User?.Claims;
+
+            return claims.Where(x => x.Type == "role").Select(x => x.Value).ToList();
+        }
+
+
+        public List<ExtendedUserDto> GetAll()
+        {
+            var result = db.Users
+                .Include(u => u.Cash)
+                .ToList(); 
+
+            return result.Select(x => ExtendedUserDto.ConvertByUser(x/*, GetRoles(x).Result*/)).ToList();
+        }
 
 
     }

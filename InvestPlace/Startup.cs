@@ -17,6 +17,8 @@ using Services.Services.FileService;
 using Services.Services.CategoryService;
 using Services.Services.BasketService;
 using Services.Services.CashService;
+using Microsoft.EntityFrameworkCore.Design.Internal;
+using Microsoft.AspNetCore.Identity;
 
 namespace InvestPlace
 {
@@ -49,7 +51,9 @@ namespace InvestPlace
                     options.Password.RequireLowercase = false;
                     options.Password.RequireNonAlphanumeric = false;
                     options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+1234567890àáâãäå¸æçèéêëìíîïğñòóôõö÷øùúûüışÿÀÁÂÃÄÅ¨ÆÇÈÉÊËÌÍÎÏĞÑÒÓÔÕÖ×ØÙÚÛÜİŞß";
+                    options.ClaimsIdentity.RoleClaimType = "role";
                 })
+                .AddRoles<ExtendedRole>()
                 .AddEntityFrameworkStores<InvestPlaceContext>()
                 //.AddPasswordValidator<
                 ;

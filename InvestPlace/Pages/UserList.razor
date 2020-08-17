@@ -1,0 +1,90 @@
+﻿@page "/UserList"
+
+@using Services;
+@using Services.DTO;
+@using Services.Services.ExtendedUserService;
+
+@inject IExtendedUserService ExtendedUserService;
+
+@attribute [Authorize(Roles = InvestPlaceDB.ExtendedRole.MODERATOR + ", " + InvestPlaceDB.ExtendedRole.ADMIN)]
+
+
+<div class="row">
+    <div class="col col-12">
+        <h3 class="text-red">Список пользователей</h3>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col col-12">
+        <table class="table">
+            <thead>
+                <tr>
+                    <td>Email</td>
+                    <td>ФИО</td>
+                    <td>Телефон</td>
+                    <td>Адрес</td>
+                    <td>Банк</td>
+                    <td>ИНН</td>
+                    <td>КПП</td>
+                    <td>БИК</td>
+                    <td>Номер счета</td>
+                    <td>Корр. счёт</td>
+                    <td>Кошелек</td>
+                    @*<td>Роль</td>*@
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var u in allUsers.OrderBy(x => x.Email))
+                {
+                <tr>
+                    <td>@(u.Email ?? "")</td>
+                    <td>@(u.InnerName ?? "") @(u.Surname ?? "") @(u.Patronymic ?? "")</td>
+                    <td>@(u.PhoneNumber ?? "")</td>
+                    <td>@(u.Address ?? "")</td>
+                    <td>@(u.Bank ?? "")</td>
+                    <td>@(u.INN ?? "")</td>
+                    <td>@(u.KPP ?? "")</td>
+                    <td>@(u.BIK ?? "")</td>
+                    <td>@(u.SchetNumber ?? "")</td>
+                    <td>@(u.CorrSchet ?? "")</td>
+                    <td>@(u.Cash?.Summ ?? 0)</td>
+                    @*<td>@(u.Role ?? "")</td>*@
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+
+
+
+@code {
+
+        [CascadingParameter]
+        protected ExtendedUserDto user { get; set; }
+
+        List<ExtendedUserDto> allUsers = new List<ExtendedUserDto>();
+
+
+    protected override void OnInitialized()
+    {
+        allUsers = FindUsers(user);
+    }
+
+    protected List<ExtendedUserDto> FindUsers(ExtendedUserDto user)
+    {
+        if (user == null)
+            return new List<ExtendedUserDto>();
+        else
+            return ExtendedUserService.GetAll();
+    }
+
+
+
+
+}

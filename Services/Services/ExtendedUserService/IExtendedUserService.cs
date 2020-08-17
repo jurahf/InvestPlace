@@ -3,6 +3,7 @@ using Services.DTO;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Services.Services.ExtendedUserService
 {
@@ -11,5 +12,7 @@ namespace Services.Services.ExtendedUserService
         ExtendedUserDto GetByEmail(string email);
 
         bool UpdateUser(ExtendedUserDto userDto);
+
+        List<ExtendedUserDto> GetAll();
     }
 }
