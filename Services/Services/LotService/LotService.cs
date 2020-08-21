@@ -14,11 +14,13 @@ namespace Services.Services.LotService
 {
     public class LotService : ILotService
     {
-        private InvestPlaceContext db;
+        private readonly InvestPlaceContext db;
+        private readonly IExtendedUserService userService;
 
-        public LotService(InvestPlaceContext db)
+        public LotService(InvestPlaceContext db, IExtendedUserService userService)
         {
             this.db = db;
+            this.userService = userService;
         }
 
         public Task<List<LotDto>> GetAllAsync()
@@ -232,7 +234,11 @@ namespace Services.Services.LotService
             if (findedModerator == null)
                 throw new ArgumentException("Модератор не найден");
 
-            // TODO: проверить, есть ли права у пользователя на модерацию
+            List<string> roles = userService.GetRoles(findedModerator);
+            if (!roles.Contains(ExtendedRole.MODERATOR) && !roles.Contains(ExtendedRole.ADMIN))   // TODO: лучше проверить через разрешения, а не роли
+            {
+                throw new ArgumentException("У пользователя нет разрешения на данное действие");
+            }
 
             findedLot.CreateModerate = solution;
             findedLot.CreateModerator = findedModerator;

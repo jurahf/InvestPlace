@@ -14,5 +14,7 @@ namespace Services.Services.ExtendedUserService
         bool UpdateUser(ExtendedUserDto userDto);
 
         List<ExtendedUserDto> GetAll();
+
+        List<string> GetRoles(ExtendedUser user);
     }
 }

@@ -14,25 +14,21 @@ namespace Services.Services.ExtendedUserService
     public class ExtendedUserService : IExtendedUserService
     {
         private InvestPlaceContext db;
-        private AuthenticationStateProvider authenticationStateProvider;
-        private UserManager<ExtendedUser> userManager;
 
-        public ExtendedUserService(
-            InvestPlaceContext db,
-            AuthenticationStateProvider authenticationStateProvider,
-            UserManager<ExtendedUser> userManager)
+        public ExtendedUserService(InvestPlaceContext db)
         {
             this.db = db;
-            this.authenticationStateProvider = authenticationStateProvider;
-            this.userManager = userManager;
         }
 
         public ExtendedUserDto GetByEmail(string email)
         {
-            return ExtendedUserDto.ConvertByUser(
-                db.Users
+            ExtendedUser user = db.Users
                 .Include(u => u.Cash)
-                .SingleOrDefault(x => x.Email == email));
+                .SingleOrDefault(x => x.Email == email);
+
+            List<string> roles = GetRoles(user);
+
+            return ExtendedUserDto.ConvertByUser(user, roles);
         }
 
         public bool UpdateUser(ExtendedUserDto dto)
@@ -70,33 +66,31 @@ namespace Services.Services.ExtendedUserService
         }
 
 
-        public async Task<IList<string>> GetRoles(ExtendedUser user)
+        public List<string> GetRoles(ExtendedUser user)
         {
             if (user == null)
                 return new List<string>();
 
-            IList<string> result = new List<string>();
-            Task<IList<string>> task = userManager.GetRolesAsync(user);
+            List<int> rolesIds = db.UserRoles
+                .Where(x => x.UserId == user.Id)
+                .Select(x => x.RoleId)
+                .ToList();
 
-            try
-            {
-                result = task.GetAwaiter().GetResult();
-            }
-            catch (Exception ex)
-            {
-            }
+            List<ExtendedRole> roles = db.Roles
+                .Where(x => rolesIds.Contains(x.Id))
+                .ToList();
 
-            return result;
+            return roles.Select(x => x.Name).ToList();
         }
 
-        private async Task<List<string>> GetRoleOfCurrentUser()
-        {
-            var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
-            var u = authState.User;
-            var claims = authState.User?.Claims;
+        //private async Task<List<string>> GetRoleOfCurrentUser()
+        //{
+        //    var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+        //    var u = authState.User;
+        //    var claims = authState.User?.Claims;
 
-            return claims.Where(x => x.Type == "role").Select(x => x.Value).ToList();
-        }
+        //    return claims.Where(x => x.Type == "role").Select(x => x.Value).ToList();
+        //}
 
 
         public List<ExtendedUserDto> GetAll()
@@ -105,7 +99,7 @@ namespace Services.Services.ExtendedUserService
                 .Include(u => u.Cash)
                 .ToList(); 
 
-            return result.Select(x => ExtendedUserDto.ConvertByUser(x/*, GetRoles(x).Result*/)).ToList();
+            return result.Select(x => ExtendedUserDto.ConvertByUser(x, GetRoles(x))).ToList();
         }
 
 
