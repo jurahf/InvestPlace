@@ -1,0 +1,249 @@
+﻿@page "/OutputCashModerate/{queryId:int}"
+
+@using Services.DTO;
+@using Services.Services.CashService;
+
+@inject ICashService CashService;
+@inject NavigationManager NavigationManager;
+
+@attribute [Authorize(Roles = InvestPlaceDB.ExtendedRole.MODERATOR + ", " + InvestPlaceDB.ExtendedRole.ADMIN)]
+
+
+<div class="row">
+    <div class="col col-12">
+        <h4 class="text-red">Заявка на вывод денег</h4>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col col-3">
+
+        <div class="row">
+            <div class="col col-12">
+                <label>Фамилия</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col col-12">
+                <label>Имя</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col col-12">
+                <label>Отчество</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col col-12">
+                <label>Email</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col col-12">
+                <label>Телефон</label>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="col col-3">
+
+        <div class="row">
+            <div class="col col-12">
+                <label>&nbsp; @forUser.Surname</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col col-12">
+                <label>&nbsp; @forUser.InnerName</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col col-12">
+                <label>&nbsp; @forUser.Patronymic</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col col-12">
+                <label>&nbsp; @forUser.Email</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col col-12">
+                <label>&nbsp; @forUser.PhoneNumber</label>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="col col-3">
+        <div class="row">
+            <div class="col col-12">
+                <label>Номер счёта</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col col-12">
+                <label>Корр. счёт</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col col-12">
+                <label>Банк получателя</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col col-12">
+                <label>ИНН</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col col-12">
+                <label>КПП</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col col-12">
+                <label>БИК</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col col-12">
+                <label>Адрес</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="col col-3">
+        <div class="row">
+            <div class="col col-12">
+                <label>&nbsp; @forUser.SchetNumber</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col col-12">
+                <label>&nbsp; @forUser.CorrSchet</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col col-12">
+                <label>&nbsp; @forUser.Bank</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col col-12">
+                <label>&nbsp; @forUser.INN</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col col-12">
+                <label>&nbsp; @forUser.KPP</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col col-12">
+                <label>&nbsp; @forUser.BIK</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col col-12">
+                <label>&nbsp; @forUser.Address</label>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<div class="row">
+    <div class="col col-3">
+        <h5>На кошельке:</h5>
+    </div>
+    <div class="col col-3">
+        <h5>@forUser.Cash.Summ руб.</h5>
+    </div>
+</div>
+
+<div class="row margin-top-50">
+    <div class="col col-3">
+        <h5>Запрос на вывод:</h5>
+    </div>
+
+    <div class="col col-3">
+        <h5>@query.Summ руб.</h5>
+    </div>
+</div>
+
+<div class="row margin-top-50">
+    <div class="col col-12">
+        <button class="btn btn-secondary" @onclick="() => Moderate(true)">Подтвердить перевод</button>
+        <button class="btn btn-secondary" @onclick="() => Moderate(false)">Отклонить перевод</button>
+        <h6>@errorText</h6>
+    </div>
+</div>
+
+
+
+
+@code {
+
+    [CascadingParameter]
+    protected ExtendedUserDto user { get; set; }
+
+    [Parameter]
+    public int queryId { get; set; }
+
+    protected QueryForOperationDto query = new QueryForOperationDto();
+
+    protected ExtendedUserDto forUser = null;
+
+    private string errorText = "";
+
+
+    protected override void OnInitialized()
+    {
+        query = FindQuery(queryId);
+        forUser = query.User;
+    }
+
+    private QueryForOperationDto FindQuery(int queryId)
+    {
+        return CashService.GetQueryForOperationById(queryId);
+    }
+
+    private void Moderate(bool solution)
+    {
+        try
+        {
+            CashService.Moderate(query, user, solution);
+            NavigationManager.NavigateTo("/OutputCashModerateList");
+            this.StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            errorText = ex.Message;
+        }
+    }
+
+}

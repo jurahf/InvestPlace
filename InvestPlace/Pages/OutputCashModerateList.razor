@@ -1,0 +1,66 @@
+﻿@page "/OutputCashModerateList"
+
+@using Services.DTO;
+@using Services.Services.CashService;
+
+@inject ICashService CashService;
+@inject NavigationManager NavigationManager;
+
+@attribute [Authorize(Roles = InvestPlaceDB.ExtendedRole.MODERATOR + ", " + InvestPlaceDB.ExtendedRole.ADMIN)]
+
+
+<div class="row">
+    <div class="col col-12">
+        <h4 class="text-red">Заявки на вывод денег</h4>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col col-12">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th style="width:20%;">Время создания</th>
+                    <th>Пользователь</th>
+                    <th>Сумма</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var q in queries.OrderBy(x => x.Date))
+                {
+                    <tr @onclick="() => RowClicked(q.Id)">
+                        <td>@q.Date.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td>@(q.User.InnerName ?? "") @(q.User.Patronymic ?? "") @(q.User.Surname ?? "") (@(q.User.Email ?? ""))</td>
+                        <td>@q.Summ</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+@code {
+    [CascadingParameter]
+    protected ExtendedUserDto user { get; set; }
+
+    protected List<QueryForOperationDto> queries = new List<QueryForOperationDto>();
+
+    protected override void OnInitialized()
+    {
+        queries = FindQueries();
+    }
+
+    private List<QueryForOperationDto> FindQueries()
+    {
+        return CashService.QueriesForModerate();
+    }
+
+
+    private void RowClicked(int queryId)
+    {
+        NavigationManager.NavigateTo($"/OutputCashModerate/{queryId}");
+    }
+
+}

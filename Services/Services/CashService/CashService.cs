@@ -133,5 +133,95 @@ namespace Services.Services.CashService
         }
 
 
+        public int OutputCashRequestCount()
+        {
+            return db.QueryForOperation.Count(x => x.OperationModerate == null);
+        }
+
+        public List<QueryForOperationDto> QueriesForModerate()
+        {
+            return db.QueryForOperation
+                .Include(x => x.CashQueryModerator)
+                .Include(x => x.Cash)
+                .ThenInclude(x => x.ExtendedUser)
+                .Where(x => x.OperationModerate == null)
+                .Select(x => QueryForOperationDto.ConvertFromQueryForOperation(x))
+                .ToList();
+        }
+
+        public QueryForOperationDto GetQueryForOperationById(int id)
+        {
+            return QueryForOperationDto.ConvertFromQueryForOperation(
+                db.QueryForOperation
+                .Include(x => x.CashQueryModerator)
+                .Include(x => x.Cash)
+                .ThenInclude(x => x.ExtendedUser)
+                .FirstOrDefault(x => x.Id == id));
+        }
+
+
+        public void Moderate(QueryForOperationDto query, ExtendedUserDto moderator, bool solution)
+        {
+            if (query == null)
+                throw new ArgumentNullException("Запрос не может быть пустым");
+
+            if (moderator == null)
+                throw new ArgumentNullException("Модератор не может быть пустым");
+
+            QueryForOperation findedQuery = db.QueryForOperation
+                .Include(x => x.CashQueryModerator)
+                .Include(x => x.Cash)
+                .ThenInclude(x => x.ExtendedUser)
+                .FirstOrDefault(x => x.Id == query.Id);
+
+            ExtendedUser findedModerator = db.Users.Find(moderator.Id);
+
+            if (findedQuery == null)
+                throw new ArgumentException("Запрос на операцию не найден");
+
+            if (findedQuery.Summ <= 0 || findedQuery.Summ > 2_000_000)
+                throw new ArgumentException("Сумма вывода денег должна быть больше 0 и меньше 2 000 000");
+
+            if (findedModerator == null)
+                throw new ArgumentException("Модератор не найден");
+
+            List<string> roles = userService.GetRoles(findedModerator);
+            if (!roles.Contains(ExtendedRole.MODERATOR) && !roles.Contains(ExtendedRole.ADMIN))
+                throw new ArgumentException("Нет прав для выполнения данной операции");
+
+            lock (lockObject)
+            {
+                if (findedQuery.Cash == null || findedQuery.Cash.Summ < findedQuery.Summ)
+                    throw new ArgumentException("На кошельке недостаточно средств");
+
+                using (var transaction = db.Database.BeginTransaction())
+                {
+                    findedQuery.OperationModerate = solution;
+                    findedQuery.CashQueryModerator = findedModerator;
+
+                    db.Update(findedQuery);
+
+                    if (solution)
+                    {
+                        findedQuery.Cash.Summ -= findedQuery.Summ;
+                    }
+
+                    CashOperation cashOperation = new CashOperation()
+                    {
+                        Date = DateTime.Now,
+                        Cash = findedQuery.Cash,
+                        Summ = -findedQuery.Summ,
+                        Comment = solution ? $"Вывод денег (id запроса = {findedQuery.Id})" : $"В операции отказано (id запроса = {findedQuery.Id})"
+                    };
+                    db.CashOperation.Add(cashOperation);
+
+                    db.SaveChanges();
+                    transaction.Commit();
+                }
+            }
+        }
+
+
+
     }
 }

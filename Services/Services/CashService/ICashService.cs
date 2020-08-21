@@ -13,5 +13,13 @@ namespace Services.Services.CashService
         void ChangeSumm(ExtendedUserDto userToChange, ExtendedUserDto moderator, decimal summDelta);
 
         void CreateOutputOperationRequest(ExtendedUserDto user, decimal summ);
+
+        int OutputCashRequestCount();
+
+        List<QueryForOperationDto> QueriesForModerate();
+
+        QueryForOperationDto GetQueryForOperationById(int id);
+
+        void Moderate(QueryForOperationDto query, ExtendedUserDto moderator, bool solution);
     }
 }

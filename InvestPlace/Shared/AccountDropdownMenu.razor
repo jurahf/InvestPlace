@@ -1,11 +1,13 @@
 ﻿@using Services.DTO;
 @using Services.Services.ExtendedUserService;
 @using Services.Services.LotService;
+@using Services.Services.CashService; 
 @using InvestPlaceDB;
 
 @inject AuthenticationStateProvider AuthenticationStateProvider;
 @inject IExtendedUserService ExtendedUserService;
 @inject ILotService LotService;
+@inject ICashService CashService;
 
 
 <AuthorizeView Roles="Moderator, Admin">
@@ -17,6 +19,9 @@
         <div class="dropdown-divider"></div>
 
         <a class="dropdown-item" href="/NewLotModerateList">Модерация новых лотов (@NewLotCount)</a>
+        <div class="dropdown-divider"></div>
+
+        <a class="dropdown-item" href="/OutputCashModerateList">Заявки на вывод денег (@OutputCashCount)</a>
         <div class="dropdown-divider"></div>
 
         <!-- вывод денег -->
@@ -71,11 +76,13 @@
 @code {
     string UserName = "";
     int NewLotCount = 0;
+    int OutputCashCount = 0;
 
     protected override void OnInitialized()
     {
         UserName = FindUserName().Result;
         NewLotCount = LotService.LotForModerateCount();
+        OutputCashCount = CashService.OutputCashRequestCount();
         base.OnInitialized();
     }
 
