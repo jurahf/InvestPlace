@@ -36,6 +36,9 @@ namespace InvestPlaceDB
         [Column(TypeName = "datetime")]
         public DateTime? CompleteDate { get; set; }
 
+        [Column(TypeName = "datetime")]
+        public DateTime? CreateModerateDate { get; set; }
+
         public bool? CreateModerate { get; set; }
 
         public bool? CompleteModerate { get; set; }

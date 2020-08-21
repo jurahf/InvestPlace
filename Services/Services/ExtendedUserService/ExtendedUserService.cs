@@ -80,7 +80,7 @@ namespace Services.Services.ExtendedUserService
 
             try
             {
-                result = await task;
+                result = task.GetAwaiter().GetResult();
             }
             catch (Exception ex)
             {

@@ -6,13 +6,14 @@ using System.Text;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Authentication.ExtendedProtection;
 
 namespace Services.DTO
 {
     public class LotDto
     {
         public int Id { get; set; }
-        
+
         [Required(ErrorMessage = "Название обязательно для заполнения")]
         public string Name { get; set; }
 
@@ -36,7 +37,17 @@ namespace Services.DTO
 
         public PriceRangeDto PriceRange { get; set; }
 
+        public DateTime? CreateDate { get; set; }
+
         public DateTime? CompleteDate { get; set; }
+
+        public bool CreateModerate { get; set; }
+
+        public ExtendedUserDto CreateModerator { get; set; }
+
+        public ExtendedUserDto Seller { get; set; }
+
+        public DateTime? CreateModerateDate { get; set; }
 
         public LotDto()
         {
@@ -60,6 +71,13 @@ namespace Services.DTO
             result.Categories = lot.LotCategory.Select(x => CategoryDto.ConvertFromCategory(x.Category)).ToList();
             result.PriceRange = PriceRangeDto.ConvertFromPriceRange(lot.PriceRange);
             result.CompleteDate = lot.CompleteDate;
+            result.CreateDate = lot.CreateDate;
+
+            result.Seller = ExtendedUserDto.ConvertByUser(lot.Seller);
+
+            result.CreateModerate = lot.CreateModerate == true;
+            result.CreateModerator = ExtendedUserDto.ConvertByUser(lot.CreateModerator);
+            result.CreateModerateDate = lot.CreateModerateDate;
 
             return result;
         }

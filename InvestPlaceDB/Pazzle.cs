@@ -57,6 +57,7 @@ namespace InvestPlaceDB
         [ForeignKey(nameof(ChangeModeratorId))]
         [InverseProperty(nameof(ExtendedUser.PazzleChangeModerator))]
         public virtual ExtendedUser ChangeModerator { get; set; }
+
         [ForeignKey(nameof(LotId))]
         [InverseProperty("Pazzle")]
         public virtual Lot Lot { get; set; }

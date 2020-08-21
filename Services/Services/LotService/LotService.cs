@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Services.DTO;
+using Services.Services.ExtendedUserService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,17 +25,27 @@ namespace Services.Services.LotService
         {
             return Task.FromResult(
                 db.Lot
+                .Include(x => x.Seller)
+                .Include(x => x.CreateModerator)
+                .Include(x => x.CompleteModerator)
                 .Include(x => x.PriceRange)
                 .Include(x => x.Pazzle)
                 .Select(x => LotDto.ConvertFromLot(x))
-                .ToList());
+                .ToList()) ;
         }
 
-        public List<LotDto> GetActual(bool actual)
+        /// <summary>
+        /// Все промодерированные и незавершенные
+        /// </summary>
+        public List<LotDto> GetActual(bool actual)  // используется в NewLot для показа лотов для участия
         {
             return db.Lot
                 .Include(x => x.PriceRange)
                 .Include(x => x.Pazzle)
+                .Include(x => x.Seller)
+                .Include(x => x.CreateModerator)
+                .Include(x => x.CompleteModerator)
+                .Where(x => x.CreateModerate == actual)
                 .Where(x => (x.CompleteDate == null) == actual)
                 .Select(x => LotDto.ConvertFromLot(x))
                 .ToList();
@@ -45,6 +56,9 @@ namespace Services.Services.LotService
             return LotDto.ConvertFromLot(db.Lot
                 .Include(x => x.PriceRange)
                 .Include(x => x.Pazzle)
+                .Include(x => x.Seller)
+                .Include(x => x.CreateModerator)
+                .Include(x => x.CompleteModerator)
                 .FirstOrDefault(x => x.Id == id));
         }
 
@@ -53,6 +67,9 @@ namespace Services.Services.LotService
             return db.Lot
                 .Include(x => x.PriceRange)
                 .Include(x => x.Pazzle)
+                .Include(x => x.Seller)
+                .Include(x => x.CreateModerator)
+                .Include(x => x.CompleteModerator)
                 .Where(x => x.SellerId == user.Id)
                 .Select(x => LotDto.ConvertFromLot(x))
                 .ToList();
@@ -63,6 +80,9 @@ namespace Services.Services.LotService
             return db.Lot
                 .Include(x => x.PriceRange)
                 .Include(x => x.Pazzle)
+                .Include(x => x.Seller)
+                .Include(x => x.CreateModerator)
+                .Include(x => x.CompleteModerator)
                 .Where(x => x.Pazzle.Any(p => p.BuyerId == user.Id))
                 .Select(x => LotDto.ConvertFromLot(x))
                 .ToList();
@@ -174,6 +194,52 @@ namespace Services.Services.LotService
                     .OrderBy(x => x.CompleteDate)
                     .ToList();
             }
+        }
+
+
+
+        public int LotForModerateCount()
+        {
+            return db.Lot
+                .Count(x => x.CreateModerate == null);
+        }
+
+
+        public List<LotDto> LotsForModerate()
+        {
+            return db.Lot
+                .Include(x => x.PriceRange)
+                .Include(x => x.Seller)
+                .Include(x => x.CreateModerator)
+                .Where(x => x.CreateModerate == null)
+                .Select(x => LotDto.ConvertFromLot(x))
+                .ToList();
+        }
+
+
+        public void CreateModerate(LotDto lot, ExtendedUserDto moderator, bool solution)
+        {
+            if (lot == null)
+                throw new ArgumentException("Товар не может быть пустым");
+            if (moderator == null)
+                throw new ArgumentException("Модератор не может быть пустым");
+
+            Lot findedLot = db.Lot.Find(lot.Id);
+            ExtendedUser findedModerator = db.Users.Find(moderator.Id);
+
+            if (findedLot == null)
+                throw new ArgumentException("Товар не найден");
+            if (findedModerator == null)
+                throw new ArgumentException("Модератор не найден");
+
+            // TODO: проверить, есть ли права у пользователя на модерацию
+
+            findedLot.CreateModerate = solution;
+            findedLot.CreateModerator = findedModerator;
+            findedLot.CreateModerateDate = DateTime.Now;
+
+            db.Update(findedLot);
+            db.SaveChanges();
         }
 
 

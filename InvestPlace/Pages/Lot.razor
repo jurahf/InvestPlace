@@ -74,17 +74,39 @@
 
 
 
+<AuthorizeView Roles="Moderator, Admin">
+
+    <div class="row">
+        <div class="col col-12">
+
+            @if (editedLot.CreateModerator == null)
+            {
+                <h5>Создатель: @editedLot.Seller?.InnerName @editedLot.Seller?.Patronymic @editedLot.Seller?.Surname (@editedLot.Seller?.Email)</h5>
+                <button class="btn btn-primary" @onclick="() => CreateModerate(true)">Подтвердить создание товара</button>
+                <button class="btn btn-primary" @onclick="() => CreateModerate(false)">Отклонить создание товара</button>
+            }
+            else
+            {
+                // TODO: а что делать, если промодерировали неправильно?
+                <h5>Промодерирован пользоватлем @editedLot.CreateModerator.InnerName (@editedLot.CreateModerator.Email)</h5>
+                <h5>@editedLot.CreateModerateDate.Value.ToString("dd.MM.yyyy HH:mm")</h5>
+            }
+        </div>
+    </div>
+</AuthorizeView>
+
+
 
 
 @code {
-    [Parameter]
-    public int Id { get; set; }
+        [Parameter]
+        public int Id { get; set; }
 
-    [CascadingParameter]
-    public EventCallback BasketCountChange { get; set; }
+        [CascadingParameter]
+        public EventCallback BasketCountChange { get; set; }
 
-    [CascadingParameter]
-    protected ExtendedUserDto user { get; set; }
+        [CascadingParameter]
+        protected ExtendedUserDto user { get; set; }
 
     private bool showNet = false;
     protected string buyErrorText = "";
@@ -111,6 +133,12 @@
             return;
         }
 
+        if (!editedLot.CreateModerate)
+        {
+            buyErrorText = "Размещение лота еще не подтверждено модератором";
+            return;
+        }
+
         try
         {
             // добавить товар пользователю
@@ -123,7 +151,12 @@
         }
     }
 
-
+    protected void CreateModerate(bool solution)
+    {
+        lotService.CreateModerate(editedLot, user, solution);
+        NavigationManager.NavigateTo("/NewLotModerateList");
+        this.StateHasChanged();
+    }
 
 
 }

@@ -84,9 +84,9 @@
     private DotNetObjectReference<Search> objRef;
 
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        allLots = await lotService.GetAllAsync();       // TODO: надо ли получать тут все? может лучше по параметрам поиска?
+        allLots = lotService.GetActual(true);       // TODO: надо ли получать тут все? может лучше по параметрам поиска?
 
         searchParams = new LotSearchParams();
         searchParams.MinPrice = (int)allLots.Min(x => x.PriceRange.Minimum);

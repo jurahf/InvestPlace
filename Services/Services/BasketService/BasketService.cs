@@ -146,6 +146,8 @@ namespace Services.Services.BasketService
             ExtendedUser user = db.Users
                 .Include(x => x.Cash)
                 .Include(x => x.Basket)
+                .ThenInclude(y => y.Pazzle)
+                .ThenInclude(z => z.Lot)
                 .FirstOrDefault(x => x.Id == userDto.Id);
             if (user == null)
                 throw new ArgumentException("Пользователь не найден");
@@ -162,6 +164,19 @@ namespace Services.Services.BasketService
                     decimal summ = user.Basket.Pazzle.Sum(x => (x.Lot.Price ?? 0) / EpicSettings.PuzzleCostDelimeter);
                     if (summ > user.Cash.Summ)
                         throw new Exception("Недостаточно средств");
+
+                    foreach (var pz in user.Basket.Pazzle)
+                    {
+                        if (pz.Lot.CreateModerate != true)
+                        {
+                            throw new Exception($"Размещение товара \"{pz.Lot.Name}\" не подтверждено модератором");
+                        }
+
+                        if (pz.Lot.CompleteDate != null)
+                        {
+                            throw new Exception($"Продажа товара \"{pz.Lot.Name}\" уже завершена");
+                        }
+                    }
 
                     CashOperation operation = new CashOperation()
                     {

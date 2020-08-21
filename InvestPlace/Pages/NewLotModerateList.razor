@@ -1,0 +1,64 @@
+﻿@page "/NewLotModerateList"
+
+@using Services.DTO;
+@using Services.Services.LotService;
+
+@inject NavigationManager NavigationManager;
+@inject ILotService LotService;
+
+<AuthorizeView Roles="Moderator, Admin">
+
+    <div class="row">
+        <div class="col col-12">
+            <h4 class="text-red">Модерация новых лотов</h4>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col col-12">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th style="width:20%;">Время создания</th>
+                        <th>Название</th>
+                        <th>Стоимость</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var lot in lots.OrderBy(x => x.CreateDate ?? DateTime.Now))
+                    {
+                        <tr onclick="window.location.href = '/Lot/@lot.Id';">
+                            <td>@(lot.CreateDate == null ? "-" : lot.CreateDate.Value.ToString("dd.MM.yyyy HH:mm"))</td>
+                            <td>@lot.Name</td>
+                            <td>@lot.Price</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+</AuthorizeView>
+
+
+
+@code {
+
+    [CascadingParameter]
+    protected ExtendedUserDto user { get; set; }
+
+    List<LotDto> lots = new List<LotDto>();
+
+    protected override void OnInitialized()
+    {
+        lots = FindLots();
+    }
+
+    private List<LotDto> FindLots()
+    {
+        return LotService.LotsForModerate();
+    }
+
+}

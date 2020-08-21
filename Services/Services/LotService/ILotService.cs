@@ -8,7 +8,7 @@ namespace Services.Services.LotService
 {
     public interface ILotService
     {
-        Task<List<LotDto>> GetAllAsync();
+        //Task<List<LotDto>> GetAllAsync();
 
         List<LotDto> GetActual(bool actual);
 
@@ -21,5 +21,11 @@ namespace Services.Services.LotService
         OperationResult CreateLot(LotDto lot, ExtendedUserDto creator, List<int> categoriesId);
 
         List<LotDto> GetBuyerField();
+
+        int LotForModerateCount();
+
+        List<LotDto> LotsForModerate();
+
+        void CreateModerate(LotDto lot, ExtendedUserDto moderator, bool solution);
     }
 }

@@ -43,8 +43,8 @@
 
     List<LotDto> allLots = new List<LotDto>();
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        allLots = await lotService.GetAllAsync();
+        allLots = lotService.GetActual(true);
     }
 }
