@@ -268,6 +268,10 @@ td.field-cell h6 {
     cursor: pointer;
 }
 
+.table tr.selected {
+    background-color: rgba(0,0,0,.075);
+}
+
 
 /* страница Мои товары */
 .lot-my-img {

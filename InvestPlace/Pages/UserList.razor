@@ -5,6 +5,7 @@
 @using Services.Services.ExtendedUserService;
 
 @inject IExtendedUserService ExtendedUserService;
+@inject NavigationManager NavigationManager;
 
 @attribute [Authorize(Roles = InvestPlaceDB.ExtendedRole.MODERATOR + ", " + InvestPlaceDB.ExtendedRole.ADMIN)]
 
@@ -18,7 +19,13 @@
 
 <div class="row">
     <div class="col col-12">
-        <table class="table">
+        <button class="btn btn-secondary" @onclick="ChangeCash" disabled="@(selectedUserId <= 0)">Изменить сумму в кошельке</button>
+    </div>
+</div>
+
+<div class="row margin-top-20">
+    <div class="col col-12">
+        <table class="table table-hover">
             <thead>
                 <tr>
                     <td>Email</td>
@@ -32,13 +39,13 @@
                     <td>Номер счета</td>
                     <td>Корр. счёт</td>
                     <td>Кошелек</td>
-                    @*<td>Роль</td>*@
+                    <td>Роль</td>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var u in allUsers.OrderBy(x => x.Email))
                 {
-                <tr>
+                <tr @onclick="() => RowClick(u.Id)" class="@(u.Id == selectedUserId ? "selected" : "")">
                     <td>@(u.Email ?? "")</td>
                     <td>@(u.InnerName ?? "") @(u.Surname ?? "") @(u.Patronymic ?? "")</td>
                     <td>@(u.PhoneNumber ?? "")</td>
@@ -50,7 +57,7 @@
                     <td>@(u.SchetNumber ?? "")</td>
                     <td>@(u.CorrSchet ?? "")</td>
                     <td>@(u.Cash?.Summ ?? 0)</td>
-                    @*<td>@(u.Role ?? "")</td>*@
+                    <td>@(u.Role ?? "")</td>
                 </tr>
                 }
             </tbody>
@@ -68,8 +75,9 @@
         [CascadingParameter]
         protected ExtendedUserDto user { get; set; }
 
-        List<ExtendedUserDto> allUsers = new List<ExtendedUserDto>();
+    protected List<ExtendedUserDto> allUsers = new List<ExtendedUserDto>();
 
+    protected int selectedUserId { get; set; } = 0;
 
     protected override void OnInitialized()
     {
@@ -85,6 +93,16 @@
     }
 
 
+    protected void RowClick(int userId)
+    {
+        selectedUserId = userId;
+    }
+
+
+    protected void ChangeCash()
+    {
+        NavigationManager.NavigateTo($"/ChangeCash/{selectedUserId}");
+    }
 
 
 }

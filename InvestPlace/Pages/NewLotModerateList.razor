@@ -6,6 +6,8 @@
 @inject NavigationManager NavigationManager;
 @inject ILotService LotService;
 
+@attribute [Authorize(Roles = InvestPlaceDB.ExtendedRole.MODERATOR + ", " + InvestPlaceDB.ExtendedRole.ADMIN)]
+
 <AuthorizeView Roles="Moderator, Admin">
 
     <div class="row">

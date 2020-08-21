@@ -11,6 +11,8 @@ namespace Services.Services.ExtendedUserService
     {
         ExtendedUserDto GetByEmail(string email);
 
+        ExtendedUserDto GetById(int id);
+
         bool UpdateUser(ExtendedUserDto userDto);
 
         List<ExtendedUserDto> GetAll();

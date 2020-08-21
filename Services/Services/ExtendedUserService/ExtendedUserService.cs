@@ -31,6 +31,17 @@ namespace Services.Services.ExtendedUserService
             return ExtendedUserDto.ConvertByUser(user, roles);
         }
 
+        public ExtendedUserDto GetById(int id)
+        {
+            ExtendedUser user = db.Users
+                .Include(u => u.Cash)
+                .FirstOrDefault(x => x.Id == id);
+
+            List<string> roles = GetRoles(user);
+
+            return ExtendedUserDto.ConvertByUser(user, roles);
+        }
+
         public bool UpdateUser(ExtendedUserDto dto)
         {
             try

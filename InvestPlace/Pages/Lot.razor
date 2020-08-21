@@ -3,9 +3,10 @@
 @using Services.DTO;
 @using Services.Services.ExtendedUserService;
 @using Services.Services.BasketService;
+@using Services.Services.LotService;
 
 @inject NavigationManager NavigationManager
-@inject Services.Services.LotService.ILotService lotService
+@inject ILotService lotService
 @inject IExtendedUserService ExtendedUserService;
 @inject IBasketService BasketService;
 

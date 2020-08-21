@@ -29,7 +29,7 @@
                             <td>@(operations.OrderByDescending(x => x.Date).ToList().IndexOf(op) + 1)</td>
                             <td>@op.Comment</td>
                             <td class="@(op.Summ < 0 ? "text-danger" : "text-success")">@op.Summ</td>
-                            <td>@op.Date.ToString("dd.MM.yyyy (hh:mm)")</td>
+                            <td>@op.Date.ToString("dd.MM.yyyy (HH:mm)")</td>
                         </tr>
                     }
                 </tbody>

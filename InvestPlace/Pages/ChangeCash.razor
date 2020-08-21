@@ -1,0 +1,104 @@
+﻿@page "/ChangeCash/{selectedUserId:int}"
+
+
+@using Services.DTO;
+@using Services.Services.ExtendedUserService;
+@using Services.Services.CashService;
+
+@inject IExtendedUserService ExtendedUserService;
+@inject ICashService cashService;
+
+@attribute [Authorize(Roles = InvestPlaceDB.ExtendedRole.MODERATOR + ", " + InvestPlaceDB.ExtendedRole.ADMIN)]
+
+
+
+<div class="row">
+    <div class="col col-12">
+        <h4>Изменение суммы в кошельке</h4>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col col-6">
+        <h6>Пользователь: @(selectedUser.InnerName ?? "") @(selectedUser.Patronymic ?? "") @(selectedUser.Surname ?? "") (@selectedUser.Email)</h6>
+    </div>
+    <div class="col col-6">
+        <h6>Сейчас в кошельке: @(selectedUser.Cash?.Summ ?? 0) руб.</h6>
+    </div>
+</div>
+
+
+<EditForm Model="summArgs" OnValidSubmit="ValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="row margin-top-50">
+        <div class="col col-6">
+            <label class="label">Введите, какую сумму добавить</label>
+            <InputNumber class="form-control" @bind-Value="summArgs.SummDelta"></InputNumber>
+            <small>Для уменьшения баланса, просто введите отрицательную сумму</small>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col col-6">
+            <button class="btn btn-secondary">Отправить сумму</button>
+            <h6 class="text-danger">@errorText</h6>
+            <h6 class="text-success">@successText</h6>
+        </div>
+    </div>
+</EditForm>
+
+
+
+
+@code {
+
+    [Parameter]
+    public int selectedUserId { get; set; }
+
+    [CascadingParameter]
+    protected ExtendedUserDto user { get; set; }
+
+    protected ExtendedUserDto selectedUser { get; set; }
+
+    protected CashSummArgs summArgs { get; set; }
+
+    protected string errorText = "";
+
+    protected string successText = "";
+
+
+    protected override void OnInitialized()
+    {
+        selectedUser = ExtendedUserService.GetById(selectedUserId);
+        summArgs = new CashSummArgs();
+    }
+
+
+    public void ValidSubmit()
+    {
+        try
+        {
+            errorText = "";
+            successText = "";
+            cashService.ChangeSumm(selectedUser, user, summArgs.SummDelta);
+            successText = "Операция успешно завершена! Если сумма не обновилась автоматически, обновите страницу.";
+            this.StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            errorText = ex.Message;
+        }
+    }
+
+
+    //////////////////////////////////////////////////////////////////////////
+
+    public class CashSummArgs
+    {
+        public decimal SummDelta { get; set; }
+    }
+
+
+
+}
