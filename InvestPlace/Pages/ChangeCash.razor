@@ -4,9 +4,10 @@
 @using Services.DTO;
 @using Services.Services.ExtendedUserService;
 @using Services.Services.CashService;
+@using System.ComponentModel.DataAnnotations;
 
 @inject IExtendedUserService ExtendedUserService;
-@inject ICashService cashService;
+@inject ICashService CashService;
 
 @attribute [Authorize(Roles = InvestPlaceDB.ExtendedRole.MODERATOR + ", " + InvestPlaceDB.ExtendedRole.ADMIN)]
 
@@ -81,7 +82,7 @@
         {
             errorText = "";
             successText = "";
-            cashService.ChangeSumm(selectedUser, user, summArgs.SummDelta);
+            CashService.ChangeSumm(selectedUser, user, summArgs.SummDelta);
             successText = "Операция успешно завершена! Если сумма не обновилась автоматически, обновите страницу.";
             this.StateHasChanged();
         }
@@ -96,6 +97,7 @@
 
     public class CashSummArgs
     {
+        [Required]
         public decimal SummDelta { get; set; }
     }
 

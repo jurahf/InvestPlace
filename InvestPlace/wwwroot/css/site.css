@@ -212,7 +212,9 @@ table.text-center td {
     align-items: center;
 }
 
-
+.hidden {
+    display: none !important;
+}
 
 /* страница поиска */
 

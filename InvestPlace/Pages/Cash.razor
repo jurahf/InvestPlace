@@ -2,8 +2,12 @@
 
 @using Services.DTO;
 @using Services.Services.ExtendedUserService;
+@using Services.Services.CashService;
+@using System.ComponentModel.DataAnnotations;
+
 @inject AuthenticationStateProvider AuthenticationStateProvider;
 @inject IExtendedUserService ExtendedUserService;
+@inject ICashService CashService;
 
 
 <LoginWelcome>
@@ -28,7 +32,24 @@
             <div class="row margin-top-120">
                 <div class="col col-12">
                     <!-- вывод денег -->
-                    <button class="btn btn-primary">Вывод денег</button>
+                    <button class="btn btn-primary" @onclick="OutCashClick">Вывод денег</button>
+                    
+                    <div class="row margin-top-20 @(outCashActivated ? "" : "hidden")">
+                        <EditForm Model="outputCashArgs" OnValidSubmit="ValidOutputCash">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary />
+                            <div class="col col-12">
+                                <label class="label">Введите, какую сумму хотите вывести</label>
+                                <InputNumber class="form-control" @bind-Value="outputCashArgs.Summ"></InputNumber>
+                            </div>
+
+                            <div class="col col-12 margin-top-20">
+                                <button class="btn btn-secondary">Вывести</button>
+                                <h6 class="text-danger">@errorText</h6>
+                                <h6 class="text-success">@successText</h6>
+                            </div>
+                        </EditForm>
+                    </div>
                 </div>
             </div>
 
@@ -51,15 +72,55 @@
     [CascadingParameter]
     protected ExtendedUserDto user { get; set; }
 
-    CashDto cash = null;
+    private CashDto cash = null;
+
+    private bool outCashActivated = false;
+
+    private OutputCashArgs outputCashArgs { get; set; }
+    private string errorText = "";
+    private string successText = "";
+
 
     protected override void OnInitialized()
     {
         cash = FindUserCash(user);
+        outputCashArgs = new OutputCashArgs();
     }
 
     private CashDto FindUserCash(ExtendedUserDto user)
     {
         return user?.Cash;
+    }
+
+    private void OutCashClick()
+    {
+        outCashActivated = !outCashActivated;
+    }
+
+
+    private void ValidOutputCash()
+    {
+        try
+        {
+            errorText = "";
+            successText = "";
+            CashService.CreateOutputOperationRequest(user, outputCashArgs.Summ);
+            successText = "Заявка на вывод денег успешно сформирована!";
+            this.StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            errorText = ex.Message;
+        }
+    }
+
+
+    //////////////////////////////////////////////////////////////////////
+
+    public class OutputCashArgs
+    {
+        [Required(ErrorMessage = "Сумма должна быть указана")]
+        [Range(1.0, 2_000_000.0, ErrorMessage = "Сумма должна быть числом от 1 до 2 000 000")]
+        public decimal Summ { get; set; }
     }
 }

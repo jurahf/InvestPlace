@@ -13,6 +13,7 @@ namespace Services.Services.CashService
 {
     public class CashService : ICashService
     {
+        private object lockObject = new object();
         private readonly InvestPlaceContext db;
         private readonly IExtendedUserService userService;
 
@@ -62,35 +63,73 @@ namespace Services.Services.CashService
                 throw new ArgumentException("У пользователя нет прав на выполнение операции");
 
 
-            if (findedUser.Cash == null)
+            lock (lockObject)   // TODO: проверить время жизни этого объекта
             {
-                Cash cash = new Cash()
+                if (findedUser.Cash == null)
                 {
-                    Summ = 0,
-                };
+                    Cash cash = new Cash()
+                    {
+                        Summ = 0,
+                    };
 
-                findedUser.Cash = cash;
+                    findedUser.Cash = cash;
 
-                db.Cash.Add(cash);
-                db.SaveChanges();
+                    db.Cash.Add(cash);
+                    db.SaveChanges();
+                }
+
+                using (var transaction = db.Database.BeginTransaction())
+                {
+                    findedUser.Cash.Summ += summDelta;
+                    CashOperation operation = new CashOperation()
+                    {
+                        Cash = findedUser.Cash,
+                        Date = DateTime.Now,
+                        Summ = summDelta,
+                        Comment = $"Операция выполнена модератором (id = {moderator.Id})",
+                    };
+                    db.CashOperation.Add(operation);
+                    db.Update(findedUser.Cash);
+
+                    db.SaveChanges();
+                    transaction.Commit();
+                }
             }
+        }
 
-            using (var transaction = db.Database.BeginTransaction())
+
+
+        public void CreateOutputOperationRequest(ExtendedUserDto user, decimal summ)
+        {
+            if (user == null)
+                throw new ArgumentNullException("Пользователь не может быть пустым");
+
+            if (summ <= 0)
+                throw new ArgumentException("Сумма для вывода должна быть больше ноля");
+
+            ExtendedUser findedUser = db.Users
+                .Include(x => x.Cash)
+                .FirstOrDefault(x => x.Id == user.Id);
+
+            if (findedUser == null)
+                throw new ArgumentException("Пользователь не найден");
+
+            if (findedUser.Cash == null || findedUser.Cash.Summ < summ)
+                throw new ArgumentException("На кошельке пользователя недостаточно средств");
+
+            // тут без транзакции и без блокировки - просто создаем заявку на вывод
+            // а вот когда заявка будет подтверждена, тогда нужны будут проверки и транзакции
+
+            QueryForOperation query = new QueryForOperation()
             {
-                findedUser.Cash.Summ += summDelta;
-                CashOperation operation = new CashOperation()
-                {
-                    Cash = findedUser.Cash,
-                    Date = DateTime.Now,
-                    Summ = summDelta,
-                    Comment = $"Операция выполнена модератором (id = {moderator.Id})",
-                };
-                db.CashOperation.Add(operation);
-                db.Update(findedUser.Cash);
+                Summ = summ,
+                IsCashOutput = true,
+                Date = DateTime.Now,
+                Cash = findedUser.Cash,
+            };
 
-                db.SaveChanges();
-                transaction.Commit();
-            }
+            db.QueryForOperation.Add(query);
+            db.SaveChanges();
         }
 
 
