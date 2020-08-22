@@ -10,7 +10,7 @@ namespace Services.Services.CashService
     {
         List<CashOperationDto> GetHistoryByUser(ExtendedUserDto user);
 
-        void ChangeSumm(ExtendedUserDto userToChange, ExtendedUserDto moderator, decimal summDelta);
+        void ChangeSumm(ExtendedUserDto userToChange, decimal summDelta);
 
         void CreateOutputOperationRequest(ExtendedUserDto user, decimal summ);
 

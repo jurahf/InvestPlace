@@ -82,7 +82,7 @@
         {
             errorText = "";
             successText = "";
-            CashService.ChangeSumm(selectedUser, user, summArgs.SummDelta);
+            CashService.ChangeSumm(selectedUser, summArgs.SummDelta);
             successText = "Операция успешно завершена! Если сумма не обновилась автоматически, обновите страницу.";
             this.StateHasChanged();
         }

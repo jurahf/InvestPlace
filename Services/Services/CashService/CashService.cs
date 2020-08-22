@@ -38,20 +38,18 @@ namespace Services.Services.CashService
                 return cash.CashOperation.Select(x => CashOperationDto.ConvertFromCashOperation(x)).ToList();
         }
 
-        public void ChangeSumm(ExtendedUserDto userToChange, ExtendedUserDto moderator, decimal summDelta)
+        public void ChangeSumm(ExtendedUserDto userToChange, decimal summDelta)
         {
             if (userToChange == null)
                 throw new ArgumentNullException("Пользователь не может быть пустым");
-            if (moderator == null)
-                throw new ArgumentNullException("Модератор не может быть пустым");
 
             if (summDelta == 0)
                 return;
-
+            
             ExtendedUser findedUser = db.Users
                 .Include(x => x.Cash)
                 .FirstOrDefault(x => x.Id == userToChange.Id);
-            ExtendedUser findedModerator = db.Users.Find(moderator.Id);
+            ExtendedUser findedModerator = userService.GetCurrentUser();
 
             if (findedUser == null)
                 throw new ArgumentException("Пользователь не найден");
@@ -86,7 +84,7 @@ namespace Services.Services.CashService
                         Cash = findedUser.Cash,
                         Date = DateTime.Now,
                         Summ = summDelta,
-                        Comment = $"Операция выполнена модератором (id = {moderator.Id})",
+                        Comment = $"Операция выполнена модератором (id = {findedModerator.Id})",
                     };
                     db.CashOperation.Add(operation);
                     db.Update(findedUser.Cash);

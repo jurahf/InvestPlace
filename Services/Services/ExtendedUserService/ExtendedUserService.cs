@@ -13,11 +13,13 @@ namespace Services.Services.ExtendedUserService
 {
     public class ExtendedUserService : IExtendedUserService
     {
-        private InvestPlaceContext db;
+        private readonly InvestPlaceContext db;
+        private readonly AuthenticationStateProvider authProvider;
 
-        public ExtendedUserService(InvestPlaceContext db)
+        public ExtendedUserService(InvestPlaceContext db, AuthenticationStateProvider authProvider)
         {
             this.db = db;
+            this.authProvider = authProvider;
         }
 
         public ExtendedUserDto GetByEmail(string email)
@@ -76,6 +78,26 @@ namespace Services.Services.ExtendedUserService
             }
         }
 
+        public ExtendedUser GetCurrentUser()
+        {
+            return GetCurrentUserAsync().Result;
+        }
+
+        private async Task<ExtendedUser> GetCurrentUserAsync()
+        {
+            ExtendedUser result = null;
+            var authState = await authProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user.Identity.IsAuthenticated)
+            {
+                result = db.Users
+                    .Include(u => u.Cash)
+                    .SingleOrDefault(x => x.Email == user.Identity.Name);
+            }
+
+            return result;
+        }
 
         public List<string> GetRoles(ExtendedUser user)
         {
@@ -93,16 +115,6 @@ namespace Services.Services.ExtendedUserService
 
             return roles.Select(x => x.Name).ToList();
         }
-
-        //private async Task<List<string>> GetRoleOfCurrentUser()
-        //{
-        //    var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
-        //    var u = authState.User;
-        //    var claims = authState.User?.Claims;
-
-        //    return claims.Where(x => x.Type == "role").Select(x => x.Value).ToList();
-        //}
-
 
         public List<ExtendedUserDto> GetAll()
         {

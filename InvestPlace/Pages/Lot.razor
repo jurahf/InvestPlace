@@ -156,7 +156,7 @@
     {
         try
         {
-            lotService.CreateModerate(editedLot, user, solution);
+            lotService.CreateModerate(editedLot, solution);
             NavigationManager.NavigateTo("/NewLotModerateList");
             this.StateHasChanged();
         }

@@ -9,6 +9,7 @@ namespace Services.Services.ExtendedUserService
 {
     public interface IExtendedUserService
     {
+
         ExtendedUserDto GetByEmail(string email);
 
         ExtendedUserDto GetById(int id);
@@ -16,6 +17,8 @@ namespace Services.Services.ExtendedUserService
         bool UpdateUser(ExtendedUserDto userDto);
 
         List<ExtendedUserDto> GetAll();
+
+        ExtendedUser GetCurrentUser();
 
         List<string> GetRoles(ExtendedUser user);
     }

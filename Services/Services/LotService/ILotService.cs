@@ -26,6 +26,6 @@ namespace Services.Services.LotService
 
         List<LotDto> LotsForModerate();
 
-        void CreateModerate(LotDto lot, ExtendedUserDto moderator, bool solution);
+        void CreateModerate(LotDto lot, bool solution);
     }
 }

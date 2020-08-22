@@ -219,15 +219,13 @@ namespace Services.Services.LotService
         }
 
 
-        public void CreateModerate(LotDto lot, ExtendedUserDto moderator, bool solution)
+        public void CreateModerate(LotDto lot, bool solution)
         {
             if (lot == null)
                 throw new ArgumentException("Товар не может быть пустым");
-            if (moderator == null)
-                throw new ArgumentException("Модератор не может быть пустым");
 
             Lot findedLot = db.Lot.Find(lot.Id);
-            ExtendedUser findedModerator = db.Users.Find(moderator.Id);
+            ExtendedUser findedModerator = userService.GetCurrentUser();
 
             if (findedLot == null)
                 throw new ArgumentException("Товар не найден");
