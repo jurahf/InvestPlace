@@ -1,17 +1,21 @@
-﻿@page "/OutputCashModerate/{queryId:int}"
+﻿@page "/ExchangeModerate/{queryId:int}"
 
 @using Services.DTO;
-@using Services.Services.CashService;
+@using Services.Services.QueryExchangeService;
 
-@inject ICashService CashService;
+@inject IQueryExchangeService QueryExchangeService;
 @inject NavigationManager NavigationManager;
 
 @attribute [Authorize(Roles = InvestPlaceDB.ExtendedRole.MODERATOR + ", " + InvestPlaceDB.ExtendedRole.ADMIN)]
 
 
+
+
+
+
 <div class="row">
     <div class="col col-12">
-        <h4 class="text-red">Заявка на вывод денег</h4>
+        <h4 class="text-red">Заявка на обмен на реальный товар</h4>
     </div>
 </div>
 
@@ -178,27 +182,18 @@
 
 <div class="row">
     <div class="col col-3">
-        <h5>На кошельке:</h5>
+        <h5>Лот:</h5>
     </div>
     <div class="col col-3">
-        <h5>@forUser.Cash.Summ руб.</h5>
+        <h5>@forLot.Name <a href="/lot/@forLot.Id" target="_blank">Посмотреть</a></h5>
     </div>
 </div>
 
-<div class="row margin-top-50">
-    <div class="col col-3">
-        <h5>Запрос на вывод:</h5>
-    </div>
-
-    <div class="col col-3">
-        <h5>@query.Summ руб.</h5>
-    </div>
-</div>
 
 <div class="row margin-top-50">
     <div class="col col-12">
-        <button class="btn btn-secondary" @onclick="() => Moderate(true)">Подтвердить перевод</button>
-        <button class="btn btn-secondary" @onclick="() => Moderate(false)">Отклонить перевод</button>
+        <button class="btn btn-secondary" @onclick="() => Moderate(true)">Подтвердить отправку товара</button>
+        <button class="btn btn-secondary" @onclick="() => Moderate(false)">Отклонить запрос</button>
         <h6 class="text-danger">@errorText</h6>
     </div>
 </div>
@@ -206,38 +201,42 @@
 
 
 
-@code {
 
+@code {
     [CascadingParameter]
     protected ExtendedUserDto user { get; set; }
 
     [Parameter]
     public int queryId { get; set; }
 
-    protected QueryForOperationDto query = new QueryForOperationDto();
+    protected QueryForExchangeDto query = new QueryForExchangeDto();
 
     protected ExtendedUserDto forUser = null;
 
+    protected LotDto forLot = null;
+
     private string errorText = "";
+
 
 
     protected override void OnInitialized()
     {
         query = FindQuery(queryId);
-        forUser = query.User;
+        forUser = query.Puzzle.Buyer;
+        forLot = query.Puzzle.Lot;
     }
 
-    private QueryForOperationDto FindQuery(int queryId)
+    private QueryForExchangeDto FindQuery(int queryId)
     {
-        return CashService.GetQueryForOperationById(queryId);
+        return QueryExchangeService.GetById(queryId);
     }
 
     private void Moderate(bool solution)
     {
         try
         {
-            CashService.Moderate(query, solution);
-            NavigationManager.NavigateTo("/OutputCashModerateList");
+            QueryExchangeService.Moderate(query, solution);
+            NavigationManager.NavigateTo("/ExchangeModerateList");
             this.StateHasChanged();
         }
         catch (Exception ex)

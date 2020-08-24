@@ -1,0 +1,68 @@
+﻿@page "/ExchangeModerateList"
+
+@using Services.DTO;
+@using Services.Services.QueryExchangeService;
+
+@inject IQueryExchangeService QueryExchangeService;
+@inject NavigationManager NavigationManager;
+
+@attribute [Authorize(Roles = InvestPlaceDB.ExtendedRole.MODERATOR + ", " + InvestPlaceDB.ExtendedRole.ADMIN)]
+
+
+
+
+<div class="row">
+    <div class="col col-12">
+        <h4 class="text-red">Заявки на обмен на реальные товары</h4>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col col-12">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th style="width:20%;">Время создания</th>
+                    <th>Пользователь</th>
+                    <th>Товар</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var q in queries.OrderBy(x => x.Date))
+                {
+                    <tr @onclick="() => RowClicked(q.Id)">
+                        <td>@q.Date.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td>@(q.Puzzle.Buyer.InnerName ?? "") @(q.Puzzle.Buyer.Patronymic ?? "") @(q.Puzzle.Buyer.Surname ?? "") (@(q.Puzzle.Buyer.Email ?? ""))</td>
+                        <td>@q.Puzzle.Lot.Name</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+
+@code {
+    [CascadingParameter]
+    protected ExtendedUserDto user { get; set; }
+
+    protected List<QueryForExchangeDto> queries = new List<QueryForExchangeDto>();
+
+    protected override void OnInitialized()
+    {
+        queries = FindQueries();
+    }
+
+    private List<QueryForExchangeDto> FindQueries()
+    {
+        return QueryExchangeService.QueriesForModerate();
+    }
+
+
+    private void RowClicked(int queryId)
+    {
+        NavigationManager.NavigateTo($"/ExchangeModerate/{queryId}");
+    }
+}

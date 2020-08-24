@@ -158,13 +158,10 @@ namespace Services.Services.CashService
         }
 
 
-        public void Moderate(QueryForOperationDto query, ExtendedUserDto moderator, bool solution)
+        public void Moderate(QueryForOperationDto query, bool solution)
         {
             if (query == null)
                 throw new ArgumentNullException("Запрос не может быть пустым");
-
-            if (moderator == null)
-                throw new ArgumentNullException("Модератор не может быть пустым");
 
             QueryForOperation findedQuery = db.QueryForOperation
                 .Include(x => x.CashQueryModerator)
@@ -172,7 +169,7 @@ namespace Services.Services.CashService
                 .ThenInclude(x => x.ExtendedUser)
                 .FirstOrDefault(x => x.Id == query.Id);
 
-            ExtendedUser findedModerator = db.Users.Find(moderator.Id);
+            ExtendedUser findedModerator = userService.GetCurrentUser();
 
             if (findedQuery == null)
                 throw new ArgumentException("Запрос на операцию не найден");

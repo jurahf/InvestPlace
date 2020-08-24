@@ -13,6 +13,8 @@ namespace Services.DTO
 
         public LotDto Lot { get; set; }
 
+        public ExtendedUserDto Buyer { get; set; }
+
         public static PuzzleDto ConvertFromPuzzle(Pazzle puzzle)
         {
             PuzzleDto dto = new PuzzleDto();
@@ -24,7 +26,8 @@ namespace Services.DTO
             {
                 Id = puzzle.Id,
                 LotId = puzzle.LotId ?? 0,
-                Lot = LotDto.ConvertFromLot(puzzle.Lot)
+                Lot = LotDto.ConvertFromLot(puzzle.Lot),
+                Buyer = ExtendedUserDto.ConvertByUser(puzzle.Buyer)
             };
 
             return dto;

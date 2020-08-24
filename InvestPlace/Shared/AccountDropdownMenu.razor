@@ -2,12 +2,14 @@
 @using Services.Services.ExtendedUserService;
 @using Services.Services.LotService;
 @using Services.Services.CashService; 
-@using InvestPlaceDB;
+@using Services.Services.QueryExchangeService;
+
 
 @inject AuthenticationStateProvider AuthenticationStateProvider;
 @inject IExtendedUserService ExtendedUserService;
 @inject ILotService LotService;
 @inject ICashService CashService;
+@inject IQueryExchangeService QueryExchangeService;
 
 
 <AuthorizeView Roles="Moderator, Admin">
@@ -24,7 +26,8 @@
         <a class="dropdown-item" href="/OutputCashModerateList">Заявки на вывод денег (@OutputCashCount)</a>
         <div class="dropdown-divider"></div>
 
-        <!-- модерация завершения покупки и обмена -->
+        <a class="dropdown-item" href="/ExchangeModerateList">Заявки на обмен товаров (@ExchangeLotCount)</a>
+        <div class="dropdown-divider"></div>
 
         <form method="post" action="/Account/LogOut">
             <button type="submit" class="nav-link btn btn-link">Выход</button>
@@ -75,12 +78,14 @@
     string UserName = "";
     int NewLotCount = 0;
     int OutputCashCount = 0;
+    int ExchangeLotCount = 0;
 
     protected override void OnInitialized()
     {
         UserName = FindUserName().Result;
         NewLotCount = LotService.LotForModerateCount();
         OutputCashCount = CashService.OutputCashRequestCount();
+        ExchangeLotCount = QueryExchangeService.GetActiveQueryCount();
         base.OnInitialized();
     }
 

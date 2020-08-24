@@ -20,6 +20,6 @@ namespace Services.Services.CashService
 
         QueryForOperationDto GetQueryForOperationById(int id);
 
-        void Moderate(QueryForOperationDto query, ExtendedUserDto moderator, bool solution);
+        void Moderate(QueryForOperationDto query, bool solution);
     }
 }
