@@ -22,6 +22,8 @@ namespace Services.Services.LotService
 
         List<LotDto> GetBuyerField();
 
+        int GetNextBuyerFieldNumber();
+
         int LotForModerateCount();
 
         List<LotDto> LotsForModerate();

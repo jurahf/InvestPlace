@@ -36,16 +36,14 @@ namespace InvestPlaceDB
         [Column(TypeName = "datetime")]
         public DateTime? CompleteDate { get; set; }
 
+        public int? CompleteNumber { get; set; }
+
         [Column(TypeName = "datetime")]
         public DateTime? CreateModerateDate { get; set; }
 
         public bool? CreateModerate { get; set; }
 
-        public bool? CompleteModerate { get; set; }
-
         public int? CreateModeratorId { get; set; }
-
-        public int? CompleteModeratorId { get; set; }
 
         public int? PriceRangeId { get; set; }
 
@@ -56,11 +54,6 @@ namespace InvestPlaceDB
         [ForeignKey(nameof(PriceRangeId))]
         [InverseProperty(nameof(InvestPlaceDB.PriceRange.LotPriceRange))]
         public virtual PriceRange PriceRange { get; set; }
-
-
-        [ForeignKey(nameof(CompleteModeratorId))]
-        [InverseProperty(nameof(ExtendedUser.LotCompleteModerator))]
-        public virtual ExtendedUser CompleteModerator { get; set; }
 
 
         [ForeignKey(nameof(CreateModeratorId))]

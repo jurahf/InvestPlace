@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Services.DTO;
+using Services.Services.LotService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,11 +16,13 @@ namespace Services.Services.BasketService
     public class BasketService : IBasketService
     {
         private readonly InvestPlaceContext db;
+        private readonly ILotService lotService;
         private static object lockObject = new object();
 
-        public BasketService(InvestPlaceContext db)
+        public BasketService(InvestPlaceContext db, ILotService lotService)
         {
             this.db = db;
+            this.lotService = lotService;
         }
 
         public BasketDto GetBasketByUser(ExtendedUserDto user)
@@ -59,37 +62,35 @@ namespace Services.Services.BasketService
 
             lock (lockObject)
             {
-                if (lot.Pazzle.Count < EpicSettings.PuzzlePerLot)
+                if (lot.Pazzle.Count >= EpicSettings.PuzzlePerLot)
+                    throw new OverflowException("Все пазлы данного лота уже куплены");
+
+                Pazzle puzzle = new Pazzle();
+                // X, Y
+                bool exitLoop = false;
+                for (int i = 0; i < EpicSettings.MaxPuzzleX; i++)
                 {
-                    Pazzle puzzle = new Pazzle();
-                    // X, Y
-                    bool exitLoop = false;
-                    for (int i = 0; i < EpicSettings.MaxPuzzleX; i++)
+                    if (exitLoop)
+                        break;
+
+                    for (int j = 0; j < EpicSettings.MaxPuzzleY; j++)
                     {
+                        if (!lot.Pazzle.Any(x => x.X == i && x.Y == j))
+                        {
+                            puzzle.X = i;
+                            puzzle.Y = j;
+                            exitLoop = true;
+                        }
+
                         if (exitLoop)
                             break;
-
-                        for (int j = 0; j < EpicSettings.MaxPuzzleY; j++)
-                        {
-                            if (!lot.Pazzle.Any(x => x.X == i && x.Y == j))
-                            {
-                                puzzle.X = i;
-                                puzzle.Y = j;
-                                exitLoop = true;
-                            }
-
-                            if (exitLoop)
-                                break;
-                        }
                     }
-
-                    lot.Pazzle.Add(puzzle);
-                    db.Pazzle.Add(puzzle);
-
-                    basket.Pazzle.Add(puzzle);
                 }
-                else
-                    throw new OverflowException("Все пазлы данного лота уже куплены");
+
+                lot.Pazzle.Add(puzzle);
+                db.Pazzle.Add(puzzle);
+
+                basket.Pazzle.Add(puzzle);
             }
 
             basket.LastOperationDate = DateTime.Now;
@@ -148,6 +149,7 @@ namespace Services.Services.BasketService
                 .Include(x => x.Basket)
                 .ThenInclude(y => y.Pazzle)
                 .ThenInclude(z => z.Lot)
+                .ThenInclude(й => й.Pazzle)
                 .FirstOrDefault(x => x.Id == userDto.Id);
             if (user == null)
                 throw new ArgumentException("Пользователь не найден");
@@ -194,6 +196,18 @@ namespace Services.Services.BasketService
                 {
                     puzzle.Buyer = user;
                     puzzle.BuyDate = DateTime.Now;
+
+                    if (puzzle.Lot.Pazzle.Count >= EpicSettings.PuzzlePerLot
+                        && puzzle.Lot.Pazzle.All(x => x.BuyDate != null))
+                    {
+                        // лот полностью куплен, определяем победителя
+                        puzzle.Lot.CompleteDate = DateTime.Now;
+                        int completeNumber = lotService.GetNextBuyerFieldNumber();
+                        puzzle.Lot.CompleteNumber = completeNumber;
+
+                        Pazzle winnerPazzle = puzzle.Lot.Pazzle.OrderBy(x => x.BuyDate).ElementAt(completeNumber - 1);
+                        winnerPazzle.Winner = true;
+                    }
                 }
 
                 user.Basket.Pazzle.Clear();

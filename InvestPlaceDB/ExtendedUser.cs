@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -10,13 +11,15 @@ namespace InvestPlaceDB
     {
         public ExtendedUser()
         {
-            LotCompleteModerator = new HashSet<Lot>();
             LotCreateModerator = new HashSet<Lot>();
             PazzleBuyer = new HashSet<Pazzle>();
-            PazzleChangeModerator = new HashSet<Pazzle>();
             CashQueryModerator = new HashSet<QueryForOperation>();
             LotSeller = new HashSet<Lot>();
+            ExchangeModerator = new HashSet<QueryForExchange>();
         }
+
+        [DefaultValue(30)]
+        public int ExchangeLevel { get; set; }
 
         public int? BasketId { get; set; }
 
@@ -64,9 +67,6 @@ namespace InvestPlaceDB
         public virtual Cash Cash { get; set; }
 
 
-        [InverseProperty(nameof(Lot.CompleteModerator))]
-        public virtual ICollection<Lot> LotCompleteModerator { get; set; }
-
         [InverseProperty(nameof(Lot.Seller))]
         public virtual ICollection<Lot> LotSeller { get; set; }
 
@@ -76,10 +76,11 @@ namespace InvestPlaceDB
         [InverseProperty(nameof(Pazzle.Buyer))]
         public virtual ICollection<Pazzle> PazzleBuyer { get; set; }
 
-        [InverseProperty(nameof(Pazzle.ChangeModerator))]
-        public virtual ICollection<Pazzle> PazzleChangeModerator { get; set; }
-
         [InverseProperty(nameof(QueryForOperation.CashQueryModerator))]
         public virtual ICollection<QueryForOperation> CashQueryModerator { get; set; }
+
+
+        [InverseProperty(nameof(QueryForExchange.ExchangeModerator))]
+        public virtual ICollection<QueryForExchange> ExchangeModerator { get; set; }
     }
 }

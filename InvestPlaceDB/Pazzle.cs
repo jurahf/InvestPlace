@@ -7,27 +7,16 @@ namespace InvestPlaceDB
 {
     public partial class Pazzle
     {
+        public Pazzle()
+        {
+            QueryForExchange = new HashSet<QueryForExchange>();
+        }
+
         [Key]
         public int Id { get; set; }
         public int X { get; set; }
         public int Y { get; set; }
         public bool? Winner { get; set; }
-
-        /// <summary>
-        /// Обменян на товар
-        /// </summary>
-        public bool? Changed { get; set; }
-
-        /// <summary>
-        /// Дата и время обмена на товар
-        /// </summary>
-        [Column(TypeName = "datetime")]
-        public DateTime? ChangeDate { get; set; }
-
-        /// <summary>
-        /// Модератор, осуществивший обмен
-        /// </summary>
-        public int? ChangeModeratorId { get; set; }
 
         public int? BasketId { get; set; }
 
@@ -54,12 +43,12 @@ namespace InvestPlaceDB
         public virtual ExtendedUser Buyer { get; set; }
 
 
-        [ForeignKey(nameof(ChangeModeratorId))]
-        [InverseProperty(nameof(ExtendedUser.PazzleChangeModerator))]
-        public virtual ExtendedUser ChangeModerator { get; set; }
-
         [ForeignKey(nameof(LotId))]
         [InverseProperty("Pazzle")]
         public virtual Lot Lot { get; set; }
+
+
+        [InverseProperty(nameof(InvestPlaceDB.QueryForExchange.Pazzle))]
+        public virtual ICollection<QueryForExchange> QueryForExchange { get; set; }
     }
 }

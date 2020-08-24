@@ -29,11 +29,10 @@ namespace Services.Services.LotService
                 db.Lot
                 .Include(x => x.Seller)
                 .Include(x => x.CreateModerator)
-                .Include(x => x.CompleteModerator)
                 .Include(x => x.PriceRange)
                 .Include(x => x.Pazzle)
                 .Select(x => LotDto.ConvertFromLot(x))
-                .ToList()) ;
+                .ToList());
         }
 
         /// <summary>
@@ -46,7 +45,6 @@ namespace Services.Services.LotService
                 .Include(x => x.Pazzle)
                 .Include(x => x.Seller)
                 .Include(x => x.CreateModerator)
-                .Include(x => x.CompleteModerator)
                 .Where(x => x.CreateModerate == actual)
                 .Where(x => (x.CompleteDate == null) == actual)
                 .Select(x => LotDto.ConvertFromLot(x))
@@ -60,7 +58,6 @@ namespace Services.Services.LotService
                 .Include(x => x.Pazzle)
                 .Include(x => x.Seller)
                 .Include(x => x.CreateModerator)
-                .Include(x => x.CompleteModerator)
                 .FirstOrDefault(x => x.Id == id));
         }
 
@@ -71,7 +68,6 @@ namespace Services.Services.LotService
                 .Include(x => x.Pazzle)
                 .Include(x => x.Seller)
                 .Include(x => x.CreateModerator)
-                .Include(x => x.CompleteModerator)
                 .Where(x => x.SellerId == user.Id)
                 .Select(x => LotDto.ConvertFromLot(x))
                 .ToList();
@@ -84,7 +80,6 @@ namespace Services.Services.LotService
                 .Include(x => x.Pazzle)
                 .Include(x => x.Seller)
                 .Include(x => x.CreateModerator)
-                .Include(x => x.CompleteModerator)
                 .Where(x => x.Pazzle.Any(p => p.BuyerId == user.Id))
                 .Select(x => LotDto.ConvertFromLot(x))
                 .ToList();
@@ -197,6 +192,21 @@ namespace Services.Services.LotService
                     .ToList();
             }
         }
+
+
+        public int GetNextBuyerFieldNumber()
+        {
+            var allCompleted = db.Lot
+                .Include(x => x.PriceRange)
+                .Include(x => x.Pazzle)
+                .Where(x => x.CompleteDate != null);
+
+            // каждые 300 - одно поле покупателей
+            int mod = allCompleted.Count() % EpicSettings.LotPerBuyerField;
+
+            return mod + 1;
+        }
+    
 
 
 
