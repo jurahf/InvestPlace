@@ -49,6 +49,10 @@ namespace InvestPlaceDB
 
         public int? SellerId { get; set; }
 
+        public bool ExchangeBySeller { get; set; }
+
+        public bool ExchangeByBuyer { get; set; }
+
 
 
         [ForeignKey(nameof(PriceRangeId))]

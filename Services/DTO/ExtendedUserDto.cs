@@ -44,6 +44,8 @@ namespace Services.DTO
 
         public CashDto Cash { get; set; }
 
+        public int ExchangeLevel { get; set; }
+
 
 
         public ExtendedUserDto()
@@ -65,6 +67,7 @@ namespace Services.DTO
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
                 Address = user.Address,
+                ExchangeLevel = user.ExchangeLevel,
                 
                 SchetNumber = user.SchetNumber,
                 CorrSchet = user.CorrSchet,

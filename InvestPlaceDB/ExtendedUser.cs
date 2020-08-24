@@ -25,8 +25,6 @@ namespace InvestPlaceDB
 
         public int? CashId { get; set; }
 
-        public int? ExchangeLevelPercent { get; set; }
-
         [StringLength(200)]
         public string InnerName { get; set; }
 

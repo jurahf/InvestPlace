@@ -29,5 +29,17 @@ namespace Services.Services.LotService
         List<LotDto> LotsForModerate();
 
         void CreateModerate(LotDto lot, bool solution);
+
+
+        List<LotDto> SelledLots(ExtendedUserDto dto);
+
+        List<LotDto> BuyedLots(ExtendedUserDto dto);
+
+
+        void ExchangeBySeller(ExtendedUserDto user, LotDto lot);
+
+        void ExchangeByBuyerOnMoney(ExtendedUserDto user, LotDto lot);
+
+        void ExchangeByBuyerOnReal(ExtendedUserDto user, LotDto lot);
     }
 }

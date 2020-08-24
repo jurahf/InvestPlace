@@ -207,6 +207,9 @@ namespace Services.Services.BasketService
 
                         Pazzle winnerPazzle = puzzle.Lot.Pazzle.OrderBy(x => x.BuyDate).ElementAt(completeNumber - 1);
                         winnerPazzle.Winner = true;
+
+                        // всем начисляем скидки (кроме победителя)
+                        // TODO: 
                     }
                 }
 

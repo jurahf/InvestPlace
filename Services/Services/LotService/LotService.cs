@@ -1,4 +1,5 @@
 ﻿using InvestPlaceDB;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Services.DTO;
@@ -14,6 +15,7 @@ namespace Services.Services.LotService
 {
     public class LotService : ILotService
     {
+        private static object lockObject = new object();
         private readonly InvestPlaceContext db;
         private readonly IExtendedUserService userService;
 
@@ -33,6 +35,47 @@ namespace Services.Services.LotService
                 .Include(x => x.Pazzle)
                 .Select(x => LotDto.ConvertFromLot(x))
                 .ToList());
+        }
+
+
+        /// <summary>
+        /// Все лоты, проданные пользователем (продажа завершена)
+        /// </summary>
+        public List<LotDto> SelledLots(ExtendedUserDto user)
+        {
+            return db.Lot
+                .Include(x => x.Seller)
+                .Include(x => x.CreateModerator)
+                .Include(x => x.PriceRange)
+                .Include(x => x.Pazzle)
+                .Where(x => x.SellerId == user.Id)
+                .Where(x => x.CompleteNumber != null)
+                .Select(x => LotDto.ConvertFromLot(x))
+                .ToList();
+        }
+
+        /// <summary>
+        /// Лоты, в которых пользователь оказался победителем
+        /// </summary>
+        public List<LotDto> BuyedLots(ExtendedUserDto user)
+        {
+            List<Pazzle> pazzles = db.Pazzle
+                .Include(x => x.Lot)
+                .Include(x => x.Buyer)
+                .Where(x => x.Winner == true)
+                .Where(x => x.BuyerId == user.Id)
+                .ToList();
+
+            List<int> lotIds = pazzles.Select(x => x.Lot.Id).ToList();
+
+            return db.Lot
+                .Include(x => x.Seller)
+                .Include(x => x.CreateModerator)
+                .Include(x => x.PriceRange)
+                .Include(x => x.Pazzle)
+                .Where(x => lotIds.Contains(x.Id))
+                .Select(x => LotDto.ConvertFromLot(x))
+                .ToList();
         }
 
         /// <summary>
@@ -254,6 +297,218 @@ namespace Services.Services.LotService
 
             db.Update(findedLot);
             db.SaveChanges();
+        }
+
+
+        /// <summary>
+        /// Обмен проданного товара на деньги по текущему уровню обмена
+        /// </summary>
+        public void ExchangeBySeller(ExtendedUserDto user, LotDto lot)
+        {
+            if (lot == null)
+                throw new ArgumentNullException("Товар должен быть указан");
+
+            if (user == null)
+                throw new ArgumentNullException("Пользователь должен быть указан");
+
+            ExtendedUser dbUser = db.Users
+                .Include(x => x.Cash)
+                .FirstOrDefault(x => x.Id == user.Id);
+
+            Lot dbLot = db.Lot
+                .Include(x => x.Seller)
+                .FirstOrDefault(x => x.Id == lot.Id);
+
+            if (dbUser == null)
+                throw new ArgumentException("Пользователь не найден");
+
+            if (dbLot == null)
+                throw new ArgumentException("Товар не найден");
+
+            if (dbLot.CompleteNumber == null)
+                throw new ArgumentException("Покупка товара еще не завершена");
+
+            if (dbLot.Seller.Id != dbUser.Id)
+                throw new ArgumentException("Пользователь не является продавцом товара");
+
+            lock (lockObject)
+            {
+                if (dbLot.ExchangeBySeller)
+                    throw new ArgumentException("Товар уже обменян продавцом");
+
+                using (var transaction = db.Database.BeginTransaction())
+                {
+                    dbLot.ExchangeBySeller = true;
+                    if (dbUser.Cash == null)
+                    {
+                        Cash cash = new Cash()
+                        {
+                            Summ = 0,
+                        };
+                        dbUser.Cash = cash;
+                        db.Cash.Add(cash);
+                    }
+
+                    decimal summ = (dbLot.Price ?? 0m) * dbUser.ExchangeLevel / 100m;
+
+                    CashOperation operation = new CashOperation()
+                    {
+                        Cash = dbUser.Cash,
+                        Summ = summ,
+                        Date = DateTime.Now,
+                        Comment = $"Обмен проданного товара \"{dbLot.Name}\" (id = {dbLot.Id}) по уровню обмена {dbUser.ExchangeLevel}%"
+                    };
+
+                    db.CashOperation.Add(operation);
+                    dbUser.Cash.Summ += summ;
+
+                    db.Update(dbLot);
+                    db.Update(dbUser);
+
+                    db.SaveChanges();
+                    transaction.Commit();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Обмен купленного товара на деньги
+        /// </summary>
+        public void ExchangeByBuyerOnMoney(ExtendedUserDto user, LotDto lot)
+        {
+            if (lot == null)
+                throw new ArgumentNullException("Товар должен быть указан");
+
+            if (user == null)
+                throw new ArgumentNullException("Пользователь должен быть указан");
+
+            ExtendedUser dbUser = db.Users
+                .Include(x => x.Cash)
+                .FirstOrDefault(x => x.Id == user.Id);
+
+            Lot dbLot = db.Lot
+                .Include(x => x.Pazzle)
+                .ThenInclude(x => x.QueryForExchange)
+                .FirstOrDefault(x => x.Id == lot.Id);
+
+            if (dbUser == null)
+                throw new ArgumentException("Пользователь не найден");
+
+            if (dbLot == null)
+                throw new ArgumentException("Товар не найден");
+
+            if (dbLot.CompleteNumber == null)
+                throw new ArgumentException("Покупка товара еще не завершена");
+
+            Pazzle pazzle = dbLot.Pazzle.FirstOrDefault(x => x.Winner == true);
+            if (pazzle == null)
+                throw new ArgumentException("Покупатель товара еще не определен");
+
+            if (pazzle.BuyerId != dbUser.Id)
+                throw new ArgumentException("Пользователь не является покупателем товара");
+
+            if (pazzle.QueryForExchange.Any(x => x.ModerateDate == null))
+                throw new ArgumentException("Уже создана заявка на обмен этого товара");
+
+            lock (lockObject)
+            {
+                if (dbLot.ExchangeByBuyer)
+                    throw new ArgumentException("Товар уже обменян покупателем");
+
+                using (var transaction = db.Database.BeginTransaction())
+                {
+                    dbLot.ExchangeByBuyer = true;
+                    if (dbUser.Cash == null)
+                    {
+                        Cash cash = new Cash()
+                        {
+                            Summ = 0,
+                        };
+                        dbUser.Cash = cash;
+                        db.Cash.Add(cash);
+                    }
+
+                    decimal summ = (dbLot.Price ?? 0m) * 80 / 100m; // за 80% стоимости
+
+                    CashOperation operation = new CashOperation()
+                    {
+                        Cash = dbUser.Cash,
+                        Summ = summ,
+                        Date = DateTime.Now,
+                        Comment = $"Обмен купленного товара \"{dbLot.Name}\" (id = {dbLot.Id}) на деньги"
+                    };
+
+                    db.CashOperation.Add(operation);
+                    dbUser.Cash.Summ += summ;
+
+                    db.Update(dbLot);
+                    db.Update(dbUser);
+
+                    db.SaveChanges();
+                    transaction.Commit();
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Обмен купленного товара на реальный товар
+        /// </summary>
+        public void ExchangeByBuyerOnReal(ExtendedUserDto user, LotDto lot)
+        {
+            if (lot == null)
+                throw new ArgumentNullException("Товар должен быть указан");
+
+            if (user == null)
+                throw new ArgumentNullException("Пользователь должен быть указан");
+
+            ExtendedUser dbUser = db.Users
+                .Include(x => x.Cash)
+                .FirstOrDefault(x => x.Id == user.Id);
+
+            Lot dbLot = db.Lot
+                .Include(x => x.Pazzle)
+                .ThenInclude(x => x.QueryForExchange)
+                .FirstOrDefault(x => x.Id == lot.Id);
+
+            if (dbUser == null)
+                throw new ArgumentException("Пользователь не найден");
+
+            if (dbLot == null)
+                throw new ArgumentException("Товар не найден");
+
+            if (dbLot.CompleteNumber == null)
+                throw new ArgumentException("Покупка товара еще не завершена");
+
+            Pazzle pazzle = dbLot.Pazzle.FirstOrDefault(x => x.Winner == true);
+            if (pazzle == null)
+                throw new ArgumentException("Покупатель товара еще не определен");
+
+            if (pazzle.BuyerId != dbUser.Id)
+                throw new ArgumentException("Пользователь не является покупателем товара");
+
+            if (pazzle.QueryForExchange.Any(x => x.ModerateDate == null))
+                throw new ArgumentException("Уже создана заявка на обмен этого товара");
+
+            lock (lockObject)
+            {
+                if (dbLot.ExchangeByBuyer)
+                    throw new ArgumentException("Товар уже обменян покупателем");
+
+                using (var transaction = db.Database.BeginTransaction())
+                {
+                    QueryForExchange query = new QueryForExchange()
+                    {
+                        Pazzle = pazzle,
+                        Date = DateTime.Now,
+                    };
+
+                    db.QueryForExchange.Add(query);
+
+                    db.SaveChanges();
+                    transaction.Commit();
+                }
+            }
         }
 
 

@@ -1,0 +1,199 @@
+﻿@page "/Exchange"
+
+
+@using Services.DTO;
+@using Services.Services.LotService;
+
+@inject ILotService lotService;
+
+ 
+
+    <LoginWelcome>
+        <div class="row">
+            <div class="col col-12">
+                <h4 class="text-red">Обмен собранной картинки на товар</h4>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col col-6">
+                <h5 class="text-gray">Текущий уровень обмена - @user.ExchangeLevel%</h5>
+            </div>
+            <div class="col col-6 left-separator">
+                <h5 class="text-gray">Обмен на деньги (за вычетом 20% от рыночной стоимости)</h5>
+            </div>
+        </div>
+
+        <hr />
+
+        <div class="row">
+            <div class="col col-6">
+                <h4 class="text-center">Мои товары</h4>
+            </div>
+            <div class="col col-6 left-separator">
+                <h4 class="text-center">Собранные товары</h4>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col col-6">
+                <!-- обмен моих товаров (для продавца) - на деньги по уровню обмена -->
+                <div class="row">
+                    @foreach (var lot in mySelledLots.OrderByDescending(x => x.CompleteDate))
+                    {
+                        <div class="col col-6 margin-top-50 div-hover @(selectedSelledId == lot.Id ? "selected" : "")" id="div_selled_@lot.Id" @onclick="() => SelledSelected(lot.Id)">
+                            <img width="250" height="200" src="@lot.ImageLink" />
+                            <small>@lot.Name</small>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="col col-6 left-separator">
+                <!-- обмен собранных мной (для покупателя-победителя) - обменять на товар или на 80% стоимости -->
+                <div class="row">
+                    @foreach (var lot in myBuyedLots.OrderByDescending(x => x.CompleteDate))
+                    {
+                        <div class="col col-6 margin-top-50 div-hover @(selectedBuyedId == lot.Id ? "selected" : "")" id="div_buyed_@lot.Id" @onclick="() => BuyedSelected(lot.Id)">
+                            <img width="250" height="200" src="@lot.ImageLink" />
+                            <small>@lot.Name</small>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col col-6 padding-top-120 text-center">
+                <button class="btn btn-primary" disabled="@(selectedSelledId <= 0)" @onclick="ExchangeSelled">Обменять</button>
+            </div>
+
+            <div class="col col-6 padding-top-120 left-separator text-center">
+                <button class="btn btn-primary" disabled="@(selectedBuyedId <= 0)" @onclick="ExchangeBuyedOnRealLot">Обменять на товар</button>
+                <button class="btn btn-primary" disabled="@(selectedBuyedId <= 0)" @onclick="ExchangeBuyedOnMoney">Обменять на деньги</button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col col-6">
+                <h5 class="text-danger">@sellerExchangeError</h5>
+                <h5 class="text-success">@sellerExchangeSuccess</h5>
+            </div>
+
+            <div class="col col-6">
+                <h5 class="text-danger">@buyerExchangeError</h5>
+                <h5 class="text-success">@buyerExchangeSuccess</h5>
+            </div>
+        </div>
+
+        <hr />
+
+    </LoginWelcome>
+
+
+
+@code {
+
+    [CascadingParameter]
+    protected ExtendedUserDto user { get; set; }
+
+    private List<LotDto> mySelledLots = new List<LotDto>();
+    private List<LotDto> myBuyedLots = new List<LotDto>();
+
+    private int selectedSelledId = 0;
+    private int selectedBuyedId = 0;
+
+    private string sellerExchangeError = "";
+    private string buyerExchangeError = "";
+    private string sellerExchangeSuccess = "";
+    private string buyerExchangeSuccess = "";
+
+
+    protected override void OnInitialized()
+    {
+        if (user != null)
+        {
+            mySelledLots = lotService.SelledLots(user).Where(x => !x.ExchangeBySeller).ToList();
+            myBuyedLots = lotService.BuyedLots(user).Where(x => !x.ExchangeByBuyer).ToList();
+        }
+    }
+
+    private void SelledSelected(int lotId)
+    {
+        selectedSelledId = lotId;
+    }
+
+    private void BuyedSelected(int lotId)
+    {
+        selectedBuyedId = lotId;
+    }
+
+    /// <summary>
+    /// Обмен выбранного проданного товара на деньги по текущему уровню обмена
+    /// </summary>
+    private void ExchangeSelled()
+    {
+        try
+        {
+            sellerExchangeError = "";
+            sellerExchangeSuccess = "";
+            lotService.ExchangeBySeller(user, mySelledLots.FirstOrDefault(x => x.Id == selectedSelledId));
+            sellerExchangeSuccess = "Товар успешно обменян!";
+        }
+        catch (Exception ex)
+        {
+            sellerExchangeError = ex.Message;
+        }
+        finally
+        {
+            OnInitialized();
+        }
+    }
+
+
+    /// <summary>
+    /// Обмен купленного товара на деньги
+    /// </summary>
+    private void ExchangeBuyedOnMoney()
+    {
+        try
+        {
+            buyerExchangeSuccess = "";
+            buyerExchangeError = "";
+            lotService.ExchangeByBuyerOnMoney(user, myBuyedLots.FirstOrDefault(x => x.Id == selectedBuyedId));
+            buyerExchangeSuccess = "Товар успешно обменян!";
+        }
+        catch (Exception ex)
+        {
+            buyerExchangeError = ex.Message;
+        }
+        finally
+        {
+            OnInitialized();
+        }
+    }
+
+
+    /// <summary>
+    /// Обмен купленного товара на реальный товар
+    /// </summary>
+    private void ExchangeBuyedOnRealLot()
+    {
+        try
+        {
+            buyerExchangeSuccess = "";
+            buyerExchangeError = "";
+            lotService.ExchangeByBuyerOnReal(user, myBuyedLots.FirstOrDefault(x => x.Id == selectedBuyedId));
+            buyerExchangeSuccess = "Заявка на обмен успешно создана!";
+        }
+        catch (Exception ex)
+        {
+            buyerExchangeError = ex.Message;
+        }
+        finally
+        {
+            OnInitialized();
+        }
+    }
+
+}

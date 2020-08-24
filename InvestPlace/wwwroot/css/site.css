@@ -216,6 +216,11 @@ table.text-center td {
     display: none !important;
 }
 
+
+.left-separator {
+    border-left: 1px solid rgba(0, 0, 0, 0.1);
+}
+
 /* страница поиска */
 
 .search-card img {
@@ -265,6 +270,27 @@ td.field-cell h6 {
     position: relative;
 }
 /***************************************/
+
+
+
+
+/************* страница обмена товаров **************************/
+
+.div-hover {
+    cursor: pointer;
+}
+
+.div-hover:hover,
+.div-hover.selected {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+
+
+/**************************************/
+
+
+
 
 .table-hover {
     cursor: pointer;
@@ -623,8 +649,13 @@ a.link-text-usual:hover {
 }
 
 
-/******** slider *********************/
+.padding-top-120 {
+    padding-top: 120px;
+}
 
+
+
+/******** slider *********************/
 .slider.slider-horizontal .slider-track .slider-selection,
 .slider .slider-track .slider-selection {
     background: #c3615a;

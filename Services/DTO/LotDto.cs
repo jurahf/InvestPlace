@@ -49,6 +49,12 @@ namespace Services.DTO
 
         public DateTime? CreateModerateDate { get; set; }
 
+        public bool ExchangeBySeller { get; set; }
+
+        public bool ExchangeByBuyer { get; set; }
+
+
+
         public LotDto()
         {
             Categories = new List<CategoryDto>();
@@ -78,6 +84,9 @@ namespace Services.DTO
             result.CreateModerate = lot.CreateModerate == true;
             result.CreateModerator = ExtendedUserDto.ConvertByUser(lot.CreateModerator);
             result.CreateModerateDate = lot.CreateModerateDate;
+
+            result.ExchangeByBuyer = lot.ExchangeByBuyer;
+            result.ExchangeBySeller = lot.ExchangeBySeller;
 
             return result;
         }
