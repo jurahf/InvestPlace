@@ -132,11 +132,12 @@
                 </div>
 
                 <!-- воспользоваться скидкой -->
-                @*<div class="row">
-            <div class="col col-12">
-                <button class="btn btn-primary disabled">Воспользоваться скидкой</button>
-            </div>
-        </div>*@
+                <div class="row">
+                    <div class="col col-12">
+                        <h6>Для размещения необходимо оплатить <span class="text-red">@newLot.PuzzlePrice руб</span></h6>
+                        <h6>@(Math.Min(user.Cash.BonusSumm, newLot.PuzzlePrice)) бонусов и @(newLot.PuzzlePrice - Math.Min(user.Cash.BonusSumm, newLot.PuzzlePrice)) руб спишется с кошелька при сохранении лота</h6>
+                    </div>
+                </div>
             </div>
         </div>
 

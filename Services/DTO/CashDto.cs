@@ -9,6 +9,7 @@ namespace Services.DTO
     public class CashDto
     {
         public decimal Summ { get; set; }
+        public decimal BonusSumm { get; set; }
         //public List<CashOperationDto>
 
         public static CashDto ConvertByCash(Cash cash)
@@ -18,7 +19,8 @@ namespace Services.DTO
 
             return new CashDto()
             {
-                Summ = Math.Round(cash.Summ, 2, MidpointRounding.ToEven)
+                Summ = Math.Round(cash.Summ, 2, MidpointRounding.ToEven),
+                BonusSumm = Math.Round(cash.BonusSumm, 2, MidpointRounding.ToEven)
             };
         }
     }

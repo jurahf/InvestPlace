@@ -138,7 +138,9 @@ namespace Services.Services.LotService
                 if (creator == null)
                     return OperationResult.CreateFail("Не задан пользователь");
 
-                ExtendedUser user = db.Find<ExtendedUser>(creator.Id);
+                ExtendedUser user = db.Users
+                    .Include(x => x.Cash)
+                    .FirstOrDefault(x => x.Id == creator.Id);
 
                 if (user == null)
                     return OperationResult.CreateFail("Пользователь не нейден в базе");
@@ -185,27 +187,63 @@ namespace Services.Services.LotService
                     PriceRange = priceRange,
                 };
 
-                // подставляем категорию из выбранной
-                foreach (int catId in categoriesId)
-                {
-                    Category cat = db.Category.Find(catId);
 
-                    if (cat != null)
+                // списываем с кошелька бонусы и деньги за размещение (цена одного пазла)
+                lock (lockObject)
+                {
+                    if (user.Cash == null)
                     {
-                        LotCategory lc = new LotCategory()
+                        return OperationResult.CreateFail("Недостаточно средств на кошельке");
+                    }
+
+                    decimal bonusSumm = Math.Min(lot.PuzzlePrice, user.Cash.BonusSumm);
+                    decimal moneySumm = lot.PuzzlePrice - Math.Min(lot.PuzzlePrice, user.Cash.Summ);
+
+                    if (moneySumm > user.Cash.Summ)
+                    {
+                        return OperationResult.CreateFail("Недостаточно средств на кошельке");
+                    }
+
+
+                    using (var transaction = db.Database.BeginTransaction())
+                    {
+                        user.Cash.BonusSumm -= bonusSumm;
+                        user.Cash.Summ -= moneySumm;
+
+                        CashOperation cp = new CashOperation()
                         {
-                            Lot = toSave,
-                            Category = cat,
+                            Cash = user.Cash,
+                            Date = DateTime.Now, 
+                            Summ = -moneySumm,
+                            Comment = $"Списание за размещение лота '{lot.Name}': {bonusSumm} бонусами и {moneySumm} деньгами"
                         };
 
-                        db.LotCategory.Add(lc);
+                        db.Add(cp);
+
+                        // подставляем категорию из выбранной
+                        foreach (int catId in categoriesId)
+                        {
+                            Category cat = db.Category.Find(catId);
+
+                            if (cat != null)
+                            {
+                                LotCategory lc = new LotCategory()
+                                {
+                                    Lot = toSave,
+                                    Category = cat,
+                                };
+
+                                db.LotCategory.Add(lc);
+                            }
+                        }
+
+                        db.Lot.Add(toSave);
+                        db.SaveChanges();
+                        transaction.Commit();
+                        
+                        return OperationResult.CreateSuccess();
                     }
                 }
-
-                db.Lot.Add(toSave);
-                db.SaveChanges();
-
-                return OperationResult.CreateSuccess();
             }
             catch (Exception ex)
             {

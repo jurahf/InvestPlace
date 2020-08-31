@@ -150,6 +150,8 @@ namespace Services.Services.BasketService
                 .ThenInclude(y => y.Pazzle)
                 .ThenInclude(z => z.Lot)
                 .ThenInclude(й => й.Pazzle)
+                .ThenInclude(q => q.Buyer)
+                .ThenInclude(q => q.Cash)
                 .FirstOrDefault(x => x.Id == userDto.Id);
             if (user == null)
                 throw new ArgumentException("Пользователь не найден");
@@ -208,8 +210,17 @@ namespace Services.Services.BasketService
                         Pazzle winnerPazzle = puzzle.Lot.Pazzle.OrderBy(x => x.BuyDate).ElementAt(completeNumber - 1);
                         winnerPazzle.Winner = true;
 
-                        // всем начисляем скидки (кроме победителя)
-                        // TODO: 
+                        // всем начисляем скидки (кроме победителя и продавца)
+                        List<ExtendedUser> forBonus = puzzle.Lot.Pazzle.Select(x => x.Buyer)
+                            .Where(b => b.Id != winnerPazzle.BuyerId)
+                            .Where(x => x.Id != puzzle.Lot.SellerId)
+                            .ToList();
+
+                        decimal bonus = (puzzle.Lot.Price ?? 0m) * EpicSettings.BonusPercent / 100m;
+                        foreach (var bonusedUser in forBonus)
+                        {
+                            bonusedUser.Cash.BonusSumm += bonus;
+                        }
                     }
                 }
 
