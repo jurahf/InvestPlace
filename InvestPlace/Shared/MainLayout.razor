@@ -39,19 +39,11 @@
                 </li>
 
                 <li class="">
-                    <a href="#">Категория товара</a>
-                </li>
-
-                <li class="">
-                    <a href="#">О нас</a>
-                </li>
-
-                <li class="">
                     <a href="#">Частые вопросы</a>
                 </li>
 
                 <li class="">
-                    <a href="/BuyerField">Поле покупателей</a>
+                    <a href="/BuyerField">Склад товаров</a>
                 </li>
             </ul>
 
@@ -59,7 +51,7 @@
 
             <ul class="navbar-nav float-right">
                 <li>
-                    <a href="/Basket" class="dropright">Корзина</a> 
+                    <a href="/Basket" class="dropright"><span class="fas fa-shopping-basket"></span> Корзина</a>
                     @if (inBasketCount > 0)
                     {
                         <span class="badge badge-danger">@inBasketCount</span>
@@ -67,7 +59,7 @@
                 </li>
 
                 <li>
-                    <a href="/Search" class="dropright">Поиск</a>
+                    <a href="/Search" class="dropright"><span class="fas fa-search"></span> Поиск</a>
                 </li>
             </ul>
         </div>

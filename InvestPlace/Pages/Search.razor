@@ -1,9 +1,12 @@
 ﻿@page "/Search"
 
 @using Services.DTO;
+@using Services.Services.LotService;
+@using Services.Services.CategoryService;
 
 @inject IJSRuntime JSRuntime;
-@inject Services.Services.LotService.ILotService lotService
+@inject ILotService lotService
+@inject ICategoryService CategoryService;
 
 <div class="row">
     <div class="col col-12">
@@ -15,12 +18,40 @@
 <EditForm Model="searchParams">
 
     <div class="row">
+        <div class="col col-6">
+            <div class="form-group">
+                <label class="label">Категория</label>
+                <InputSelect class="form-control" Value="@searchParams.ParentCategoryId" ValueExpression="() => searchParams.ParentCategoryId" ValueChanged="(string s) => ParentCategoryChanged(s)">
+                    <option value="0">Не выбрано</option>
+                    @foreach (var cat in categories.Where(x => x.Parent == null).OrderBy(x => x.Name))
+                    {
+                        <option value="@cat.Id">@cat.Name</option>
+                    }
+                </InputSelect>
+            </div>
+        </div>
+        <div class="col col-6">
+            <div class="form-group">
+                <label class="label">Подкатегория</label>
+                <InputSelect class="form-control" Value="@searchParams.SelectedCategoryId" ValueExpression="() => searchParams.SelectedCategoryId" ValueChanged="(string s) => SelectedCategoryChanged(s)">
+                    <option value="0">Не выбрано</option>
+                    @foreach (var cat in categories.Where(x => x.Parent != null && $"{x.Parent.Id}" == searchParams.ParentCategoryId).OrderBy(x => x.Name))
+                    {
+                        <option value="@cat.Id">@cat.Name</option>
+                    }
+                </InputSelect>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row">
         <div class="col col-12">
             <div class="input-group mb-3">
                 <div class="input-group-prepend">
                     <span class="input-group-text" id="basic-addon1"><i class="fas fa-search"></i></span>
                 </div>
-                <InputText type="text" class="form-control" placeholder="Название или категория товара" aria-label="Search" aria-describedby="basic-addon1" Value="@searchParams.Text" ValueExpression="() => searchParams.Text" ValueChanged="(string s) => SearchTextChanged(s)"/>
+                <InputText type="text" class="form-control" placeholder="Название или категория товара" aria-label="Search" aria-describedby="basic-addon1" Value="@searchParams.Text" ValueExpression="() => searchParams.Text" ValueChanged="(string s) => SearchTextChanged(s)" />
             </div>
         </div>
     </div>
@@ -82,11 +113,13 @@
     private List<LotDto> allLots = new List<LotDto>();
     private List<LotDto> searchedLots = new List<LotDto>();
     private DotNetObjectReference<Search> objRef;
+    protected List<CategoryDto> categories = new List<CategoryDto>();
 
 
     protected override void OnInitialized()
     {
         allLots = lotService.GetActual(true);       // TODO: надо ли получать тут все? может лучше по параметрам поиска?
+        categories = CategoryService.GetAll();
 
         searchParams = new LotSearchParams();
         searchParams.MinPrice = (int)allLots.Min(x => x.PriceRange.Minimum);
@@ -126,6 +159,18 @@
         }
     }
 
+    public void ParentCategoryChanged(string value)
+    {
+        searchParams.ParentCategoryId = value;
+        DoSearch();
+    }
+
+    public void SelectedCategoryChanged(string value)
+    {
+        searchParams.SelectedCategoryId = value;
+        DoSearch();
+    }
+
     public void SearchTextChanged(string text)
     {
         searchParams.Text = text;
@@ -135,7 +180,7 @@
     public void KeyPress(KeyboardEventArgs args)
     {
         // TODO: учитывать надо delete, backspace и т.д.
-        // в компоненте -  @onkeypress="KeyPress" 
+        // в компоненте -  @onkeypress="KeyPress"
         if (args.Key.Length == 1)
         {
             searchParams.Text += args.Key;
@@ -157,6 +202,16 @@
                 || x.Categories.Any(x => x.Name.ToLower().Contains(searchText)));
         }
 
+        if (int.TryParse(searchParams.ParentCategoryId, out int parentCatId) && parentCatId > 0)
+        {
+            res = res.Where(x => x.Categories.Any(y => y.Id == parentCatId || y.Parent.Id == parentCatId));
+        }
+
+        if (int.TryParse(searchParams.SelectedCategoryId, out int selectedCatId) && selectedCatId > 0)
+        {
+            res = res.Where(x => x.Categories.Any(y => y.Id == selectedCatId));
+        }
+
         searchedLots = res.ToList();
         this.StateHasChanged();
     }
@@ -164,6 +219,8 @@
     public class LotSearchParams
     {
         public string Text { get; set; }
+        public string ParentCategoryId { get; set; } = "0";
+        public string SelectedCategoryId { get; set; } = "0";
         public int MinPrice { get; set; }
         public int MaxPrice { get; set; }
     }

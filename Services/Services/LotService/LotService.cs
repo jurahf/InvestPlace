@@ -88,6 +88,9 @@ namespace Services.Services.LotService
                 .Include(x => x.Pazzle)
                 .Include(x => x.Seller)
                 .Include(x => x.CreateModerator)
+                .Include(x => x.LotCategory)
+                .ThenInclude(x => x.Category)
+                .ThenInclude(x => x.Parent)
                 .Where(x => x.CreateModerate == actual)
                 .Where(x => (x.CompleteDate == null) == actual)
                 .Select(x => LotDto.ConvertFromLot(x))
@@ -124,6 +127,8 @@ namespace Services.Services.LotService
                 .Include(x => x.Seller)
                 .Include(x => x.CreateModerator)
                 .Where(x => x.Pazzle.Any(p => p.BuyerId == user.Id))
+                .Where(x => x.CreateModerate == true)
+                .Where(x => x.CompleteDate == null)
                 .Select(x => LotDto.ConvertFromLot(x))
                 .ToList();
         }
@@ -254,10 +259,13 @@ namespace Services.Services.LotService
 
         public List<LotDto> GetBuyerField()
         {
+            // завершенные на вчерашний день
             var allCompleted = db.Lot
                 .Include(x => x.PriceRange)
                 .Include(x => x.Pazzle)
-                .Where(x => x.CompleteDate != null && x.CompleteDate.Value.Date < DateTime.Today); // завершенные на вчерашний день
+                .Where(x => x.CompleteDate != null)
+                .ToList()       // следующее предложение не транслируется в SQL
+                .Where(x => x.CompleteDate.Value.Date < DateTime.Today); 
 
             // каждые 300 - одно поле покупателей
             int mod = allCompleted.Count() % EpicSettings.LotPerBuyerField;

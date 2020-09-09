@@ -14,7 +14,7 @@
 
 <AuthorizeView Roles="Moderator, Admin">
     <Authorized>
-        <a class="text-red dropdown-item" href="/ManageAccount">@UserName</a>
+        <a class="text-red dropdown-item" href="/ManageAccount"><span class="fas fa-user"></span> @UserName</a>
         <div class="dropdown-divider"></div>
 
         <a class="dropdown-item" href="/UserList">Список пользователей</a>
@@ -39,29 +39,29 @@
 
 <AuthorizeView Roles="Normal">
     <Authorized>
-        <a class="text-red dropdown-item" href="/ManageAccount">@UserName</a>
+        <a class="text-red dropdown-item" href="/ManageAccount"><span class="fas fa-user"></span> @UserName</a>
         <div class="dropdown-divider"></div>
 
-        <a class="dropdown-item" href="/Cash">Кошелёк</a>
+        <a class="dropdown-item" href="/Cash"><span class="fas fa-wallet"></span> Кошелёк</a>
         <div class="dropdown-divider"></div>
 
-        <a class="dropdown-item" href="/MyLots">Мои товары</a>
+        <a class="dropdown-item" href="/MyLots"><span class="fas fa-boxes"></span> Мои товары</a>
         <div class="dropdown-divider"></div>
 
-        <a class="dropdown-item" href="/MyPuzzles">Участвую в сборе пазлов</a>
+        <a class="dropdown-item" href="/MyPuzzles"><span class="fas fa-puzzle-piece"></span> Участвую в сборе пазлов</a>
         <div class="dropdown-divider"></div>
 
-        <a class="dropdown-item" href="/Exchange">Обмен собранной картинки на товар</a>
+        <a class="dropdown-item" href="/Exchange"><span class="fas fa-sync"></span> Обмен/продажа</a>
         <div class="dropdown-divider"></div>
 
-        <a class="dropdown-item" href="#">Правила участия</a>
+        <a class="dropdown-item" href="#"><span class="fas fa-file-alt"></span> Правила участия</a>
         <div class="dropdown-divider"></div>
 
-        <a class="dropdown-item" href="/History">История операций</a>
+        <a class="dropdown-item" href="/History"><span class="fas fa-history"></span> История операций</a>
         <div class="dropdown-divider"></div>
 
         <form method="post" action="/Account/LogOut">
-            <button type="submit" class="nav-link btn btn-link">Выход</button>
+            <button type="submit" class="nav-link btn btn-link"><span class="fas fa-door-open"></span> Выход</button>
         </form>
     </Authorized>
     <NotAuthorized>

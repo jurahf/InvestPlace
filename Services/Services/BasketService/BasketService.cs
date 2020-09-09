@@ -41,27 +41,28 @@ namespace Services.Services.BasketService
 
         public BasketDto AddToBasket(ExtendedUserDto userDto, LotDto lotDto)
         {
-            ExtendedUser user = db.Find<ExtendedUser>(userDto.Id);
-            if (user == null)
-                throw new ArgumentException("Пользователь не найден");
-
-            Lot lot = db.Find<Lot>(lotDto.Id);
-            if (lot == null)
-                throw new ArgumentException("Лот не найден");
-
-            Basket basket = db.Basket.FirstOrDefault(x => x.ExtendedUser.Single().Id == userDto.Id);
-
-            if (basket == null)
-            {
-                basket = new Basket();
-                basket.ExtendedUser.Add(user);
-                //user.Basket = basket;
-
-                db.Basket.Add(basket);
-            }
-
             lock (lockObject)
             {
+                ExtendedUser user = db.Find<ExtendedUser>(userDto.Id);
+                if (user == null)
+                    throw new ArgumentException("Пользователь не найден");
+
+                Lot lot = db.Find<Lot>(lotDto.Id);
+                if (lot == null)
+                    throw new ArgumentException("Лот не найден");
+
+                Basket basket = db.Basket.FirstOrDefault(x => x.ExtendedUser.Single().Id == userDto.Id);
+
+                if (basket == null)
+                {
+                    basket = new Basket();
+                    basket.ExtendedUser.Add(user);
+                    //user.Basket = basket;
+
+                    db.Basket.Add(basket);
+                }
+
+
                 if (lot.Pazzle.Count >= EpicSettings.PuzzlePerLot)
                     throw new OverflowException("Все пазлы данного лота уже куплены");
 
@@ -91,51 +92,51 @@ namespace Services.Services.BasketService
                 db.Pazzle.Add(puzzle);
 
                 basket.Pazzle.Add(puzzle);
+
+                basket.LastOperationDate = DateTime.Now;
+                db.SaveChanges();
+
+                return BasketDto.ConvertFromBasket(basket);
             }
-
-            basket.LastOperationDate = DateTime.Now;
-            db.SaveChanges();
-
-            return BasketDto.ConvertFromBasket(basket);
         }
 
 
         public BasketDto RemoveFromBasket(ExtendedUserDto userDto, LotDto lotDto, bool allByLot)
         {
-            ExtendedUser user = db.Find<ExtendedUser>(userDto.Id);
-            if (user == null)
-                throw new ArgumentException("Пользователь не найден");
-
-            Lot lot = db.Find<Lot>(lotDto.Id);
-            if (lot == null)
-                throw new ArgumentException("Лот не найден");
-
-            Basket basket = db.Basket.FirstOrDefault(x => x.ExtendedUser.Single().Id == userDto.Id);
-
-            if (basket == null)
-                throw new ArgumentException("У пользователя не найдена корзина");
-
-
-            Pazzle puzzleForDel = null;
-            do
+            lock (lockObject)
             {
-                puzzleForDel = basket.Pazzle.FirstOrDefault(x => x.LotId == lot.Id/* && x.BuyDate == null*/); // все, которые в корзине - не куплены
+                ExtendedUser user = db.Find<ExtendedUser>(userDto.Id);
+                if (user == null)
+                    throw new ArgumentException("Пользователь не найден");
 
-                lock (lockObject)
+                Lot lot = db.Find<Lot>(lotDto.Id);
+                if (lot == null)
+                    throw new ArgumentException("Лот не найден");
+
+                Basket basket = db.Basket.FirstOrDefault(x => x.ExtendedUser.Single().Id == userDto.Id);
+
+                if (basket == null)
+                    throw new ArgumentException("У пользователя не найдена корзина");
+
+
+                Pazzle puzzleForDel = null;
+                do
                 {
+                    puzzleForDel = basket.Pazzle.FirstOrDefault(x => x.LotId == lot.Id/* && x.BuyDate == null*/); // все, которые в корзине - не куплены
+
                     if (puzzleForDel != null)
                     {
                         basket.Pazzle.Remove(puzzleForDel);
                         lot.Pazzle.Remove(puzzleForDel);
                         db.Pazzle.Remove(puzzleForDel);     // может быть только этого достаточно
                     }
-                }
-            } while (allByLot && puzzleForDel != null);
+                } while (allByLot && puzzleForDel != null);
 
-            basket.LastOperationDate = DateTime.Now;
-            db.SaveChanges();
+                basket.LastOperationDate = DateTime.Now;
+                db.SaveChanges();
 
-            return BasketDto.ConvertFromBasket(basket);
+                return BasketDto.ConvertFromBasket(basket);
+            }
         }
 
 
@@ -144,7 +145,9 @@ namespace Services.Services.BasketService
         /// </summary>
         public void Buy(ExtendedUserDto userDto)
         {
-            ExtendedUser user = db.Users
+            lock (lockObject)
+            {
+                ExtendedUser user = db.Users
                 .Include(x => x.Cash)
                 .Include(x => x.Basket)
                 .ThenInclude(y => y.Pazzle)
@@ -153,17 +156,15 @@ namespace Services.Services.BasketService
                 .ThenInclude(q => q.Buyer)
                 .ThenInclude(q => q.Cash)
                 .FirstOrDefault(x => x.Id == userDto.Id);
-            if (user == null)
-                throw new ArgumentException("Пользователь не найден");
-            if (user.Basket == null)
-                throw new ArgumentException("У пользователя нет корзины");
-            if (user.Cash == null)
-                throw new ArgumentException("У пользователя нет кошелька");
 
-            using (var transaction = db.Database.BeginTransaction())
-            {
+                if (user == null)
+                    throw new ArgumentException("Пользователь не найден");
+                if (user.Basket == null)
+                    throw new ArgumentException("У пользователя нет корзины");
+                if (user.Cash == null)
+                    throw new ArgumentException("У пользователя нет кошелька");
 
-                lock (lockObject)
+                using (var transaction = db.Database.BeginTransaction())
                 {
                     decimal summ = user.Basket.Pazzle.Sum(x => (x.Lot.Price ?? 0) / EpicSettings.PuzzleCostDelimeter);
                     if (summ > user.Cash.Summ)
@@ -192,44 +193,45 @@ namespace Services.Services.BasketService
 
                     db.CashOperation.Add(operation);
                     user.Cash.Summ -= summ;
-                }
 
-                foreach (var puzzle in user.Basket.Pazzle)
-                {
-                    puzzle.Buyer = user;
-                    puzzle.BuyDate = DateTime.Now;
 
-                    if (puzzle.Lot.Pazzle.Count >= EpicSettings.PuzzlePerLot
-                        && puzzle.Lot.Pazzle.All(x => x.BuyDate != null))
+                    foreach (var puzzle in user.Basket.Pazzle)
                     {
-                        // лот полностью куплен, определяем победителя
-                        puzzle.Lot.CompleteDate = DateTime.Now;
-                        int completeNumber = lotService.GetNextBuyerFieldNumber();
-                        puzzle.Lot.CompleteNumber = completeNumber;
+                        puzzle.Buyer = user;
+                        puzzle.BuyDate = DateTime.Now;
 
-                        Pazzle winnerPazzle = puzzle.Lot.Pazzle.OrderBy(x => x.BuyDate).ElementAt(completeNumber - 1);
-                        winnerPazzle.Winner = true;
-
-                        // всем начисляем скидки (кроме победителя и продавца)
-                        List<ExtendedUser> forBonus = puzzle.Lot.Pazzle.Select(x => x.Buyer)
-                            .Where(b => b.Id != winnerPazzle.BuyerId)
-                            .Where(x => x.Id != puzzle.Lot.SellerId)
-                            .ToList();
-
-                        decimal bonus = (puzzle.Lot.Price ?? 0m) * EpicSettings.BonusPercent / 100m;
-                        foreach (var bonusedUser in forBonus)
+                        if (puzzle.Lot.Pazzle.Count >= EpicSettings.PuzzlePerLot
+                            && puzzle.Lot.Pazzle.All(x => x.BuyDate != null))
                         {
-                            bonusedUser.Cash.BonusSumm += bonus;
+                            // лот полностью куплен, определяем победителя
+                            puzzle.Lot.CompleteDate = DateTime.Now;
+                            int completeNumber = lotService.GetNextBuyerFieldNumber();
+                            puzzle.Lot.CompleteNumber = completeNumber;
+
+                            Pazzle winnerPazzle = puzzle.Lot.Pazzle.OrderBy(x => x.BuyDate).ElementAt(completeNumber - 1);
+                            winnerPazzle.Winner = true;
+
+                            // всем начисляем скидки (кроме победителя и продавца)
+                            List<ExtendedUser> forBonus = puzzle.Lot.Pazzle.Select(x => x.Buyer)
+                                .Where(b => b.Id != winnerPazzle.BuyerId)
+                                .Where(x => x.Id != puzzle.Lot.SellerId)
+                                .ToList();
+
+                            decimal bonus = (puzzle.Lot.Price ?? 0m) * EpicSettings.BonusPercent / 100m;
+                            foreach (var bonusedUser in forBonus)
+                            {
+                                bonusedUser.Cash.BonusSumm += bonus;
+                            }
                         }
                     }
+
+                    user.Basket.Pazzle.Clear();
+                    db.Basket.Remove(user.Basket);
+
+                    db.SaveChanges();
+
+                    transaction.Commit();
                 }
-
-                user.Basket.Pazzle.Clear();
-                db.Basket.Remove(user.Basket);
-
-                db.SaveChanges();
-
-                transaction.Commit();
             }
         }
 
@@ -238,4 +240,7 @@ namespace Services.Services.BasketService
 
 
     }
+
+
+
 }

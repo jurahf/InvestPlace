@@ -19,9 +19,23 @@
 
 <div class="row">
     <div class="col col-12">
+        <button class="btn btn-secondary" @onclick="ShowDetails" disabled="@(selectedUserId <= 0)">Подробная информация</button>
         <button class="btn btn-secondary" @onclick="ChangeCash" disabled="@(selectedUserId <= 0)">Изменить сумму в кошельке</button>
     </div>
 </div>
+
+<EditForm Model="searchParams">
+    <div class="row margin-top-20">
+        <div class="col col-6">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1"><i class="fas fa-search"></i></span>
+                </div>
+                <InputText type="text" class="form-control" placeholder="Email или ФИО пользователя" aria-label="Search" aria-describedby="basic-addon1" Value="@searchParams.Text" ValueExpression="() => searchParams.Text" ValueChanged="(string s) => SearchTextChanged(s)" />
+            </div>
+        </div>
+    </div>
+</EditForm>
 
 <div class="row margin-top-20">
     <div class="col col-12">
@@ -43,22 +57,22 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var u in allUsers.OrderBy(x => x.Email))
+                @foreach (var u in filteredUsers.OrderBy(x => x.Email))
                 {
-                <tr @onclick="() => RowClick(u.Id)" class="@(u.Id == selectedUserId ? "selected" : "")">
-                    <td>@(u.Email ?? "")</td>
-                    <td>@(u.InnerName ?? "") @(u.Surname ?? "") @(u.Patronymic ?? "")</td>
-                    <td>@(u.PhoneNumber ?? "")</td>
-                    <td>@(u.Address ?? "")</td>
-                    <td>@(u.Bank ?? "")</td>
-                    <td>@(u.INN ?? "")</td>
-                    <td>@(u.KPP ?? "")</td>
-                    <td>@(u.BIK ?? "")</td>
-                    <td>@(u.SchetNumber ?? "")</td>
-                    <td>@(u.CorrSchet ?? "")</td>
-                    <td>@(u.Cash?.Summ ?? 0)</td>
-                    <td>@(u.Role ?? "")</td>
-                </tr>
+                    <tr @onclick="() => RowClick(u.Id)" class="@(u.Id == selectedUserId ? "selected" : "")">
+                        <td>@(u.Email ?? "")</td>
+                        <td>@(u.InnerName ?? "") @(u.Surname ?? "") @(u.Patronymic ?? "")</td>
+                        <td>@(u.PhoneNumber ?? "")</td>
+                        <td>@(u.Address ?? "")</td>
+                        <td>@(u.Bank ?? "")</td>
+                        <td>@(u.INN ?? "")</td>
+                        <td>@(u.KPP ?? "")</td>
+                        <td>@(u.BIK ?? "")</td>
+                        <td>@(u.SchetNumber ?? "")</td>
+                        <td>@(u.CorrSchet ?? "")</td>
+                        <td>@(u.Cash?.Summ ?? 0)</td>
+                        <td>@(u.Role ?? "")</td>
+                    </tr>
                 }
             </tbody>
         </table>
@@ -70,39 +84,93 @@
 
 
 
-@code {
+    @code {
 
-        [CascadingParameter]
-        protected ExtendedUserDto user { get; set; }
+            [CascadingParameter]
+            protected ExtendedUserDto user { get; set; }
 
-    protected List<ExtendedUserDto> allUsers = new List<ExtendedUserDto>();
+        protected List<ExtendedUserDto> allUsers = new List<ExtendedUserDto>();
+        protected List<ExtendedUserDto> filteredUsers = new List<ExtendedUserDto>();
+        protected int selectedUserId { get; set; } = 0;
+        protected UserSearchParams searchParams = new UserSearchParams();
 
-    protected int selectedUserId { get; set; } = 0;
 
-    protected override void OnInitialized()
-    {
-        allUsers = FindUsers(user);
+
+
+
+        protected override void OnInitialized()
+        {
+            allUsers = FindUsers(user);
+            filteredUsers = allUsers.Select(x => x).ToList();
+        }
+
+        protected List<ExtendedUserDto> FindUsers(ExtendedUserDto user)
+        {
+            if (user == null)
+                return new List<ExtendedUserDto>();
+            else
+                return ExtendedUserService.GetAll();
+        }
+
+
+        protected void RowClick(int userId)
+        {
+            selectedUserId = userId;
+        }
+
+
+        protected void ChangeCash()
+        {
+            NavigationManager.NavigateTo($"/ChangeCash/{selectedUserId}");
+        }
+
+
+        protected void ShowDetails()
+        {
+
+        }
+
+
+        protected void SearchTextChanged(string value)
+        {
+            searchParams.Text = value;
+            DoSearch();
+        }
+
+        protected void DoSearch()
+        {
+            if (string.IsNullOrWhiteSpace(searchParams.Text))
+            {
+                filteredUsers = allUsers.Select(x => x).ToList();
+            }
+            else
+            {
+                string[] parts = searchParams.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                var currentFilter = allUsers.Select(x => x);
+
+                foreach (var part in parts)
+                {
+                    currentFilter = currentFilter.Where(x =>
+                        x.Email?.StartsWith(searchParams.Text) == true
+                        || x.InnerName?.StartsWith(searchParams.Text) == true
+                        || x.Patronymic?.StartsWith(searchParams.Text) == true
+                        || x.Surname?.StartsWith(searchParams.Text) == true);
+                }
+
+                filteredUsers = currentFilter.ToList();
+            }
+        }
+
+
+
+
+
+        ///////////////////////////////////////////////////////////////////
+
+        public class UserSearchParams
+        {
+            public string Text { get; set; }
+        }
+
+
     }
-
-    protected List<ExtendedUserDto> FindUsers(ExtendedUserDto user)
-    {
-        if (user == null)
-            return new List<ExtendedUserDto>();
-        else
-            return ExtendedUserService.GetAll();
-    }
-
-
-    protected void RowClick(int userId)
-    {
-        selectedUserId = userId;
-    }
-
-
-    protected void ChangeCash()
-    {
-        NavigationManager.NavigateTo($"/ChangeCash/{selectedUserId}");
-    }
-
-
-}

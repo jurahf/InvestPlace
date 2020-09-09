@@ -339,28 +339,29 @@ td.field-cell h6 {
 /* лоты на главной */
 
 .lot-list-img {
-    width: 245px;
-    height: 200px;
+    width: 155px;
+    height: 140px;
 }
 
 .lot-list-count {
     background-image: url('../images/puzzle-detail.png');
     background-repeat: no-repeat;
+    background-size: contain;
     position: absolute;
-    top: 30px;
-    left: 200px;
+    top: 10px;
+    left: 140px;
     color: white;
-    width: 97px;
-    height: 85px;
-    line-height: 85px;
-    font-size: 20px;
+    width: 70px;
+    height: 60px;
+    line-height: 60px;
+    font-size: 18px;
     text-align: center;
 }
 
 .lot-list-price {
     position: absolute;
-    top: 150px;
-    left: 200px;
+    top: 100px;
+    left: 120px;
     padding-left: 5px;
     padding-right: 5px;
     background-color: #800000;
