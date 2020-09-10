@@ -20,6 +20,7 @@ using Services.Services.CashService;
 using Microsoft.EntityFrameworkCore.Design.Internal;
 using Microsoft.AspNetCore.Identity;
 using Services.Services.QueryExchangeService;
+using Services.Services.PuzzlePaintService;
 
 namespace InvestPlace
 {
@@ -69,6 +70,7 @@ namespace InvestPlace
             services.AddScoped<IBasketService, BasketService>();
             services.AddScoped<ICashService, CashService>();
             services.AddScoped<IQueryExchangeService, QueryExchangeService>();
+            services.AddScoped<IPuzzlePaintService, PuzzlePaintService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

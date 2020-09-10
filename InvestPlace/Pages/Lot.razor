@@ -18,7 +18,7 @@
         <!-- картинка и разбивка по пазлам -->
         <div class="row">
             <div class="col col-12">
-                <ImageWithHover MainImage="@editedLot.ImageLink" HoverImage="/images/puzzle-net.png" ShowHover="@showNet">
+                <ImageWithHover MainImage="@editedLot.ImageLink" HoverImage='@($"/api/PuzzlePaint/PuzzleNet/{editedLot.Id}")' ShowHover="@showNet">
                 </ImageWithHover>
             </div>
         </div>
