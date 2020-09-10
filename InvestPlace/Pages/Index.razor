@@ -14,13 +14,13 @@
 
     @foreach (var lot in allLots)
     {        
-    <div class="col col-2">
+    <div class="col col-2 margin-top-20">
         <a class="link-text-usual" href="/lot/@lot.Id">
             <img class="lot-list-img" src="@lot.ImageLink" alt="" />
             <div class="lot-list-count">@lot.PuzzleCount</div>
             <div class="lot-list-price">@lot.Price ₽</div>
 
-            <div style="">@lot.Name</div>
+            <div class="lot-list-label">@lot.Name</div>
         </a>
     </div>
     }

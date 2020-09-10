@@ -1,0 +1,172 @@
+﻿@page "/ManageAccount/{userId:int}"
+
+@using Services.DTO;
+@using Services.Services.ExtendedUserService;
+
+
+@inject IExtendedUserService ExtendedUserService;
+
+@attribute [Authorize(Roles = InvestPlaceDB.ExtendedRole.MODERATOR + ", " + InvestPlaceDB.ExtendedRole.ADMIN)]
+
+
+<LoginWelcome>
+
+    <div class="margin-top-50"></div>
+
+    <div class="row">
+        <div class="col col-2 offset-1 text-center">
+            <img class="" src="/images/icon-profile.png" alt="profile" />
+            <h4 class="text-red text-center margin-top-20">@editedUser.InnerName</h4>
+        </div>
+
+        <div class="col col-9">
+
+            <EditForm Model="@editedUser">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <!-- фамилия -->
+                <div class="row">
+                    <div class="col col-6">
+                        <div class="form-group">
+                            <label class="label">Фамилия</label>
+                            <input class="form-control" value="@editedUser.Surname" disabled />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- имя отчество -->
+                <div class="row">
+                    <div class="col col-6">
+                        <div class="form-group">
+                            <label class="label">Имя</label>
+                            <input class="form-control" value="@editedUser.InnerName" disabled />
+                        </div>
+                    </div>
+                    <div class="col col-6">
+                        <div class="form-group">
+                            <label class="label">Отчетво</label>
+                            <input class="form-control" value="@editedUser.Patronymic" disabled />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- телефон Email -->
+                <div class="row">
+                    <div class="col col-6">
+                        <div class="form-group">
+                            <label class="label">Телефон</label>
+                            <input class="form-control" value="@editedUser.PhoneNumber" disabled />
+                        </div>
+                    </div>
+                    <div class="col col-6">
+                        <div class="form-group">
+                            <label class="label">E-mail</label>
+                            <input class="form-control" value="@editedUser.Email" type="email" disabled />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- раздел - банковский счет -->
+                <div class="row margin-top-50">
+                    <div class="col col-12">
+                        <p class="text-red">Реквизиты банковского счёта</p>
+                        <hr />
+                    </div>
+                </div>
+
+                <!-- Номер счета Корр.счет -->
+                <div class="row">
+                    <div class="col col-6">
+                        <div class="form-group">
+                            <label class="label">Номер счёта</label>
+                            <input class="form-control" value="@editedUser.SchetNumber" disabled />
+                        </div>
+                    </div>
+                    <div class="col col-6">
+                        <div class="form-group">
+                            <label class="label">Корр. счёт</label>
+                            <input class="form-control" value="@editedUser.CorrSchet" disabled />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Банк получателя ИНН -->
+                <div class="row">
+                    <div class="col col-6">
+                        <div class="form-group">
+                            <label class="label">Банк получателя</label>
+                            <input class="form-control" value="@editedUser.Bank" disabled />
+                        </div>
+                    </div>
+                    <div class="col col-6">
+                        <div class="form-group">
+                            <label class="label">ИНН</label>
+                            <input class="form-control" value="@editedUser.INN" disabled />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- БИК КПП -->
+                <div class="row">
+                    <div class="col col-6">
+                        <div class="form-group">
+                            <label class="label">БИК</label>
+                            <input class="form-control" value="@editedUser.BIK" disabled />
+                        </div>
+                    </div>
+                    <div class="col col-6">
+                        <div class="form-group">
+                            <label class="label">КПП</label>
+                            <input class="form-control" value="@editedUser.KPP" disabled />
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <!-- раздел - адрес -->
+                <div class="row margin-top-50">
+                    <div class="col col-12">
+                        <p class="text-red">Адрес получения награды</p>
+                        <hr />
+                    </div>
+                </div>
+                <!-- Адрес -->
+                <div class="row">
+                    <div class="col col-12">
+                        <div class="form-group">
+                            <label class="label">Индекс, область/край, город, улица, дом</label>
+                            <input class="form-control" value="@editedUser.Address" disabled />
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Годовой рекламный сбор-->
+
+            </EditForm>
+        </div>
+    </div>
+
+
+
+</LoginWelcome>
+
+
+
+
+@code {
+    [Parameter]
+    public int userId { get; set; }
+
+    protected ExtendedUserDto editedUser;
+
+
+    protected override void OnInitialized()
+    {
+        editedUser = ExtendedUserService.GetById(userId);
+    }
+
+
+}

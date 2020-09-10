@@ -25,9 +25,11 @@ a, .btn-link {
     text-transform: uppercase;
 }
 
-.btn-primary.disabled,
+.btn-primary.disabled, 
+.btn-primary:disabled,
 .btn-secondary.disabled {
-    background-color: #808080;
+    background-color: #A08080;
+    border-color: #A08080;
 }
 
 .btn-primary,
@@ -221,8 +223,14 @@ table.text-center td {
     border-left: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-/* страница поиска */
+.right-separator {
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+}
 
+
+
+
+/* страница поиска */
 .search-card img {
     width: 167px;
     height: 127px;
@@ -366,7 +374,18 @@ td.field-cell h6 {
     padding-right: 5px;
     background-color: #800000;
     color: white;
+    font-size: 14px;
 }
+
+.lot-list-label {
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 3em;
+    width: 155px;
+    white-space: nowrap;
+}
+
 /*******************************************/
 
 /* лоты подробно */
