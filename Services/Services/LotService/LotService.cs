@@ -201,8 +201,8 @@ namespace Services.Services.LotService
                         return OperationResult.CreateFail("Недостаточно средств на кошельке");
                     }
 
-                    decimal bonusSumm = Math.Min(lot.PuzzlePrice, user.Cash.BonusSumm);
-                    decimal moneySumm = lot.PuzzlePrice - Math.Min(lot.PuzzlePrice, user.Cash.Summ);
+                    //decimal bonusSumm = Math.Min(lot.PuzzlePrice, user.Cash.BonusSumm);
+                    decimal moneySumm = lot.PuzzlePrice/* - bonusSumm*/;
 
                     if (moneySumm > user.Cash.Summ)
                     {
@@ -212,7 +212,7 @@ namespace Services.Services.LotService
 
                     using (var transaction = db.Database.BeginTransaction())
                     {
-                        user.Cash.BonusSumm -= bonusSumm;
+                        //user.Cash.BonusSumm -= bonusSumm;
                         user.Cash.Summ -= moneySumm;
 
                         CashOperation cp = new CashOperation()
@@ -220,7 +220,7 @@ namespace Services.Services.LotService
                             Cash = user.Cash,
                             Date = DateTime.Now, 
                             Summ = -moneySumm,
-                            Comment = $"Списание за размещение лота '{lot.Name}': {bonusSumm} бонусами и {moneySumm} деньгами"
+                            Comment = $"Списание за размещение лота '{lot.Name}': {moneySumm} руб"
                         };
 
                         db.Add(cp);
