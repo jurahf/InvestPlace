@@ -17,6 +17,26 @@ body {
     background-color: #ededed;
 }
 
+.nav-row .dropdown-menu.dropdown-form {
+    background-color: white;
+}
+
+.dropdown-form {
+    min-width: 25rem;
+    padding: 10px;
+    margin-left: -10rem;
+    justify-content: center;
+    background-color: white;
+}
+
+.navbar .dropdown-menu.dropdown-form.container {
+    display: none;
+}
+
+.dropdown:hover .dropdown-menu.dropdown-form {
+    display: block;
+}
+
 a, .btn-link {
     color: #0366d6;
 }
@@ -32,6 +52,7 @@ a, .btn-link {
     border-color: #A08080;
 }
 
+.btn-primary.focus, .btn-primary:focus,
 .btn-primary,
 .btn-secondary {
     color: #fff;

@@ -31,8 +31,9 @@ namespace Services.Services.BasketService
                 throw new ArgumentException("Пользователь задан неверно");
 
             Basket basket = db.Basket
-                .Include(x => x.Pazzle)
                 .Include(x => x.ExtendedUser)
+                .Include(x => x.Pazzle)
+                .ThenInclude(x => x.Lot)
                 .FirstOrDefault(x => x.ExtendedUser.Single().Id == user.Id);
 
             return BasketDto.ConvertFromBasket(basket);

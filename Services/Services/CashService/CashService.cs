@@ -115,6 +115,19 @@ namespace Services.Services.CashService
             if (findedUser.Cash == null || findedUser.Cash.Summ < summ)
                 throw new ArgumentException("На кошельке пользователя недостаточно средств");
 
+            List<QueryForOperation> existedQueries = db.QueryForOperation
+                .Include(x => x.CashQueryModerator)
+                .Include(x => x.Cash)
+                .ThenInclude(x => x.ExtendedUser)
+                .Where(x => x.OperationModerate == null)
+                .Where(x => x.CashId == findedUser.CashId)
+                .ToList();
+
+            decimal existedQueriesSumm = existedQueries.Sum(x => x.Summ);
+
+            if (findedUser.Cash.Summ < summ + existedQueriesSumm)
+                throw new ArgumentException("На кошельке пользователя недостаточно средств, с учетом уже созданных запросов на вывод средств");
+
             // тут без транзакции и без блокировки - просто создаем заявку на вывод
             // а вот когда заявка будет подтверждена, тогда нужны будут проверки и транзакции
 

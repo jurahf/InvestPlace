@@ -9,6 +9,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider;
 @inject IExtendedUserService ExtendedUserService;
 @inject IBasketService BasketService
+@inject NavigationManager NavigationManager;
 
 <div class="main">
 
@@ -51,11 +52,59 @@
 
             <ul class="navbar-nav float-right">
                 <li>
-                    <a href="/Basket" class="dropright"><span class="fas fa-shopping-basket"></span> Корзина</a>
-                    @if (inBasketCount > 0)
-                    {
-                        <span class="badge badge-danger">@inBasketCount</span>
-                    }
+                    <div class="dropdown">
+                        <a href="/Basket" class="dropright" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="fas fa-shopping-basket"></span>
+                            Корзина
+                            @if (inBasketCount > 0)
+                            {
+                                <span class="badge badge-danger">@inBasketCount</span>
+                            }
+                        </a>
+
+                        <!-- всплывающее меню корзины -->
+                        <div class="dropdown-menu dropdown-form container">
+                            @foreach (var group in puzzles.GroupBy(x => x.Lot))
+                            {
+                                <div class="row">
+                                    <div class="col col-3">
+                                        <img class="img-full" src="@group.Key.ImageLink" />
+                                    </div>
+                                    <div class="col col-7">
+                                        <h6>@group.Key.Name</h6>
+                                        <h6 class="text-red">@(group.Key.PuzzlePrice * group.Count()) ₽</h6>
+                                    </div>
+                                    <div class="col col-2">
+                                        <button class="del-row-btn" @onclick="() => DeleteRowFromBasket(user, group.Key)"></button>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col col-12">
+                                        <hr />
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="row text-center">
+                                <div class="col col-12">
+                                    <h5 class="text-gray inline">Подытог: </h5>
+                                    <h4 class="text-red inline">@puzzles.Sum(x => x.Lot.PuzzlePrice) ₽</h4>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col col-12">
+                                    <hr />
+                                </div>
+                            </div>
+
+                            <div class="row conteiner-for-centered text-center">
+                                <div class="col col-12">
+                                    <button class="btn btn-primary" @onclick="GoToBasket">Перейти в корзину</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </li>
 
                 <li>
@@ -80,11 +129,12 @@
 
     protected ExtendedUserDto user = null;
     protected int inBasketCount = 0;
+    protected List<PuzzleDto> puzzles = new List<PuzzleDto>();
 
     protected override void OnInitialized()
     {
         user = FindUser().Result;
-        UpdateBasketCount();
+        UpdateBasket();
 
         base.OnInitialized();
     }
@@ -110,26 +160,46 @@
         get
         {
             if (_BasketCountChange.Equals(EventCallback.Empty))
-                _BasketCountChange = EventCallback.Factory.Create(this, UpdateBasketCount);
+                _BasketCountChange = EventCallback.Factory.Create(this, UpdateBasket);
             return _BasketCountChange;
         }
     }
 
-    private void UpdateBasketCount()
+    private void UpdateBasket()
     {
-        inBasketCount = GetBasketLotCount(user);
+        puzzles = GetBasketPuzzles(user);
+        inBasketCount = puzzles.GroupBy(x => x.Lot).Count();
     }
 
-    private int GetBasketLotCount(ExtendedUserDto user)
+    private List<PuzzleDto> GetBasketPuzzles(ExtendedUserDto user)
     {
         if (user == null)
-            return 0;
+            return new List<PuzzleDto>();
 
         BasketDto basket = BasketService.GetBasketByUser(user);
         if (basket == null || !basket.Puzzles.Any())
-            return 0;
+            return new List<PuzzleDto>();
 
-        return basket.Puzzles.GroupBy(x => x.LotId).Count();
+        return basket.Puzzles.ToList();
+    }
+
+    private void GoToBasket()
+    {
+        NavigationManager.NavigateTo("/Basket");
+    }
+
+    private void DeleteRowFromBasket(ExtendedUserDto user, LotDto lot)
+    {
+        try
+        {
+            BasketService.RemoveFromBasket(user, lot, true);
+
+            // обновим бейджик у корзины
+            BasketCountChange.InvokeAsync(null);
+        }
+        catch (Exception ex)
+        {
+        }
     }
 
 }
