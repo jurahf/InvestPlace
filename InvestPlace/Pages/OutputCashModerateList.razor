@@ -23,6 +23,7 @@
                     <th style="width:20%;">Время создания</th>
                     <th>Пользователь</th>
                     <th>Сумма</th>
+                    <th>Тип</th>
                 </tr>
             </thead>
             <tbody>
@@ -32,6 +33,7 @@
                         <td>@q.Date.ToString("dd.MM.yyyy HH:mm")</td>
                         <td>@(q.User.InnerName ?? "") @(q.User.Patronymic ?? "") @(q.User.Surname ?? "") (@(q.User.Email ?? ""))</td>
                         <td>@q.Summ</td>
+                        <td>@(q.IsOutput ? "Вывод" : "Пополнение")</td>
                     </tr>
                 }
             </tbody>

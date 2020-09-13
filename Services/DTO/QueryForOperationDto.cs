@@ -16,6 +16,8 @@ namespace Services.DTO
 
         public bool? Moderate { get; set; }
 
+        public bool IsOutput { get; set; }
+
         public ExtendedUserDto Moderator { get; set; }
 
         public ExtendedUserDto User { get; set; }
@@ -31,8 +33,9 @@ namespace Services.DTO
                 Date = query.Date,
                 Summ = query.Summ,
                 Moderate = query.OperationModerate,
+                IsOutput = query.IsCashOutput,
                 Moderator = ExtendedUserDto.ConvertByUser(query.CashQueryModerator),
-                User = ExtendedUserDto.ConvertByUser(query.Cash.ExtendedUser.First())
+                User = ExtendedUserDto.ConvertByUser(query.Cash.ExtendedUser.First()),
             };
         }
     }

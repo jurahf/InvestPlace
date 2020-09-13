@@ -119,6 +119,7 @@ namespace Services.Services.CashService
                 .Include(x => x.CashQueryModerator)
                 .Include(x => x.Cash)
                 .ThenInclude(x => x.ExtendedUser)
+                .Where(x => x.IsCashOutput)
                 .Where(x => x.OperationModerate == null)
                 .Where(x => x.CashId == findedUser.CashId)
                 .ToList();
