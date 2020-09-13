@@ -18,6 +18,9 @@ namespace Services.DTO
 
         public bool IsOutput { get; set; }
 
+        public string Status { get; set; }
+        public int StatusInt { get; set; }
+
         public ExtendedUserDto Moderator { get; set; }
 
         public ExtendedUserDto User { get; set; }
@@ -36,7 +39,29 @@ namespace Services.DTO
                 IsOutput = query.IsCashOutput,
                 Moderator = ExtendedUserDto.ConvertByUser(query.CashQueryModerator),
                 User = ExtendedUserDto.ConvertByUser(query.Cash.ExtendedUser.First()),
+                Status = StatusToString(query.Status),
+                StatusInt = (int)query.Status,  // TODO
             };
         }
+
+        private static string StatusToString(CashQueryStatus status)
+        {
+            switch (status)
+            {
+                case CashQueryStatus.None:
+                    return "Может быть обработан модератором";
+                case CashQueryStatus.ProcessByUser:
+                    return "Обрабатывается пользователем";
+                case CashQueryStatus.SendConfirm:
+                    return "Отправка денег подтверждена";
+                case CashQueryStatus.GetConfirm:
+                    return "Получение денег подтверждено";
+                default:
+                    return $"{status}";
+            }
+        }
+
     }
+
+
 }

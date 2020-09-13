@@ -26,10 +26,29 @@ namespace InvestPlaceDB
         public bool IsCashOutput { get; set; }
 
         public int? CashQueryModeratorId { get; set; }
+
         [ForeignKey(nameof(CashQueryModeratorId))]
         [InverseProperty(nameof(ExtendedUser.CashQueryModerator))]
         public virtual ExtendedUser CashQueryModerator { get; set; }
 
         public bool? OperationModerate { get; set; }
+
+
+        public CashQueryStatus Status { get; set; }
+
+
+        public int? CashQueryClientProcessorId { get; set; }
+
+        [ForeignKey(nameof(CashQueryClientProcessorId))]
+        [InverseProperty(nameof(ExtendedUser.CashQueryClientProcessor))]
+        public virtual ExtendedUser CashQueryClientProcessor { get; set; }
+    }
+
+    public enum CashQueryStatus
+    {
+        None = 0,
+        ProcessByUser = 1,
+        SendConfirm = 2,
+        GetConfirm = 3
     }
 }

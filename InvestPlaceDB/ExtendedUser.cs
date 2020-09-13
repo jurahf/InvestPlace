@@ -77,6 +77,9 @@ namespace InvestPlaceDB
         [InverseProperty(nameof(QueryForOperation.CashQueryModerator))]
         public virtual ICollection<QueryForOperation> CashQueryModerator { get; set; }
 
+        [InverseProperty(nameof(QueryForOperation.CashQueryClientProcessor))]
+        public virtual ICollection<QueryForOperation> CashQueryClientProcessor { get; set; }
+
 
         [InverseProperty(nameof(QueryForExchange.ExchangeModerator))]
         public virtual ICollection<QueryForExchange> ExchangeModerator { get; set; }

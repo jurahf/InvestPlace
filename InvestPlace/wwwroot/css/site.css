@@ -17,6 +17,10 @@ body {
     background-color: #ededed;
 }
 
+.background-color-white {
+    background-color: white;
+}
+
 .nav-row .dropdown-menu.dropdown-form {
     background-color: white;
 }
@@ -429,6 +433,14 @@ td.field-cell h6 {
 
 
 
+a.text-red {
+    cursor: pointer;
+}
+
+a:hover.text-red {
+    cursor: pointer;
+    text-decoration: underline;
+}
 
 a.link-text-usual {
     color: black;

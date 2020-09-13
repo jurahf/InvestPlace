@@ -8,64 +8,218 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider;
 @inject IExtendedUserService ExtendedUserService;
 @inject ICashService CashService;
+@inject IJSRuntime JSRuntime;
 
 
-<LoginWelcome>
+    <LoginWelcome>
 
-    <div class="margin-top-50"></div>
+        <div class="margin-top-50"></div>
 
-    <div class="row">
-        <div class="col col-2 offset-1 text-center">
-            <img class="" src="/images/icon-cash.png" alt="cash"/>
-            <h4 class="text-red text-center margin-top-20">КОШЕЛЁК</h4>
-        </div>
-
-        <div class="col col-6 offset-3">
-
-            <div class="row">
-                <div class="col col-12">
-                    <!-- баланс -->
-                    <h4 class="inline">Баланс: </h4><h2 class="inline">@(cash?.Summ ?? 0)</h2><h4 class="inline"> руб</h4>
-                    <br/>
-                    @*<h4 class="inline">Бонусы: </h4><h2 class="inline">@(cash?.BonusSumm ?? 0)</h2><h4 class="inline"> руб</h4>*@
-                </div>
+        <div class="row">
+            <div class="col col-2 offset-1 text-center">
+                <img class="" src="/images/icon-cash.png" alt="cash" />
+                <h4 class="text-red text-center margin-top-20">КОШЕЛЁК</h4>
             </div>
 
-            <div class="row margin-top-120">
-                <div class="col col-12">
-                    <!-- вывод денег -->
-                    <button class="btn btn-primary" @onclick="OutCashClick">Вывод денег</button>
-                    
-                    <div class="row margin-top-20 @(outCashActivated ? "" : "hidden")">
-                        <EditForm Model="outputCashArgs" OnValidSubmit="ValidOutputCash">
-                            <DataAnnotationsValidator />
-                            <ValidationSummary />
+            <div class="col col-6 offset-3">
+
+                <div class="row">
+                    <div class="col col-12">
+                        <!-- баланс -->
+                        <h4 class="inline">Баланс: </h4><h2 class="inline">@(cash?.Summ ?? 0)</h2><h4 class="inline"> руб</h4>
+                        <br />
+                        @*<h4 class="inline">Бонусы: </h4><h2 class="inline">@(cash?.BonusSumm ?? 0)</h2><h4 class="inline"> руб</h4>*@
+                    </div>
+                </div>
+
+                <div class="row margin-top-120">
+                    <div class="col col-12">
+                        <!-- вывод денег -->
+                        <button class="btn btn-primary" @onclick="OutCashClick">Вывод денег</button>
+
+                        <div class="row margin-top-20 @(outCashActivated ? "" : "hidden")">
                             <div class="col col-12">
                                 <label class="label">Введите, какую сумму хотите вывести</label>
-                                <InputNumber class="form-control" @bind-Value="outputCashArgs.Summ"></InputNumber>
+
+                                <form class="form-inline slider-wrapper" id="slider-wrapper-out">
+                                    <div class="form-group mx-sm-3 mb-2">
+                                        <input id="sliderOutput" type="text" class="span2" value="" data-slider-min="500" data-slider-max="20000" data-slider-step="500" data-slider-value="@outputCashArgs.Summ" data-slider-handle="square" />
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="text" class="form-control input-min" id="cashOutputText" value="@outputCashArgs.Summ" disabled />
+                                    </div>
+                                </form>
                             </div>
 
                             <div class="col col-12 margin-top-20">
-                                <button class="btn btn-secondary" disabled="@outputButtonDisabled">Вывести</button>
-                                <h6 class="text-danger">@errorText</h6>
-                                <h6 class="text-success">@successText</h6>
+                                <button class="btn btn-secondary" disabled="@outputButtonDisabled" @onclick="ValidOutputCash">Вывести</button>
+                                <h6 class="text-danger">@errorTextOutput</h6>
+                                <h6 class="text-success">@successTextOutput</h6>
                             </div>
-                        </EditForm>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="row margin-top-20">
-                <div class="col col-12">
-                    <!-- проверить реквизиты -->
-                    <a class="text-red" href="/ManageAccount">Проверить банковские реквизиты</a>
+                <div class="row margin-top-20">
+                    <div class="col col-12">
+                        <!-- проверить реквизиты -->
+                        <a class="text-red" href="/ManageAccount">Проверить банковские реквизиты</a>
+                    </div>
                 </div>
+
+
+
+                <div class="row margin-top-50">
+                    <div class="col col-12">
+                        <!-- пополнение кошелька -->
+                        <button class="btn btn-primary" @onclick="InCashClick">Пополнение кошелька</button>
+
+                        <!-- ввод суммы для пополнения кошелька -->
+                        <div class="row margin-top-20 @(inCashActivated ? "" : "hidden")">
+                            <div class="col col-12">
+                                <label class="label">Введите, на какую сумму хотите пополнить кошелек</label>
+
+                                <form class="form-inline slider-wrapper" id="slider-wrapper-in">
+                                    <div class="form-group mx-sm-3 mb-2">
+                                        <input id="sliderInput" type="text" class="span2" value="" data-slider-min="500" data-slider-max="20000" data-slider-step="500" data-slider-value="@inputCashArgs.Summ" data-slider-handle="square" />
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="number" class="form-control input-min" id="cashInputText" value="@inputCashArgs.Summ" disabled />
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="col col-12 margin-top-20">
+                                <button class="btn btn-secondary" disabled="@inputButtonDisabled" @onclick="GetPhoneForInputCash">Пополнить</button>
+                            </div>
+                        </div>
+
+                        <!-- номер телефона для пополнения кошелька -->
+                        <div class="row margin-top-20 @(phoneForSendActivated ? "" : "hidden")">
+                            <div class="col col-12">
+                                <h6>Переведите @(inputCashArgs.Summ) руб. на банковский счёт по номеру телефона: </h6>
+                                <h6 class="text-red">@sendMoneyParams.Phone</h6>
+                            </div>
+
+                            <div class="col col-12 margin-top-20">
+                                <button class="btn btn-secondary" disabled="@inputButtonDisabled" @onclick="ConfirmSendMoney">Подтвердить отправку</button>
+                                <h6 class="text-danger">@errorTextInput</h6>
+                                <h6 class="text-success">@successTextInput</h6>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+
             </div>
         </div>
-    </div>
+
+        <div class="row">
+            <div class="col col-6">
+                <h6 class="text-danger">@errorText</h6>
+                <h6 class="text-success">@successText</h6>
+            </div>
+        </div>
+
+        <!-- пополнения счетов других пользователей, которые обещал сделать -->
+        <div class="row margin-top-50">
+            <div class="col col-6 @(processByMe.Any() ? "" : "hidden")">
+                <h5>Требуются действия</h5>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Сумма</th>
+                            <th>Операция</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var q in processByMe.OrderByDescending(x => x.Date))
+                        {
+                            <tr>
+                                <td>@q.Date</td>
+                                <td>@q.Summ</td>
+                                <td>Для пополнения кошелька переведите сумму по номеру телефона @q.User.PhoneNumber</td>
+                                <td>
+                                    <a class="text-red" @onclick="() => ProcessOutput(q.User.Id, q.User.PhoneNumber, q.Summ)">Подтвердить</a>
+                                    <a class="text-red" @onclick="() => DeclainOutput(q)">Отказаться</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- активные запросы -->
+        <div class="row margin-top-20">
+            <div class="col col-6">
+                <h5>Активные запросы</h5>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Сумма</th>
+                            <th>Операция</th>
+                            <th>Статус</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var q in myQueries.Where(x => x.Moderate == null).OrderByDescending(x => x.Date))
+                        {
+                            <tr>
+                                <td>@q.Date</td>
+                                <td>@q.Summ</td>
+                                <td>@(q.IsOutput ? "Вывод денег" : "Пополнение кошелька")</td>
+                                <td>@q.Status</td>
+                                <td>
+                                    @if (q.StatusInt == 2)
+                                    {
+                                        <a class="text-red" @onclick="() => ConfirmGetMoney(q)">Подтвердить получение денег</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- выполненные запросы -->
+        <div class="row margin-top-20">
+            <div class="col col-6">
+                <h5>Выполненные запросы</h5>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Сумма</th>
+                            <th>Операция</th>
+                            <th>Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var q in myQueries.Where(x => x.Moderate != null).OrderByDescending(x => x.Date))
+                        {
+                            <tr>
+                                <td>@q.Date</td>
+                                <td>@q.Summ</td>
+                                <td>@(q.IsOutput ? "Вывод денег" : "Пополнение кошелька")</td>
+                                <td>@(q.Moderate == true ? "Выполнен" : "Отклонен")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
 
-</LoginWelcome>
+    </LoginWelcome>
 
 
 
@@ -75,19 +229,67 @@
     protected ExtendedUserDto user { get; set; }
 
     private CashDto cash = null;
-
-    private bool outCashActivated = false;
-
-    private OutputCashArgs outputCashArgs { get; set; }
+    private DotNetObjectReference<Cash> objRef;
+    private List<QueryForOperationDto> myQueries = new List<QueryForOperationDto>();
+    private List<QueryForOperationDto> processByMe = new List<QueryForOperationDto>();
     private string errorText = "";
     private string successText = "";
+
+
+    private bool outCashActivated = false;
+    private CashArgs outputCashArgs { get; set; }
+    private string errorTextOutput = "";
+    private string successTextOutput = "";
     private bool outputButtonDisabled = false;
+
+
+    private bool inCashActivated = false;
+    private bool phoneForSendActivated = false;
+    private SendMoneyToUserParams sendMoneyParams = new SendMoneyToUserParams();
+    private CashArgs inputCashArgs { get; set; }
+    private string errorTextInput = "";
+    private string successTextInput = "";
+    private bool inputButtonDisabled = false;
 
 
     protected override void OnInitialized()
     {
         cash = FindUserCash(user);
-        outputCashArgs = new OutputCashArgs();
+        outputCashArgs = new CashArgs() { Summ = 500 };
+        inputCashArgs = new CashArgs() { Summ = 500 };
+
+        if (user != null)
+        {
+            myQueries = CashService.QueriesCashByUser(user);
+            processByMe = CashService.ProcessOutputsByUser(user);
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (objRef == null)
+            objRef = DotNetObjectReference.Create(this);
+
+        await JSRuntime.InvokeAsync<string>("initSlider1", "sliderOutput", "slider-wrapper-out", "cashOutputText", "OutputValChanged", objRef);
+        await JSRuntime.InvokeAsync<string>("initSlider1", "sliderInput", "slider-wrapper-in", "cashInputText", "InputValChanged", objRef);
+    }
+
+    [JSInvokable]
+    public void OutputValChanged(string val)
+    {
+        if (int.TryParse(val, out int min))
+        {
+            outputCashArgs.Summ = min;
+        }
+    }
+
+    [JSInvokable]
+    public void InputValChanged(string val)
+    {
+        if (int.TryParse(val, out int min))
+        {
+            inputCashArgs.Summ = min;
+        }
     }
 
     private CashDto FindUserCash(ExtendedUserDto user)
@@ -98,6 +300,15 @@
     private void OutCashClick()
     {
         outCashActivated = !outCashActivated;
+        inCashActivated = false;
+        phoneForSendActivated = false;
+    }
+
+    private void InCashClick()
+    {
+        inCashActivated = !inCashActivated;
+        outCashActivated = false;
+        phoneForSendActivated = false;
     }
 
 
@@ -105,11 +316,99 @@
     {
         try
         {
+            errorTextOutput = "";
+            successTextOutput = "";
+            CashService.CreateOutputOperationRequest(user, outputCashArgs.Summ);
+            successTextOutput = "Заявка на вывод денег успешно сформирована!";
+            outputButtonDisabled = true;
+            this.StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            errorTextOutput = ex.Message;
+        }
+    }
+
+    private void GetPhoneForInputCash()
+    {
+        try
+        {
+            errorTextInput = "";
+            successTextInput = "";
+            sendMoneyParams = CashService.GetPhoneForInputMoney(user, inputCashArgs.Summ);
+            inCashActivated = false;
+            phoneForSendActivated = true;
+            this.StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            errorTextInput = ex.Message;
+        }
+    }
+
+    private void ConfirmSendMoney()
+    {
+        try
+        {
+            errorTextInput = "";
+            successTextInput = "";
+            CashService.ConfirmSendMoney(user, sendMoneyParams.UserId, sendMoneyParams.Phone, inputCashArgs.Summ);
+            successTextInput = "В ближайшее время деньги будут зачислены на ваш кошелек!";
+            inputButtonDisabled = true;
+            this.StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            errorTextInput = ex.Message;
+        }
+    }
+
+    private void ConfirmGetMoney(QueryForOperationDto query)
+    {
+        try
+        {
             errorText = "";
             successText = "";
-            CashService.CreateOutputOperationRequest(user, outputCashArgs.Summ);
-            successText = "Заявка на вывод денег успешно сформирована!";
-            outputButtonDisabled = true;
+            CashService.ConfirmGetMoney(user, query);
+
+            cash = FindUserCash(user);
+            myQueries = CashService.QueriesCashByUser(user);
+            processByMe = CashService.ProcessOutputsByUser(user);
+            successText = "Операция успешно завершена!";
+            this.StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            errorText = ex.Message;
+        }
+    }
+
+    private void ProcessOutput(int userId, string phone, decimal summ)
+    {
+        try
+        {
+            errorText = "";
+            successText = "";
+            CashService.ConfirmSendMoney(user, userId, phone, summ);
+            processByMe = CashService.ProcessOutputsByUser(user);
+            successText = "Деньги поступят на ваш кошелек в ближайшее время";
+            this.StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            errorText = ex.Message;
+        }
+    }
+
+    private void DeclainOutput(QueryForOperationDto query)
+    {
+        try
+        {
+            errorText = "";
+            successText = "";
+            CashService.DeclainProcessOutput(user, query);
+            processByMe = CashService.ProcessOutputsByUser(user);
+            successText = "Пополнение кошелька отменено";
             this.StateHasChanged();
         }
         catch (Exception ex)
@@ -121,7 +420,7 @@
 
     //////////////////////////////////////////////////////////////////////
 
-    public class OutputCashArgs
+    public class CashArgs
     {
         [Required(ErrorMessage = "Сумма должна быть указана")]
         [Range(1.0, 2_000_000.0, ErrorMessage = "Сумма должна быть числом от 1 до 2 000 000")]

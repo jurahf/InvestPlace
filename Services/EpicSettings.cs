@@ -50,5 +50,10 @@ namespace Services
         /// Сколько других товаров надо напокупать, чтобы разместить свой товар
         /// </summary>
         public const int AnotherPuzzlesForNewLot = 3;
+
+        /// <summary>
+        /// Телефон для перевода денег на счет сайта
+        /// </summary>
+        public const string PhoneForGetMoney = "+79203033952";
     }
 }

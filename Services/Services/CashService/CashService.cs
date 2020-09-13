@@ -161,6 +161,20 @@ namespace Services.Services.CashService
                 .ToList();
         }
 
+        public List<QueryForOperationDto> QueriesCashByUser(ExtendedUserDto user)
+        {
+            if (user == null)
+                throw new ArgumentNullException("Пользователь не задан");
+
+            return db.QueryForOperation
+                .Include(x => x.CashQueryModerator)
+                .Include(x => x.Cash)
+                .ThenInclude(x => x.ExtendedUser)
+                .Where(x => x.Cash.ExtendedUser.Any(u => u.Id == user.Id))
+                .Select(x => QueryForOperationDto.ConvertFromQueryForOperation(x))
+                .ToList();
+        }
+
         public QueryForOperationDto GetQueryForOperationById(int id)
         {
             return QueryForOperationDto.ConvertFromQueryForOperation(
@@ -200,7 +214,7 @@ namespace Services.Services.CashService
 
             lock (lockObject)
             {
-                if (findedQuery.Cash == null || findedQuery.Cash.Summ < findedQuery.Summ)
+                if (findedQuery.IsCashOutput && (findedQuery.Cash == null || findedQuery.Cash.Summ < findedQuery.Summ))
                     throw new ArgumentException("На кошельке недостаточно средств");
 
                 using (var transaction = db.Database.BeginTransaction())
@@ -210,23 +224,273 @@ namespace Services.Services.CashService
 
                     db.Update(findedQuery);
 
+                    string comment = $"В операции отказано (id запроса = {findedQuery.Id})";
                     if (solution)
                     {
-                        findedQuery.Cash.Summ -= findedQuery.Summ;
+                        if (findedQuery.IsCashOutput)
+                        {
+                            findedQuery.Cash.Summ -= findedQuery.Summ;
+                            comment = $"Вывод денег (id запроса = {findedQuery.Id})";
+                        }
+                        else
+                        {
+                            findedQuery.Cash.Summ += findedQuery.Summ;
+                            comment = $"Пополнение кошелька (id запроса = {findedQuery.Id})";
+                        }
                     }
 
                     CashOperation cashOperation = new CashOperation()
                     {
                         Date = DateTime.Now,
                         Cash = findedQuery.Cash,
-                        Summ = -findedQuery.Summ,
-                        Comment = solution ? $"Вывод денег (id запроса = {findedQuery.Id})" : $"В операции отказано (id запроса = {findedQuery.Id})"
+                        Summ = findedQuery.IsCashOutput ? -findedQuery.Summ : findedQuery.Summ,
+                        Comment = comment 
                     };
                     db.CashOperation.Add(cashOperation);
 
                     db.SaveChanges();
                     transaction.Commit();
                 }
+            }
+        }
+
+
+        public SendMoneyToUserParams GetPhoneForInputMoney(ExtendedUserDto user, decimal summ)
+        {
+            if (user == null)
+                throw new ArgumentNullException("Пользователь не задан");
+
+            ExtendedUser findedUser = db.Users.FirstOrDefault(x => x.Id == user.Id);
+            if (findedUser == null)
+                throw new ArgumentException("Пользователь не найден в базе");
+
+            lock (lockObject)
+            {
+                List<QueryForOperation> goodQueries = db.QueryForOperation
+                    .Include(x => x.Cash)
+                    .ThenInclude(x => x.ExtendedUser)
+                    .Where(x => x.OperationModerate == null)
+                    .Where(x => x.Status == CashQueryStatus.None)
+                    .Where(x => x.IsCashOutput)
+                    .Where(x => x.Summ == summ)
+                    .Where(x => !string.IsNullOrEmpty(x.Cash.ExtendedUser.First().PhoneNumber))
+                    .ToList();
+
+                if (goodQueries.Any())
+                {
+                    var query = goodQueries.OrderBy(x => x.Date).First();
+                    query.CashQueryClientProcessor = findedUser;        // в заявку на вывод денег подставляем обработчиком чувака, который хочет пополнить счет
+                    query.Status = CashQueryStatus.ProcessByUser;
+                    db.SaveChanges();
+                    return new SendMoneyToUserParams()
+                    {
+                        Phone = query.Cash.ExtendedUser.First().PhoneNumber,
+                        UserId = query.Cash.ExtendedUser.First().Id
+                    };
+                }
+                else
+                {
+                    return new SendMoneyToUserParams()
+                    {
+                        Phone = EpicSettings.PhoneForGetMoney,
+                        UserId = null
+                    };
+                }
+            }
+        }
+
+
+        public void ConfirmSendMoney(ExtendedUserDto fromUser, int? toUserId, string phone, decimal summ)
+        {
+            if (fromUser == null)
+                throw new ArgumentNullException("Пользователь не задан");
+
+            ExtendedUser findedUser = db.Users.FirstOrDefault(x => x.Id == fromUser.Id);
+            if (findedUser == null)
+                throw new ArgumentException("Пользователь не найден в базе");
+
+            lock (lockObject)
+            {
+                if (toUserId.HasValue)
+                {
+                    QueryForOperation relatedQuery = db.QueryForOperation
+                        .Include(x => x.CashQueryClientProcessor)
+                        .Include(x => x.Cash)
+                        .ThenInclude(x => x.ExtendedUser)
+                        .Where(x => x.OperationModerate == null)
+                        .Where(x => x.Status == CashQueryStatus.ProcessByUser)
+                        .Where(x => x.IsCashOutput)
+                        .Where(x => x.Summ == summ)
+                        .Where(x => x.Cash.ExtendedUser.First().Id == toUserId)     // кому перевести - владелец кошелька и автор запроса на ВЫВОД денег (у него спишутся деньги с кошелька и придут в реальности)
+                        .Where(x => x.CashQueryClientProcessor.Id == fromUser.Id)   // от кого перевести - ему надо запрос на пополнение кошелька, а свои деньги в реальности он отправит (уже подтвердил, что отправил)
+                        .FirstOrDefault();
+
+                    if (relatedQuery == null)
+                        throw new ArgumentException("Не найдена связанная заявка. Обратитесь к администароту.");
+
+                    // создадим запрос на пополнение кошелька
+                    relatedQuery.Status = CashQueryStatus.SendConfirm;
+                    QueryForOperation query = new QueryForOperation()
+                    {
+                        Status = CashQueryStatus.ProcessByUser,
+                        Cash = findedUser.Cash,
+                        Date = DateTime.Now,
+                        IsCashOutput = false,
+                        CashQueryClientProcessor = relatedQuery.Cash.ExtendedUser.First(),
+                        Summ = summ
+                    };
+                    db.Add(query);
+                    db.SaveChanges();
+                }
+                else
+                {
+                    // перевел сайту по номеру телефона
+                    // создаем запрос на пополнение кошелька, и ждем, когда обработает модератор
+                    QueryForOperation query = new QueryForOperation()
+                    {
+                        Status = CashQueryStatus.None,
+                        Cash = findedUser.Cash,
+                        Date = DateTime.Now,
+                        IsCashOutput = false,
+                        CashQueryClientProcessor = null,
+                        Summ = summ,
+                    };
+                    db.Add(query);
+                    db.SaveChanges();
+                }
+            }
+        }
+
+
+        public void ConfirmGetMoney(ExtendedUserDto user, QueryForOperationDto queryForOutputDto)
+        {
+            // пользователь говорит: деньги получил, вывод с кошелька состоялся
+
+            if (user == null)
+                throw new ArgumentNullException("Пользователь не задан");
+
+            ExtendedUser findedUser = db.Users.FirstOrDefault(x => x.Id == user.Id);
+            if (findedUser == null)
+                throw new ArgumentException("Пользователь не найден в базе");
+
+            if (queryForOutputDto == null)
+                throw new ArgumentNullException("Запрос не задан");
+
+            lock (lockObject)
+            {
+                using (var tran = db.Database.BeginTransaction())
+                {
+                    QueryForOperation queryForOutput = db.QueryForOperation
+                        .Include(x => x.CashQueryClientProcessor)
+                        .Include(x => x.Cash)
+                        .ThenInclude(x => x.ExtendedUser)
+                        .Where(x => x.IsCashOutput == true)
+                        .Where(x => x.Id == queryForOutputDto.Id)
+                        .FirstOrDefault();
+                    if (queryForOutput == null)
+                        throw new ArgumentException("Запрос не найден в базе");
+                    if (queryForOutput.OperationModerate == true)
+                        throw new ArgumentException("Операция уже была проведена ранее");
+
+                    // заявка на вывод и получение денег подтверждается
+                    // деньги вычитаются из кошелька
+                    if (queryForOutput.Cash.Summ < queryForOutput.Summ)
+                        throw new ArgumentException("На кошельке недостаточно средств");
+
+                    queryForOutput.Status = CashQueryStatus.SendConfirm;
+                    queryForOutput.OperationModerate = true;
+                    queryForOutput.Cash.Summ -= queryForOutput.Summ;
+                    CashOperation cashOutputOperation = new CashOperation()
+                    {
+                        Date = DateTime.Now,
+                        Cash = queryForOutput.Cash,
+                        Summ = -queryForOutput.Summ,
+                        Comment = $"Вывод денег (id запроса = {queryForOutput.Id})"
+                    };
+                    db.CashOperation.Add(cashOutputOperation);
+
+                    // связанная завяка на пополнение кошелька подтверждается
+                    // деньги добавляются на кошелек
+                    QueryForOperation queryForInput = db.QueryForOperation
+                        .Include(x => x.CashQueryClientProcessor)
+                        .Include(x => x.Cash)
+                        .ThenInclude(x => x.ExtendedUser)
+                        .Where(x => x.OperationModerate == null)
+                        .Where(x => x.CashQueryClientProcessor.Id == queryForOutput.Cash.ExtendedUser.First().Id)
+                        .Where(x => x.Status == CashQueryStatus.ProcessByUser)
+                        .Where(x => x.Summ == queryForOutput.Summ)
+                        .Where(x => x.IsCashOutput == false)
+                        .Where(x => x.Cash.ExtendedUser.First().Id == queryForOutput.CashQueryClientProcessorId)
+                        .FirstOrDefault();
+
+                    if (queryForInput == null)
+                        throw new ArgumentException("Не найдена связанная операция пополнения");
+
+                    queryForInput.Status = CashQueryStatus.SendConfirm;
+                    queryForInput.OperationModerate = true;
+                    queryForInput.Cash.Summ += queryForInput.Summ;
+                    CashOperation cashInputOperation = new CashOperation()
+                    {
+                        Date = DateTime.Now,
+                        Cash = queryForInput.Cash,
+                        Summ = queryForInput.Summ,
+                        Comment = $"Пополнение кошелька (id запроса = {queryForInput.Id})"
+                    };
+                    db.CashOperation.Add(cashInputOperation);
+
+                    db.SaveChanges();
+                    tran.Commit();
+                }
+            }
+        }
+
+
+        public List<QueryForOperationDto> ProcessOutputsByUser(ExtendedUserDto user)
+        {
+            if (user == null)
+                throw new ArgumentNullException("Пользователь не задан");
+
+            return db.QueryForOperation
+                .Include(x => x.CashQueryModerator)
+                .Include(x => x.CashQueryClientProcessor)
+                .Include(x => x.Cash)
+                .ThenInclude(x => x.ExtendedUser)
+                .Where(x => x.CashQueryClientProcessor.Id == user.Id)
+                .Where(x => x.OperationModerate == null)
+                .Where(x => x.Status == CashQueryStatus.ProcessByUser)
+                .Where(x => x.IsCashOutput == true)
+                .Select(x => QueryForOperationDto.ConvertFromQueryForOperation(x))
+                .ToList();
+        }
+
+
+        public void DeclainProcessOutput(ExtendedUserDto user, QueryForOperationDto queryForOutputDto)
+        {
+            if (user == null)
+                throw new ArgumentNullException("Пользователь не задан");
+
+            ExtendedUser findedUser = db.Users.FirstOrDefault(x => x.Id == user.Id);
+            if (findedUser == null)
+                throw new ArgumentException("Пользователь не найден в базе");
+
+            if (queryForOutputDto == null)
+                throw new ArgumentNullException("Запрос не задан");
+
+            lock (lockObject)
+            {
+                QueryForOperation queryForOutput = db.QueryForOperation
+                    .Include(x => x.CashQueryClientProcessor)
+                    .Include(x => x.Cash)
+                    .ThenInclude(x => x.ExtendedUser)
+                    .Where(x => x.IsCashOutput == true)
+                    .Where(x => x.Id == queryForOutputDto.Id)
+                    .Where(x => x.CashQueryClientProcessor.Id == findedUser.Id)
+                    .FirstOrDefault();
+                if (queryForOutput == null)
+                    throw new ArgumentException("Запрос не найден в базе");
+
+                queryForOutput.Status = CashQueryStatus.None;
+                db.SaveChanges();
             }
         }
 

@@ -60,9 +60,23 @@
             });
         }
 
+        // вызывается со страницы Cash
+        function initSlider1(sliderId, wrapperId, inputId, Callback, objRef) {
+            $("#" + sliderId).slider({});
+
+            $('#' + sliderId).change(function () {
+                var val = $('#' + wrapperId + ' .tooltip-main .tooltip-inner').text();
+
+                // если менять только так, то биндинга значений в blazor не сработает
+                $('#' + wrapperId + ' #' + inputId).val(val);
+
+                // поэтому еще так
+                objRef.invokeMethodAsync(Callback, val);
+            });
+        }
 
         // вызывается со страницы Search
-        function initSlider(sliderId, wrapperId, objRef) {
+        function initSlider2(sliderId, wrapperId, objRef) {
             $("#" + sliderId).slider({});
 
             $('#' + sliderId).change(function () {
