@@ -334,6 +334,22 @@ td.field-cell h6 {
 }
 
 
+/* это для списка лотов в размещении лота */
+.lot-my-img-sm {
+    width: 123px !important;
+    height: 100px !important;
+}
+
+.lot-my-img-xs {
+    width: 60px !important;
+    height: 50px !important;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+
 /* страница Мои товары */
 .lot-my-img {
     width: 123px;

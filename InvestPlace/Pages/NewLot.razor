@@ -6,6 +6,7 @@
 @using Services.Services.ExtendedUserService;
 @using Services.Services.FileService;
 @using Services.Services.CategoryService;
+@using Services.Services.BasketService;
 
 
 @inject NavigationManager NavigationManager;
@@ -14,6 +15,7 @@
 @inject IExtendedUserService ExtendedUserService;
 @inject IFileService FileService;
 @inject ICategoryService CategoryService;
+@inject IBasketService BasketService;
 
 
 <LoginWelcome>
@@ -146,8 +148,69 @@
         <!-- список товаров для покупки пазлов -->
         <div class="margin-top-20">
             <h6>Для размещения собственного товара, необходимо осуществить помощь в сборе пазлов другим участникам в количестве 49%, только в рублевом эквиваленте</h6>
-            <LotRowsByPriceRange Lots="actualRangeredLots" />
+
+            <!-- тут нельзя использовать LotRowsByPriceRange, потому что: 1. не переходим товар, а помещаем в корзину. 2. выбранный надо отмечать галками -->
+            <!-- на самом деле тут всегда одна группа -->
+            @foreach (var gr in actualRangeredLots.GroupBy(x => x.PriceRange).OrderBy(x => x.Key.Minimum))
+            {
+                <!-- сначала строка с первыми товарами -->
+                <div class="row margin-top-20">
+                    <div class="col col-2 conteiner-for-centered right-separator justify-content-center">
+                        <h6 class="text-center text-red">@gr.Key.Minimum - @gr.Key.Maximum руб</h6>
+                    </div>
+
+                    @foreach (var lot in gr.Take(5))
+                    {
+                        <div class="col col-2">
+                            <a class="link-text-usual cursor-pointer" @onclick="() => LotClicked(lot)">
+                                <ImageWithHover MainImageClasses="lot-my-img-sm" HoverImageClasses="lot-my-img-xs" MainImage="@lot.ImageLink" HoverImage="/images/galka.png" ShowHover="@lotsInBasket.Contains(lot)" />
+                                <div class="lot-my-count">@lot.PuzzleCount</div>
+                                <div class="lot-my-price">@lot.Price ₽</div>
+
+                                <div class="lot-my-caption">@lot.Name</div>
+                            </a>
+                        </div>
+                    }
+                </div>
+
+
+                <!-- а потом уже и остальные строки на раскрывающейся панели -->
+                <div class="row">
+                    <div class="col col-2 offset-5">
+                        <a class="" data-toggle="collapse" href="#collapseGroup_@gr.Key.Id" role="button" aria-expanded="false" aria-controls="collapseExample">
+                            <img width="145" src="/images/horizontal-arrow.png" />
+                        </a>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col col-12">
+
+                        <div class="collapse" id="collapseGroup_@gr.Key.Id">
+                            <div class="card card-body background-color-body">
+                                <div class="row">
+                                    @foreach (var lot in gr.Skip(5))
+                                    {
+                                        <div class="col col-2">
+                                            <a class="link-text-usual" href="/lot/@lot.Id">
+                                                <img class="lot-my-img" src="@lot.ImageLink" alt="" />
+                                                <div class="lot-my-count">@lot.PuzzleCount</div>
+                                                <div class="lot-my-price">@lot.Price ₽</div>
+
+                                                <div class="lot-my-caption">@lot.Name</div>
+                                            </a>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            }
         </div>
+
+
 
         <!-- рекламный сбор -->
         <div class="row">
@@ -176,6 +239,9 @@
     [CascadingParameter]
     protected ExtendedUserDto user { get; set; }
 
+    [CascadingParameter]
+    public EventCallback BasketCountChange { get; set; }
+
     protected const int MaxFileSizeMb = 2;
     protected const int MaxFileSizeBytes = MaxFileSizeMb * 1024 * 1024;
     protected string fileErrorText = "";
@@ -186,6 +252,7 @@
     protected List<CategoryDto> categories = new List<CategoryDto>();
     protected List<LotDto> actualLots = new List<LotDto>();
     protected List<LotDto> actualRangeredLots = new List<LotDto>();
+    protected List<LotDto> lotsInBasket = new List<LotDto>();
     protected LotDto newLot;
 
 
@@ -195,6 +262,7 @@
         categories = FindCategories();
         actualLots = LotService.GetActual(true);
         actualRangeredLots = actualLots.GroupBy(x => x.PriceRange).FirstOrDefault().ToList();
+        UpdateLotsInBasket();
     }
 
     private List<CategoryDto> FindCategories()
@@ -226,7 +294,7 @@
                         {
                             imageLink = t.Result;
                             this.StateHasChanged(); // чтобы перерисовалось view (из асинхронного вызова оно не может)
-                            });
+                        });
                     }, TaskContinuationOptions.ExecuteSynchronously)
                     .ContinueWith((t, o) =>
                     {
@@ -312,6 +380,34 @@
         {
             saveErrorText = result.ErrorText;
         }
+    }
+
+
+    private void UpdateLotsInBasket()
+    {
+        BasketDto basket = BasketService.GetBasketByUser(user);
+        lotsInBasket = basket.Puzzles.Select(x => x.Lot).ToList();
+    }
+
+    /// <summary>
+    /// Нажали на один из лотов в помощи другим участникам
+    /// </summary>
+    private void LotClicked(LotDto lot)
+    {
+        // нужно добавить или убрать из корзины
+        if (lotsInBasket.Contains(lot))
+        {
+            BasketService.RemoveFromBasket(user, lot, true);
+        }
+        else
+        {
+            BasketService.AddToBasket(user, lot);
+        }
+
+        BasketCountChange.InvokeAsync(null);
+        // TODO: По идее, это надо делать в событии: BasketCountChange += (x) => { }; Но отсюда к нему нельзя прикрепиться
+        UpdateLotsInBasket();
+        StateHasChanged();
     }
 
 

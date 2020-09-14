@@ -3,8 +3,8 @@
 
 
 <div class="img-wrapper">
-    <img class="img-full" src="@MainImage" />
-    <img class="img-hover" src="@HoverImage" style="display: @(ShowHover ? "block" : "none");" />
+    <img class="img-full @MainImageClasses" src="@MainImage" />
+    <img class="img-hover @HoverImageClasses" src="@HoverImage" style="display: @(ShowHover ? "block" : "none");" />
 </div>
 
 
@@ -23,6 +23,12 @@
 
     [Parameter]
     public bool ShowHover { get; set; }
+
+    [Parameter]
+    public string MainImageClasses { get; set; }
+
+    [Parameter]
+    public string HoverImageClasses { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
