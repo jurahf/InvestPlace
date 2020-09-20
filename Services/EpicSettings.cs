@@ -19,12 +19,12 @@ namespace Services
         /// <summary>
         /// Число ячеек по горизонтали в поле покупателей
         /// </summary>
-        public const int MaxBuyerFieldX = 15;
+        public const int MaxBuyerFieldX = 20;
 
         /// <summary>
         /// Число ячеек по вертикали в поле покупателей
         /// </summary>
-        public const int MaxBuyerFieldY = 20;
+        public const int MaxBuyerFieldY = 15;
 
         /// <summary>
         /// Число лотов в поле покупателей
@@ -35,6 +35,16 @@ namespace Services
         /// Процент, который возвращается в качестве бонусов тем, кто участвовал в покупке товара но не выиграл
         /// </summary>
         public const decimal BonusPercent = 0.2m;
+
+        /// <summary>
+        /// Уровень обмена для разместившего товар
+        /// </summary>
+        public const decimal ExchangeLevelSeller = 0.8m;
+
+        /// <summary>
+        /// Уровень обмена для победителя лота
+        /// </summary>
+        public const decimal ExchangeLevelBuyer = 0.8m;
 
         /// <summary>
         /// Сколько пазлов в одном лоте
@@ -55,5 +65,7 @@ namespace Services
         /// Телефон для перевода денег на счет сайта
         /// </summary>
         public const string PhoneForGetMoney = "+79203033952";
+
+
     }
 }

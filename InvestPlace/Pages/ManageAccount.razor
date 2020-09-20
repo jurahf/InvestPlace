@@ -1,5 +1,6 @@
 ﻿@page "/ManageAccount"
 
+@using Services;
 @using Services.DTO;
 @using Services.Services.ExtendedUserService;
 
@@ -169,10 +170,14 @@
     [CascadingParameter]
     protected ExtendedUserDto user { get; set; }
 
+    [CascadingParameter(Name = "MainMenuPunktChanged")]
+    protected EventCallback MainMenuPunktChanged { get; set; }
+
     bool showSuccess = false;
 
     protected override void OnInitialized()
     {
+        MainMenuPunktChanged.InvokeAsync(MainMenuPunkt.Profile);
     }
 
     private void ValidSubmit()

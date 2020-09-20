@@ -39,7 +39,7 @@ namespace InvestPlace.Scheduler
         {
             logger.LogInformation("UnusedBasketHostedService running.");
 
-            timer = new Timer(DoWork, null, TimeSpan.FromMinutes(1), TimeSpan.FromHours(12));
+            timer = new Timer(DoWork, null, TimeSpan.FromMinutes(1), TimeSpan.FromHours(6));
 
             return Task.CompletedTask;
         }
@@ -52,8 +52,10 @@ namespace InvestPlace.Scheduler
             using (var scope = Services.CreateScope())
             {
                 var unusedBasketHostedService = scope.ServiceProvider.GetRequiredService<IUnusedBasketHostedService>();
-
                 unusedBasketHostedService.DoWork();
+
+                var overfloweredLotsHostedService = scope.ServiceProvider.GetRequiredService<IOverfloweredLotsHostedService>();
+                overfloweredLotsHostedService.DoWork();
             }
         }
 

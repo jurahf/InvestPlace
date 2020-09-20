@@ -1,5 +1,6 @@
 ﻿@page "/History"
 
+@using Services;
 @using Services.DTO;
 @using Services.Services.ExtendedUserService;
 @using Services.Services.CashService;
@@ -47,10 +48,14 @@
     [CascadingParameter]
     protected ExtendedUserDto user { get; set; }
 
+    [CascadingParameter(Name = "MainMenuPunktChanged")]
+    protected EventCallback MainMenuPunktChanged { get; set; }
+
     List<CashOperationDto> operations = new List<CashOperationDto>();
 
     protected override void OnInitialized()
     {
+        MainMenuPunktChanged.InvokeAsync(MainMenuPunkt.Profile);
         operations = FindOperations(user);
     }
 

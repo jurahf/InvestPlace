@@ -1,5 +1,6 @@
 ﻿@page "/Basket"
 
+@using Services;
 @using Services.DTO;
 @using Services.Services.LotService;
 @using Services.Services.ExtendedUserService;
@@ -90,7 +91,10 @@
 
 @code {
 
-    [CascadingParameter]
+    [CascadingParameter(Name = "MainMenuPunktChanged")]
+    protected EventCallback MainMenuPunktChanged { get; set; }
+
+    [CascadingParameter(Name = "BasketCountChange")]
     public EventCallback BasketCountChange { get; set; }
 
     [CascadingParameter]
@@ -104,6 +108,7 @@
 
     protected override void OnInitialized()
     {
+        MainMenuPunktChanged.InvokeAsync(MainMenuPunkt.Basket);
         // по пользователю надо получить корзину со всеми пазлами и лотами
         puzzles = FindPuzzles(user);
     }

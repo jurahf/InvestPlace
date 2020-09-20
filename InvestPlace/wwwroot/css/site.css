@@ -295,7 +295,7 @@ td.field-cell h6 {
     text-shadow: 2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 1px 1px #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
     font-size: 18px;
     position: absolute;
-    left: 40px;
+    left: 30px;
     top: 30px;
 }
 
@@ -474,7 +474,7 @@ a.link-text-usual:hover {
 
 .nav-row {
     background-color: #141414;
-    padding-top: 0px;
+    padding-top: 1px;
     padding-bottom: 0px;
     padding-left: 10em;
     padding-right: 10em;
@@ -505,8 +505,9 @@ a.link-text-usual:hover {
     text-decoration: none;
 }
 
-.nav-row a.active {
-    border-top: 2px solid #7f0000;
+.nav-row a.active,
+.nav-row li>a:hover {
+    border-top: 3px solid #7f0000;
 }
 
 

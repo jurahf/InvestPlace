@@ -15,10 +15,14 @@ namespace InvestPlace.Scheduler
         Task DoWork();
     }
 
+    /// <summary>
+    /// По расписанию - удаляем пазлы, которые слишком долго лежат в корзине и не покупаются
+    /// </summary>
     public class UnusedBasketHostedService : IUnusedBasketHostedService
     {
         private readonly InvestPlaceContext db;
         private readonly ILogger<UnusedBasketHostedService> logger;
+        private const int deleteAfterHours = 6;
 
         public UnusedBasketHostedService(ILogger<UnusedBasketHostedService> logger, InvestPlaceContext db)
         {
@@ -36,7 +40,7 @@ namespace InvestPlace.Scheduler
                 List<Basket> basketForClear = db.Basket
                     .Include(x => x.Pazzle)
                     .ThenInclude(x => x.Lot)
-                    .Where(x => x.LastOperationDate == null || x.LastOperationDate < DateTime.Now.AddHours(-12))
+                    .Where(x => x.LastOperationDate == null || x.LastOperationDate < DateTime.Now.AddHours(-deleteAfterHours))
                     .Where(x => x.Pazzle.Any())
                     .ToList();
 

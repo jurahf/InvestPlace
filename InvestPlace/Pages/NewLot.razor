@@ -236,11 +236,11 @@
 
 
 @code {
-    [CascadingParameter]
-    protected ExtendedUserDto user { get; set; }
+        [CascadingParameter]
+        protected ExtendedUserDto user { get; set; }
 
-    [CascadingParameter]
-    public EventCallback BasketCountChange { get; set; }
+        [CascadingParameter(Name = "BasketCountChange")]
+        public EventCallback BasketCountChange { get; set; }
 
     protected const int MaxFileSizeMb = 2;
     protected const int MaxFileSizeBytes = MaxFileSizeMb * 1024 * 1024;
@@ -394,20 +394,28 @@
     /// </summary>
     private void LotClicked(LotDto lot)
     {
-        // нужно добавить или убрать из корзины
-        if (lotsInBasket.Contains(lot))
+        try
         {
-            BasketService.RemoveFromBasket(user, lot, true);
-        }
-        else
-        {
-            BasketService.AddToBasket(user, lot);
-        }
+            saveErrorText = "";
+            // нужно добавить или убрать из корзины
+            if (lotsInBasket.Contains(lot))
+            {
+                BasketService.RemoveFromBasket(user, lot, true);
+            }
+            else
+            {
+                BasketService.AddToBasket(user, lot);
+            }
 
-        BasketCountChange.InvokeAsync(null);
-        // TODO: По идее, это надо делать в событии: BasketCountChange += (x) => { }; Но отсюда к нему нельзя прикрепиться
-        UpdateLotsInBasket();
-        StateHasChanged();
+            BasketCountChange.InvokeAsync(null);
+            // TODO: По идее, это надо делать в событии: BasketCountChange += (x) => { }; Но отсюда к нему нельзя прикрепиться
+            UpdateLotsInBasket();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            saveErrorText = ex.Message;
+        }
     }
 
 

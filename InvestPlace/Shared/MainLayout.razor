@@ -1,6 +1,6 @@
 ﻿@inherits LayoutComponentBase
 
-
+@using Services; 
 @using Services.DTO;
 @using Services.Services.ExtendedUserService;
 @using Services.Services.BasketService;
@@ -30,8 +30,12 @@
 
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
+                <li class="">
+                    <a href="#" class="@(selectedPunkt == MainMenuPunkt.Main ? "active" : "")">Главная</a>
+                </li>
+
                 <li class=" dropdown">
-                    <a class="dropdown-toggle active" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <a class="dropdown-toggle @(selectedPunkt == MainMenuPunkt.Profile ? "active" : "")" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Личный кабинет
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -39,12 +43,12 @@
                     </div>
                 </li>
 
-                <li class="">
-                    <a href="#">Частые вопросы</a>
+                <li>
+                    <a href="#" class="@(selectedPunkt == MainMenuPunkt.Faq ? "active" : "")">Частые вопросы</a>
                 </li>
 
-                <li class="">
-                    <a href="/BuyerField">Склад товаров</a>
+                <li>
+                    <a href="/BuyerField" class="@(selectedPunkt == MainMenuPunkt.BuyerField ? "active" : "")">Склад товаров</a>
                 </li>
             </ul>
 
@@ -53,7 +57,7 @@
             <ul class="navbar-nav float-right">
                 <li>
                     <div class="dropdown">
-                        <a href="/Basket" class="dropright" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <a href="/Basket" class="dropright @(selectedPunkt == MainMenuPunkt.Basket ? "active" : "")" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <span class="fas fa-shopping-basket"></span>
                             Корзина
                             @if (inBasketCount > 0)
@@ -108,18 +112,20 @@
                 </li>
 
                 <li>
-                    <a href="/Search" class="dropright"><span class="fas fa-search"></span> Поиск</a>
+                    <a href="/Search" class="dropright @(selectedPunkt == MainMenuPunkt.Search ? "active" : "")"><span class="fas fa-search"></span> Поиск</a>
                 </li>
             </ul>
         </div>
     </nav>
 
 
-    <CascadingValue Value="user">
-        <CascadingValue Value="BasketCountChange">
-            <div class="content px-4">
-                @Body
-            </div>
+    <CascadingValue Value="@user">
+        <CascadingValue Value="@BasketCountChange" Name="BasketCountChange">
+            <CascadingValue Value="@MainMenuPunktChanged" Name="MainMenuPunktChanged">
+                <div class="content px-4">
+                    @Body
+                </div>
+            </CascadingValue>
         </CascadingValue>
     </CascadingValue>
 </div>
@@ -130,6 +136,7 @@
     protected ExtendedUserDto user = null;
     protected int inBasketCount = 0;
     protected List<PuzzleDto> puzzles = new List<PuzzleDto>();
+    protected MainMenuPunkt selectedPunkt;
 
     protected override void OnInitialized()
     {
@@ -152,6 +159,24 @@
 
         return result;
     }
+
+    // для выделения пунктов меню
+    EventCallback mainMenuPunktChanged = EventCallback.Empty;
+    EventCallback MainMenuPunktChanged
+    {
+        get
+        {
+            if (mainMenuPunktChanged.Equals(EventCallback.Empty))
+                mainMenuPunktChanged = EventCallback.Factory.Create(this, (s) => OnMainMenuPunktChanged((MainMenuPunkt)s));
+            return mainMenuPunktChanged;
+        }
+    }
+
+    private void OnMainMenuPunktChanged(MainMenuPunkt punkt)
+    {
+        selectedPunkt = punkt;
+    }
+
 
     // это чтобы можно было обновить корзину с конкретных страниц
     EventCallback _BasketCountChange = EventCallback.Empty;

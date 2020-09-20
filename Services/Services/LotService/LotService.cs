@@ -115,6 +115,7 @@ namespace Services.Services.LotService
                 .Include(x => x.Seller)
                 .Include(x => x.CreateModerator)
                 .Where(x => x.SellerId == user.Id)
+                .Where(x => x.CompleteDate == null)
                 .Select(x => LotDto.ConvertFromLot(x))
                 .ToList();
         }
@@ -395,14 +396,14 @@ namespace Services.Services.LotService
                         db.Cash.Add(cash);
                     }
 
-                    decimal summ = (dbLot.Price ?? 0m) * dbUser.ExchangeLevel / 100m;
+                    decimal summ = (dbLot.Price ?? 0m) * EpicSettings.ExchangeLevelSeller;
 
                     CashOperation operation = new CashOperation()
                     {
                         Cash = dbUser.Cash,
                         Summ = summ,
                         Date = DateTime.Now,
-                        Comment = $"Обмен проданного товара \"{dbLot.Name}\" (id = {dbLot.Id}) по уровню обмена {dbUser.ExchangeLevel}%"
+                        Comment = $"Обмен проданного товара \"{dbLot.Name}\" (id = {dbLot.Id}) по уровню обмена {EpicSettings.ExchangeLevelSeller * 100}%"
                     };
 
                     db.CashOperation.Add(operation);
@@ -474,14 +475,14 @@ namespace Services.Services.LotService
                         db.Cash.Add(cash);
                     }
 
-                    decimal summ = (dbLot.Price ?? 0m) * 80 / 100m; // за 80% стоимости
+                    decimal summ = (dbLot.Price ?? 0m) * EpicSettings.ExchangeLevelBuyer;
 
                     CashOperation operation = new CashOperation()
                     {
                         Cash = dbUser.Cash,
                         Summ = summ,
                         Date = DateTime.Now,
-                        Comment = $"Обмен купленного товара \"{dbLot.Name}\" (id = {dbLot.Id}) на деньги"
+                        Comment = $"Обмен купленного товара \"{dbLot.Name}\" (id = {dbLot.Id}) на деньги ({EpicSettings.ExchangeLevelBuyer * 100}%)"
                     };
 
                     db.CashOperation.Add(operation);
@@ -556,6 +557,34 @@ namespace Services.Services.LotService
                 }
             }
         }
+
+
+
+        public void CompleteLot(Lot lot)
+        {
+            // лот полностью куплен, определяем победителя
+            lot.CompleteDate = DateTime.Now;
+            int completeNumber = GetNextBuyerFieldNumber();
+            lot.CompleteNumber = completeNumber;
+
+            Pazzle winnerPazzle = lot.Pazzle.OrderBy(x => x.BuyDate).ElementAt(completeNumber - 1);
+            winnerPazzle.Winner = true;
+
+            // всем начисляем скидки (кроме победителя и продавца)
+            List<ExtendedUser> forBonus = lot.Pazzle.Select(x => x.Buyer)
+                .Where(b => b.Id != winnerPazzle.BuyerId)
+                .Where(x => x.Id != lot.SellerId)
+                .ToList();
+
+            decimal bonus = (lot.Price ?? 0m) * EpicSettings.BonusPercent / 100m;
+            foreach (var bonusedUser in forBonus)
+            {
+                bonusedUser.Cash.BonusSumm += bonus;
+            }
+        }
+
+
+
 
 
     }

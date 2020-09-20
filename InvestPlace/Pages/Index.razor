@@ -1,5 +1,6 @@
 ﻿@page "/"
 
+@using Services;
 @using Services.DTO;
 
 @inject Services.Services.LotService.ILotService lotService
@@ -29,22 +30,17 @@
 
 
 
-<!-- вы участвуете в благотворительности -->
-<div class="row margin-top-50">
-    <div class="col col-12">
-        <p class="text-red">Становясь клиентом Invest Place Вы участвуете в благотворительности.</p>
-    </div>
-</div>
-
-
 
 
 @code { 
+    [CascadingParameter(Name = "MainMenuPunktChanged")]
+    protected EventCallback MainMenuPunktChanged { get; set; }
 
     List<LotDto> allLots = new List<LotDto>();
 
     protected override void OnInitialized()
     {
+        MainMenuPunktChanged.InvokeAsync(MainMenuPunkt.Main);
         allLots = lotService.GetActual(true);
     }
 }

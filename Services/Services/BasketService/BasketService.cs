@@ -52,6 +52,9 @@ namespace Services.Services.BasketService
                 if (lot == null)
                     throw new ArgumentException("Лот не найден");
 
+                if (lot.SellerId == user.Id)
+                    throw new ArgumentException("Нельзя покупать пазлы лота, который сам разместил");
+
                 Basket basket = db.Basket.FirstOrDefault(x => x.ExtendedUser.Single().Id == userDto.Id);
 
                 if (basket == null)
@@ -204,25 +207,7 @@ namespace Services.Services.BasketService
                         if (puzzle.Lot.Pazzle.Count >= EpicSettings.PuzzlePerLot
                             && puzzle.Lot.Pazzle.All(x => x.BuyDate != null))
                         {
-                            // лот полностью куплен, определяем победителя
-                            puzzle.Lot.CompleteDate = DateTime.Now;
-                            int completeNumber = lotService.GetNextBuyerFieldNumber();
-                            puzzle.Lot.CompleteNumber = completeNumber;
-
-                            Pazzle winnerPazzle = puzzle.Lot.Pazzle.OrderBy(x => x.BuyDate).ElementAt(completeNumber - 1);
-                            winnerPazzle.Winner = true;
-
-                            // всем начисляем скидки (кроме победителя и продавца)
-                            List<ExtendedUser> forBonus = puzzle.Lot.Pazzle.Select(x => x.Buyer)
-                                .Where(b => b.Id != winnerPazzle.BuyerId)
-                                .Where(x => x.Id != puzzle.Lot.SellerId)
-                                .ToList();
-
-                            decimal bonus = (puzzle.Lot.Price ?? 0m) * EpicSettings.BonusPercent / 100m;
-                            foreach (var bonusedUser in forBonus)
-                            {
-                                bonusedUser.Cash.BonusSumm += bonus;
-                            }
+                            lotService.CompleteLot(puzzle.Lot);
                         }
                     }
 

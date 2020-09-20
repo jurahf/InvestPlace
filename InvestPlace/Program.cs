@@ -30,6 +30,7 @@ namespace InvestPlace
                 {
                     services.AddHostedService<ScopedShceduleServiceStarter>();
                     services.AddScoped<IUnusedBasketHostedService, UnusedBasketHostedService>();
+                    services.AddScoped<IOverfloweredLotsHostedService, OverfloweredLotsHostedService>();
                 });
     }
 }

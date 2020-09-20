@@ -17,7 +17,7 @@
 
         <!-- картинка и разбивка по пазлам -->
         <div class="row">
-            <div class="col col-12">
+            <div class="col col-10">
                 <ImageWithHover MainImage="@editedLot.ImageLink" HoverImage='@($"/api/PuzzlePaint/PuzzleNet/{editedLot.Id}")' ShowHover="@showNet">
                 </ImageWithHover>
             </div>
@@ -30,11 +30,11 @@
                 <h6 class="text-danger">@((MarkupString)buyErrorText)</h6>
             </div>
 
-            <div class="col col-4">
+            <div class="col col-3">
                 <h5 class="text-red">@editedLot.PuzzlePrice руб</h5>
             </div>
 
-            <div class="col col-4">
+            <div class="col col-3">
                 <button @onclick="ShowNet" class="lot-edit-count-btn">
                     <div class="lot-edit-count">@editedLot.PuzzleCount</div>
                 </button>
@@ -103,7 +103,7 @@
     [Parameter]
     public int Id { get; set; }
 
-    [CascadingParameter]
+    [CascadingParameter(Name = "BasketCountChange")]
     public EventCallback BasketCountChange { get; set; }
 
     [CascadingParameter]
@@ -145,6 +145,7 @@
             // добавить товар пользователю
             BasketDto basket = BasketService.AddToBasket(user, editedLot);
             BasketCountChange.InvokeAsync(null);
+            NavigationManager.NavigateTo("/Basket");
         }
         catch (Exception ex)
         {

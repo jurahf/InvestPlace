@@ -61,7 +61,7 @@
                 {
                     <tr @onclick="() => RowClick(u.Id)" class="@(u.Id == selectedUserId ? "selected" : "")">
                         <td>@(u.Email ?? "")</td>
-                        <td>@(u.InnerName ?? "") @(u.Surname ?? "") @(u.Patronymic ?? "")</td>
+                        <td>@(u.InnerName ?? "") @(u.Patronymic ?? "") @(u.Surname ?? "")</td>
                         <td>@(u.PhoneNumber ?? "")</td>
                         <td>@(u.Address ?? "")</td>
                         <td>@(u.Bank ?? "")</td>

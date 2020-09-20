@@ -1,4 +1,5 @@
-﻿using Services.DTO;
+﻿using InvestPlaceDB;
+using Services.DTO;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -41,5 +42,8 @@ namespace Services.Services.LotService
         void ExchangeByBuyerOnMoney(ExtendedUserDto user, LotDto lot);
 
         void ExchangeByBuyerOnReal(ExtendedUserDto user, LotDto lot);
+
+
+        void CompleteLot(Lot lot);
     }
 }

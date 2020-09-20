@@ -1,5 +1,6 @@
 ﻿@page "/Cash"
 
+@using Services;
 @using Services.DTO;
 @using Services.Services.ExtendedUserService;
 @using Services.Services.CashService;
@@ -180,7 +181,7 @@
                                 <td>
                                     @if (q.StatusInt == 2)
                                     {
-                                        <a class="text-red" @onclick="() => ConfirmGetMoney(q)">Подтвердить получение денег</a>
+                                        <a class="btn btn-secondary text-white" @onclick="() => ConfirmGetMoney(q)">Подтвердить получение денег</a>
                                     }
                                 </td>
                             </tr>
@@ -210,7 +211,7 @@
                                 <td>@q.Date</td>
                                 <td>@q.Summ</td>
                                 <td>@(q.IsOutput ? "Вывод денег" : "Пополнение кошелька")</td>
-                                <td>@(q.Moderate == true ? "Выполнен" : "Отклонен")</td>
+                                <td class="@(q.Moderate == true ? "text-success" : "text-danger")">@(q.Moderate == true ? "Выполнен" : "Отклонен")</td>
                             </tr>
                         }
                     </tbody>
@@ -227,6 +228,9 @@
 @code {
     [CascadingParameter]
     protected ExtendedUserDto user { get; set; }
+
+    [CascadingParameter(Name = "MainMenuPunktChanged")]
+    protected EventCallback MainMenuPunktChanged { get; set; }
 
     private CashDto cash = null;
     private DotNetObjectReference<Cash> objRef;
@@ -254,6 +258,7 @@
 
     protected override void OnInitialized()
     {
+        MainMenuPunktChanged.InvokeAsync(MainMenuPunkt.Profile);
         cash = FindUserCash(user);
         outputCashArgs = new CashArgs() { Summ = 500 };
         inputCashArgs = new CashArgs() { Summ = 500 };

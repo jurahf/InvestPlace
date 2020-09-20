@@ -1,5 +1,6 @@
 ﻿@page "/Search"
 
+@using Services;
 @using Services.DTO;
 @using Services.Services.LotService;
 @using Services.Services.CategoryService;
@@ -109,6 +110,9 @@
 
 @code {
 
+    [CascadingParameter(Name = "MainMenuPunktChanged")]
+    protected EventCallback MainMenuPunktChanged { get; set; }
+
     private LotSearchParams searchParams = null;
     private List<LotDto> allLots = new List<LotDto>();
     private List<LotDto> searchedLots = new List<LotDto>();
@@ -118,6 +122,8 @@
 
     protected override void OnInitialized()
     {
+        MainMenuPunktChanged.InvokeAsync(MainMenuPunkt.Search);
+
         allLots = lotService.GetActual(true);       // TODO: надо ли получать тут все? может лучше по параметрам поиска?
         categories = CategoryService.GetAll();
 

@@ -1,5 +1,6 @@
 ﻿@page "/MyLots"
 
+@using Services;
 @using Services.DTO;
 @using Services.Services.LotService;
 
@@ -52,10 +53,14 @@
     [CascadingParameter]
     protected ExtendedUserDto user { get; set; }
 
+    [CascadingParameter(Name = "MainMenuPunktChanged")]
+    protected EventCallback MainMenuPunktChanged { get; set; }
+
     List<LotDto> lots = new List<LotDto>();
 
     protected override void OnInitialized()
     {
+        MainMenuPunktChanged.InvokeAsync(MainMenuPunkt.Profile);
         lots = FindLots(user);
     }
 
