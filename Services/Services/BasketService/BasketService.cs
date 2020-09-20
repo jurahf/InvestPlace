@@ -197,7 +197,7 @@ namespace Services.Services.BasketService
 
                     db.CashOperation.Add(operation);
                     user.Cash.Summ -= summ;
-
+                    user.Cash.HelpingSumm += summ;
 
                     foreach (var puzzle in user.Basket.Pazzle)
                     {

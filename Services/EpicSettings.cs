@@ -57,9 +57,9 @@ namespace Services
         public const int PuzzleCostDelimeter = 100;
 
         /// <summary>
-        /// Сколько других товаров надо напокупать, чтобы разместить свой товар
+        /// Сколько нужно оказать помощи для размещения лота, в процентах от стоимости размещаемого лота
         /// </summary>
-        public const int AnotherPuzzlesForNewLot = 3;
+        public const int HelpingSummForNewLotPercent = 50;
 
         /// <summary>
         /// Телефон для перевода денег на счет сайта

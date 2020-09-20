@@ -23,6 +23,9 @@ namespace InvestPlaceDB
         [Column(TypeName = "decimal(18, 2)")]
         public decimal BonusSumm { get; set; }
 
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal HelpingSumm { get; set; }
+
         [InverseProperty("Cash")]
         public virtual ICollection<CashOperation> CashOperation { get; set; }
 
