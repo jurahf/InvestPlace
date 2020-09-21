@@ -69,6 +69,7 @@ namespace Services.Services.LotPresaveService
                 catch (Exception ex)
                 {
                     // не критично
+                    return null;
                 }
             }
         }

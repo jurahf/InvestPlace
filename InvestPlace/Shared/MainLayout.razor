@@ -1,15 +1,17 @@
 ﻿@inherits LayoutComponentBase
 
-@using Services; 
+@using Services;
 @using Services.DTO;
 @using Services.Services.ExtendedUserService;
 @using Services.Services.BasketService;
+@using Microsoft.Extensions.Configuration
 
 
 @inject AuthenticationStateProvider AuthenticationStateProvider;
 @inject IExtendedUserService ExtendedUserService;
 @inject IBasketService BasketService
 @inject NavigationManager NavigationManager;
+@inject IConfiguration Configuration
 
 <div class="main">
 
@@ -17,6 +19,13 @@
         <div class="row header">
             <div class="col col-6">
                 <a href="#"><img src="/images/logo.png" /></a>
+            </div>
+            <div class="col col-6 float-right">
+                <a class="social-logo" href="@(Configuration.GetValue<string>("contacts:instagram"))" target="_blank"><img src="/images/social-networks/instagram-color.png" /></a>
+                <a class="social-logo" href="@(Configuration.GetValue<string>("contacts:youtube"))" target="_blank"><img src="/images/social-networks/youtube-color.png" /></a>
+                <a class="social-logo" href="@(Configuration.GetValue<string>("contacts:ok"))" target="_blank"><img src="/images/social-networks/ok-color.png" /></a>
+                <a class="social-logo" href="@(Configuration.GetValue<string>("contacts:facebook"))" target="_blank"><img src="/images/social-networks/facebook-color.png" /></a>
+                <a class="social-logo" href="@(Configuration.GetValue<string>("contacts:vk"))" target="_blank"><img src="/images/social-networks/vk-color.png" /></a>
             </div>
         </div>
     </div>

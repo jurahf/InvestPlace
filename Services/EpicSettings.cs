@@ -61,11 +61,5 @@ namespace Services
         /// </summary>
         public const int HelpingSummForNewLotPercent = 50;
 
-        /// <summary>
-        /// Телефон для перевода денег на счет сайта
-        /// </summary>
-        public const string PhoneForGetMoney = "+79203033952";
-
-
     }
 }

@@ -1,13 +1,11 @@
-﻿
-using InvestPlaceDB;
+﻿using InvestPlaceDB;
 using Microsoft.EntityFrameworkCore;
 using Services.DTO;
 using Services.Services.ExtendedUserService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
+using Microsoft.Extensions.Configuration;
 
 namespace Services.Services.CashService
 {
@@ -16,11 +14,13 @@ namespace Services.Services.CashService
         private object lockObject = new object();
         private readonly InvestPlaceContext db;
         private readonly IExtendedUserService userService;
+        private readonly IConfiguration Configuration;
 
-        public CashService(InvestPlaceContext db, IExtendedUserService userService)
+        public CashService(InvestPlaceContext db, IExtendedUserService userService, IConfiguration configuration)
         {
             this.db = db;
             this.userService = userService;
+            this.Configuration = configuration;
         }
 
         public List<CashOperationDto> GetHistoryByUser(ExtendedUserDto user)
@@ -292,7 +292,7 @@ namespace Services.Services.CashService
                 {
                     return new SendMoneyToUserParams()
                     {
-                        Phone = EpicSettings.PhoneForGetMoney,
+                        Phone = Configuration.GetValue<string>("contacts:phone"),
                         UserId = null
                     };
                 }

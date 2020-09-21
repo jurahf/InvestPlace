@@ -252,7 +252,10 @@ table.text-center td {
     border-right: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-
+.social-logo {
+    float: right;
+    margin-left: 10px;
+}
 
 
 /* страница поиска */
