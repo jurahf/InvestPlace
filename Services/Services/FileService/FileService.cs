@@ -54,6 +54,9 @@ namespace Services.Services.FileService
                 case UploadFileType.LotImage:
                     result += $"images{Path.DirectorySeparatorChar}Lots{Path.DirectorySeparatorChar}UserUploads{Path.DirectorySeparatorChar}";
                     break;
+                case UploadFileType.Avatar:
+                    result += $"images{Path.DirectorySeparatorChar}Avatars{Path.DirectorySeparatorChar}";
+                    break;
                 default:
                     break;
             }

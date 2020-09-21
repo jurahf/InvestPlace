@@ -44,6 +44,9 @@ namespace InvestPlaceDB
         [StringLength(1000)]
         public string Bank { get; set; }
 
+        [StringLength(2000)]
+        public string AvatarLink { get; set; }
+
         [StringLength(50)]
         public string INN { get; set; }
 

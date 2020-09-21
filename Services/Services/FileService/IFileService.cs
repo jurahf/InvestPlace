@@ -18,7 +18,8 @@ namespace Services.Services.FileService
 
     public enum UploadFileType
     {
-        LotImage
+        LotImage,
+        Avatar
     }
 
 

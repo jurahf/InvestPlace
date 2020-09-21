@@ -3,8 +3,10 @@
 @using Services;
 @using Services.DTO;
 @using Services.Services.ExtendedUserService;
+@using Services.Services.FileService;
 
 
+@inject IFileService FileService;
 @inject IExtendedUserService ExtendedUserService;
 
 
@@ -16,7 +18,21 @@
 
     <div class="row">
         <div class="col col-2 offset-1 text-center">
-            <img class="" src="/images/icon-profile.png" alt="profile" />
+            @if (string.IsNullOrEmpty(avatarLink))
+            {
+                <img class="avatar" src="/images/icon-profile.png" alt="profile" />
+            }
+            else
+            {
+                <img class="avatar" src="@avatarLink" alt="profile" />
+            }
+
+            <div class="load-link">
+                <h6>Выберите файл для загрузки</h6>
+                <InputFile dropclass="load-img" OnChange="AvatarChanged"></InputFile>
+            </div>
+            <h6 class="text-danger">@fileErrorText</h6>
+
             <h4 class="text-red text-center margin-top-20">@user.InnerName</h4>
         </div>
 
@@ -173,16 +189,94 @@
     [CascadingParameter(Name = "MainMenuPunktChanged")]
     protected EventCallback MainMenuPunktChanged { get; set; }
 
-    bool showSuccess = false;
+    protected const int MaxFileSizeMb = 2;
+    protected const int MaxFileSizeBytes = MaxFileSizeMb * 1024 * 1024;
+    private bool showSuccess = false;
+    private string fileErrorText = "";
+    private string avatarLink = "";
 
     protected override void OnInitialized()
     {
         MainMenuPunktChanged.InvokeAsync(MainMenuPunkt.Profile);
+        avatarLink = user.AvatarLink;
     }
 
     private void ValidSubmit()
     {
         showSuccess = false;
+        user.AvatarLink = avatarLink;
         showSuccess = ExtendedUserService.UpdateUser(user);
     }
+
+
+    protected async void AvatarChanged(IFileListEntry[] files)
+    {
+        avatarLink = "";
+        fileErrorText = "";
+        var file = files.FirstOrDefault();
+
+        try
+        {
+            if (file != null)
+            {
+                Task task = UploadFile(file)
+                    .ContinueWith((t, o) =>
+                    {
+                        InvokeAsync(() =>
+                        {
+                            avatarLink = t.Result;
+                            this.StateHasChanged(); // чтобы перерисовалось view (из асинхронного вызова оно не может)
+                        });
+                    }, TaskContinuationOptions.ExecuteSynchronously)
+                    .ContinueWith((t, o) =>
+                    {
+                        while (!t.IsCompleted) { }
+
+                        if (t.Status == TaskStatus.Faulted)
+                        {
+                        }
+                    }, TaskContinuationOptions.OnlyOnFaulted);
+
+                await task;
+            }
+        }
+        catch (ArgumentException aex)
+        {
+            fileErrorText = aex.Message;
+        }
+        catch (Exception ex)
+        {
+            fileErrorText = $"Непредвиденная ошибка при загрузке файла: {ex.Message}";
+        }
+    }
+
+    private async Task<string> UploadFile(IFileListEntry file)
+    {
+        List<string> acceptedFileTypes = new List<string>() { "image/png", "image/jpeg", "image/gif" };
+        if (file != null)
+        {
+            if (file.Size > MaxFileSizeBytes)
+            {
+                throw new ArgumentException($"Размер файла не должен превышать {MaxFileSizeMb} Мб");
+            }
+
+            if (!acceptedFileTypes.Contains(file.Type))
+            {
+                throw new ArgumentException("Файл должен иметь расширение png, jpg или gif");
+            }
+
+            // принимаем файл, загружаем его на сервер, и отображаем по ссылке
+            if (string.IsNullOrEmpty(fileErrorText))
+            {
+                string ext = file.Type.Substring(file.Type.IndexOf('/') + 1);
+
+                return await FileService.UploadFileAndGetLinkAsync(UploadFileType.Avatar, ext, file.Data, user);
+            }
+        }
+
+        return "";
+    }
+
+
+
 }

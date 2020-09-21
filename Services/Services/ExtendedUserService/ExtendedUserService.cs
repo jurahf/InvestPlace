@@ -54,6 +54,7 @@ namespace Services.Services.ExtendedUserService
                 user.Surname = dto.Surname;
                 user.Patronymic = dto.Patronymic;
                 user.PhoneNumber = dto.PhoneNumber;
+                user.AvatarLink = dto.AvatarLink;
 
                 user.Email = dto.Email;
                 //user.UserName = dto.Email;  // blazor хочет входить по email. еще надо Normalizaed name и email
