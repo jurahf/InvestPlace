@@ -15,6 +15,7 @@ namespace InvestPlaceDB
             PazzleBuyer = new HashSet<Pazzle>();
             CashQueryModerator = new HashSet<QueryForOperation>();
             LotSeller = new HashSet<Lot>();
+            LotPresaveSeller = new HashSet<LotPresave>();
             ExchangeModerator = new HashSet<QueryForExchange>();
         }
 
@@ -67,6 +68,11 @@ namespace InvestPlaceDB
 
         [InverseProperty(nameof(Lot.Seller))]
         public virtual ICollection<Lot> LotSeller { get; set; }
+
+        [InverseProperty(nameof(LotPresave.Seller))]
+        public virtual ICollection<LotPresave> LotPresaveSeller { get; set; }
+
+
 
         [InverseProperty(nameof(Lot.CreateModerator))]
         public virtual ICollection<Lot> LotCreateModerator { get; set; }

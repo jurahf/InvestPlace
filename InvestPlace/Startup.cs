@@ -21,6 +21,7 @@ using Microsoft.EntityFrameworkCore.Design.Internal;
 using Microsoft.AspNetCore.Identity;
 using Services.Services.QueryExchangeService;
 using Services.Services.PuzzlePaintService;
+using Services.Services.LotPresaveService;
 
 namespace InvestPlace
 {
@@ -71,6 +72,7 @@ namespace InvestPlace
             services.AddScoped<ICashService, CashService>();
             services.AddScoped<IQueryExchangeService, QueryExchangeService>();
             services.AddScoped<IPuzzlePaintService, PuzzlePaintService>();
+            services.AddScoped<ILotPresaveService, LotPresaveService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

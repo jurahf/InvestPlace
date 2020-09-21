@@ -92,6 +92,27 @@ namespace Services.DTO
         }
 
 
+        public static LotDto ConvertFromLotPresave(LotPresave lot)
+        {
+            LotDto result = new LotDto();
+
+            if (lot == null)
+                return result; // а не return null?
+
+            result.Id = lot.Id;
+            result.Name = lot.Name;
+            result.Description = lot.Description;
+            result.SourceLink = lot.SourceLink;
+            result.ImageLink = lot.ImageLink;
+            result.Price = lot.Price ?? 0;
+            result.Categories = lot.LotPresaveCategory.Select(x => CategoryDto.ConvertFromCategory(x.Category)).ToList();
+            result.CreateDate = lot.CreateDate;
+            result.Seller = ExtendedUserDto.ConvertByUser(lot.Seller);
+
+            return result;
+        }
+
+
         public override bool Equals(object obj)
         {
             LotDto other = obj as LotDto;

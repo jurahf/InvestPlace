@@ -3,6 +3,7 @@
 @using Services.DTO;
 @using Services.Services;
 @using Services.Services.LotService;
+@using Services.Services.LotPresaveService;
 @using Services.Services.ExtendedUserService;
 @using Services.Services.FileService;
 @using Services.Services.CategoryService;
@@ -16,6 +17,7 @@
 @inject IFileService FileService;
 @inject ICategoryService CategoryService;
 @inject IBasketService BasketService;
+@inject ILotPresaveService LotPresaveService;
 
 
 <LoginWelcome>
@@ -78,7 +80,7 @@
                     <div class="col col-12">
                         <div class="form-group">
                             <label class="label">Подкатегория</label>
-                            <InputSelect class="form-control" @bind-Value="selectedCategory">
+                            <InputSelect class="form-control"  Value="@selectedCategory" ValueExpression="() => selectedCategory" ValueChanged="(string v) => SelectedCategoryChanged(v)">
                                 <option value="0">Не выбрано</option>
                                 @foreach (var cat in categories.Where(x => x.Parent != null && $"{x.Parent.Id}" == parentCategory).OrderBy(x => x.Name))
                                 {
@@ -93,7 +95,7 @@
                     <div class="col col-12">
                         <div class="form-group">
                             <label class="label">Название товара</label>
-                            <InputText class="form-control" @bind-Value="newLot.Name"></InputText>
+                            <InputText class="form-control" Value="@newLot.Name" ValueExpression="() => newLot.Name" ValueChanged="(string v) => NameValueChanged(v)"></InputText>
                         </div>
                     </div>
                 </div>
@@ -102,7 +104,7 @@
                     <div class="col col-12">
                         <div class="form-group">
                             <label class="label">Адрес сайта товара</label>
-                            <InputText class="form-control" @bind-Value="newLot.SourceLink"></InputText>
+                            <InputText class="form-control" Value="@newLot.SourceLink" ValueExpression="() => newLot.SourceLink" ValueChanged="(string v) => SourceLinkValueChanged(v)"></InputText>
                         </div>
                     </div>
                 </div>
@@ -112,7 +114,7 @@
                         <div class="form-group">
                             <label class="label">Цена в интернет-магазине</label>
                             <!-- если сделать просто bind-Value, то не сможем обработать событие на изменение -->
-                            <InputNumber class="form-control" Value="newLot.Price" ValueExpression="() => newLot.Price" ValueChanged="(decimal v) => PriceValueChanged(v)"></InputNumber>
+                            <InputNumber class="form-control" Value="@newLot.Price" ValueExpression="() => newLot.Price" ValueChanged="(decimal v) => PriceValueChanged(v)"></InputNumber>
                         </div>
                     </div>
                 </div>
@@ -121,7 +123,7 @@
                     <div class="col col-12">
                         <div class="form-group">
                             <label class="label">Краткое описание товара</label>
-                            <InputTextArea class="form-control" @bind-Value="newLot.Description"></InputTextArea>
+                            <InputTextArea class="form-control" Value="@newLot.Description" ValueExpression="() => newLot.Description" ValueChanged="(string v) => DescriptionValueChanged(v)"></InputTextArea>
                         </div>
                     </div>
                 </div>
@@ -235,11 +237,11 @@
 
 
 @code {
-        [CascadingParameter]
-        protected ExtendedUserDto user { get; set; }
+    [CascadingParameter]
+    protected ExtendedUserDto user { get; set; }
 
-        [CascadingParameter(Name = "BasketCountChange")]
-        public EventCallback BasketCountChange { get; set; }
+    [CascadingParameter(Name = "BasketCountChange")]
+    public EventCallback BasketCountChange { get; set; }
 
     protected const int MaxFileSizeMb = 2;
     protected const int MaxFileSizeBytes = MaxFileSizeMb * 1024 * 1024;
@@ -257,11 +259,29 @@
 
     protected override void OnInitialized()
     {
-        newLot = new LotDto();
         categories = FindCategories();
         actualLots = LotService.GetActual(true);
         actualRangeredLots = actualLots.GroupBy(x => x.PriceRange).FirstOrDefault().ToList();
         UpdateLotsInBasket();
+
+        if (user != null)
+        {
+            newLot = LotPresaveService.GetPresaveLot(user);
+            if (newLot != null)
+            {
+                imageLink = newLot.ImageLink;
+                parentCategory = newLot.Categories.FirstOrDefault()?.Parent?.Id.ToString() ?? "0";
+                selectedCategory = newLot.Categories.FirstOrDefault()?.Id.ToString() ?? "0";
+            }
+            else
+            {
+                newLot = new LotDto();
+            }
+        }
+        else
+        {
+            newLot = new LotDto();
+        }
     }
 
     private List<CategoryDto> FindCategories()
@@ -272,7 +292,8 @@
     protected void RemoveFile()
     {
         imageLink = "";
-        // с сервера при этом не удаляем ?
+        // файл с сервера при этом не удаляем ?
+        PresaveLot();
     }
 
     protected async void HandleFileSelected(IFileListEntry[] files)
@@ -292,6 +313,7 @@
                         InvokeAsync(() =>
                         {
                             imageLink = t.Result;
+                            PresaveLot();
                             this.StateHasChanged(); // чтобы перерисовалось view (из асинхронного вызова оно не может)
                         });
                     }, TaskContinuationOptions.ExecuteSynchronously)
@@ -344,6 +366,8 @@
         return "";
     }
 
+
+
     private void PriceValueChanged(decimal value)
     {
         newLot.Price = value;
@@ -353,6 +377,48 @@
         actualRangeredLots = actualLots.GroupBy(x => x.PriceRange)
             .FirstOrDefault(x => x.Key.Minimum <= newLot.PuzzlePrice && newLot.PuzzlePrice <= x.Key.Maximum)
             ?.ToList() ?? new List<LotDto>();
+
+        PresaveLot();
+    }
+
+    private void NameValueChanged(string value)
+    {
+        newLot.Name = value;
+
+        PresaveLot();
+    }
+
+    private void SourceLinkValueChanged(string value)
+    {
+        newLot.SourceLink = value;
+
+        PresaveLot();
+    }
+
+    private void DescriptionValueChanged(string value)
+    {
+        newLot.Description = value;
+
+        PresaveLot();
+    }
+
+    private void SelectedCategoryChanged(string category)
+    {
+        selectedCategory = category;
+
+        PresaveLot();
+    }
+
+
+
+    private void PresaveLot()
+    {
+        LotDto presave = newLot;
+        presave.ImageLink = imageLink;
+
+        presave.Categories = new List<CategoryDto>() { new CategoryDto() { Id = int.Parse(selectedCategory) } };
+
+        LotPresaveService.SavePresaveLot(user, presave);
     }
 
 
@@ -373,6 +439,7 @@
 
         if (result.Success)
         {
+            LotPresaveService.ClearPresaveLot(user);
             NavigationManager.NavigateTo("/MyLots");
         }
         else
