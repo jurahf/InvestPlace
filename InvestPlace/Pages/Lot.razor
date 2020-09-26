@@ -85,6 +85,7 @@
                 <h5>Создатель: @editedLot.Seller?.InnerName @editedLot.Seller?.Patronymic @editedLot.Seller?.Surname (@editedLot.Seller?.Email)</h5>
                 <button class="btn btn-primary" @onclick="() => CreateModerate(true)">Подтвердить создание товара</button>
                 <button class="btn btn-primary" @onclick="() => CreateModerate(false)">Отклонить создание товара</button>
+                <button class="btn btn-primary" @onclick="StartEdit">Редактировать</button>
             }
             else
             {
@@ -100,14 +101,14 @@
 
 
 @code {
-    [Parameter]
-    public int Id { get; set; }
+        [Parameter]
+        public int Id { get; set; }
 
-    [CascadingParameter(Name = "BasketCountChange")]
-    public EventCallback BasketCountChange { get; set; }
+        [CascadingParameter(Name = "BasketCountChange")]
+        public EventCallback BasketCountChange { get; set; }
 
-    [CascadingParameter]
-    protected ExtendedUserDto user { get; set; }
+        [CascadingParameter]
+        protected ExtendedUserDto user { get; set; }
 
     private bool showNet = false;
     protected string buyErrorText = "";
@@ -121,6 +122,11 @@
     private void ShowNet()
     {
         showNet = !showNet;
+    }
+
+    private void StartEdit()
+    {
+        NavigationManager.NavigateTo($"/EditLot/{Id}");
     }
 
     private void Buy()

@@ -104,6 +104,9 @@ namespace Services.Services.LotService
                 .Include(x => x.Pazzle)
                 .Include(x => x.Seller)
                 .Include(x => x.CreateModerator)
+                .Include(x => x.LotCategory)
+                .ThenInclude(x => x.Category)
+                .ThenInclude(x => x.Parent)
                 .FirstOrDefault(x => x.Id == id));
         }
 
@@ -207,6 +210,92 @@ namespace Services.Services.LotService
                         user.Cash.HelpingSumm -= helpingNeed;
 
                         db.Lot.Add(toSave);
+                        db.SaveChanges();
+                        transaction.Commit();
+
+                        return OperationResult.CreateSuccess();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return OperationResult.CreateFail($"Непредвиденная ошибка: {ex.Message}");
+            }
+        }
+
+
+        public OperationResult UpdateLot(int id, LotDto lot, ExtendedUserDto editor, List<int> categoriesId)
+        {
+            try
+            {
+                lock (lockObject)
+                {
+                    if (lot == null)
+                        return OperationResult.CreateFail("Не задан лот");
+                    if (editor == null)
+                        return OperationResult.CreateFail("Не задан пользователь");
+
+                    ExtendedUser user = db.Users
+                        .Include(x => x.Cash)
+                        .FirstOrDefault(x => x.Id == editor.Id);
+
+                    if (user == null)
+                        return OperationResult.CreateFail("Пользователь не нейден в базе");
+
+                    List<string> roles = userService.GetRoles(user);
+                    if (!roles.Contains(ExtendedRole.MODERATOR) && !roles.Contains(ExtendedRole.ADMIN))   // TODO: лучше проверить через разрешения, а не роли
+                    {
+                        return OperationResult.CreateFail("У пользователя нет разрешения на данное действие");
+                    }
+
+                    Lot oldLot = db.Lot
+                        .Include(x => x.Seller)
+                        .Include(x => x.PriceRange)
+                        .Include(x => x.LotCategory)
+                        .FirstOrDefault(x => x.Id == lot.Id);
+
+                    if (oldLot == null)
+                    {
+                        return OperationResult.CreateFail("Не найден лот для редактирования");
+                    }
+
+                    // подбираем диапазон цены (это цена пазла)
+                    PriceRange priceRange = db.PriceRange.FirstOrDefault(x => x.Minimum <= lot.PuzzlePrice && lot.PuzzlePrice <= x.Maximum);
+                    if (priceRange == null)
+                        return OperationResult.CreateFail("Не найден диапазон цены для товара");
+
+                    // проверить, нет ли лота с тем же названием
+                    if (db.Lot.Any(x => x.Name.ToLower() == lot.Name.ToLower() && x.Id != oldLot.Id))
+                        return OperationResult.CreateFail("Товар с таким названием уже существует");
+
+                    using (var transaction = db.Database.BeginTransaction())
+                    {
+                        oldLot.Name = lot.Name;
+                        oldLot.Description = lot.Description;
+                        oldLot.ImageLink = lot.ImageLink;
+                        oldLot.Price = lot.Price;
+                        oldLot.SourceLink = lot.SourceLink;
+                        oldLot.PriceRange = priceRange;
+                        oldLot.LotCategory.Clear();
+
+                        // подставляем категорию из выбранной
+                        foreach (int catId in categoriesId)
+                        {
+                            Category cat = db.Category.Find(catId);
+
+                            if (cat != null)
+                            {
+                                LotCategory lc = new LotCategory()
+                                {
+                                    Lot = oldLot,
+                                    Category = cat,
+                                };
+
+                                db.LotCategory.Add(lc);
+                            }
+                        }
+
+                        db.Lot.Update(oldLot);
                         db.SaveChanges();
                         transaction.Commit();
 

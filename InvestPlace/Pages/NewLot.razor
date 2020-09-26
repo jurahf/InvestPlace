@@ -1,4 +1,5 @@
 ﻿@page "/NewLot"
+@page "/EditLot/{id:int}"
 
 @using Services.DTO;
 @using Services.Services;
@@ -8,6 +9,7 @@
 @using Services.Services.FileService;
 @using Services.Services.CategoryService;
 @using Services.Services.BasketService;
+@using InvestPlaceDB;
 
 
 @inject NavigationManager NavigationManager;
@@ -80,7 +82,7 @@
                     <div class="col col-12">
                         <div class="form-group">
                             <label class="label">Подкатегория</label>
-                            <InputSelect class="form-control"  Value="@selectedCategory" ValueExpression="() => selectedCategory" ValueChanged="(string v) => SelectedCategoryChanged(v)">
+                            <InputSelect class="form-control" Value="@selectedCategory" ValueExpression="() => selectedCategory" ValueChanged="(string v) => SelectedCategoryChanged(v)">
                                 <option value="0">Не выбрано</option>
                                 @foreach (var cat in categories.Where(x => x.Parent != null && $"{x.Parent.Id}" == parentCategory).OrderBy(x => x.Name))
                                 {
@@ -223,7 +225,7 @@
         <div class="row margin-top-20">
             <div class="col col-12">
                 <button class="btn btn-secondary" type="submit">Сохранить</button>
-                <br/>
+                <br />
                 <h6 class="text-danger">@saveErrorText</h6>
             </div>
         </div>
@@ -242,6 +244,11 @@
 
     [CascadingParameter(Name = "BasketCountChange")]
     public EventCallback BasketCountChange { get; set; }
+
+    [Parameter]
+    public int? Id { get; set; }
+
+    private bool EditMode { get { return Id != null; } }
 
     protected const int MaxFileSizeMb = 2;
     protected const int MaxFileSizeBytes = MaxFileSizeMb * 1024 * 1024;
@@ -264,6 +271,20 @@
         actualRangeredLots = actualLots.GroupBy(x => x.PriceRange).FirstOrDefault().ToList();
         UpdateLotsInBasket();
 
+        newLot = new LotDto();
+
+        if (Id == null)
+        {
+            LoadLotFromPresave();
+        }
+        else
+        {
+            LoadLotForEdit();
+        }
+    }
+
+    private void LoadLotFromPresave()
+    {
         if (user != null)
         {
             newLot = LotPresaveService.GetPresaveLot(user);
@@ -278,9 +299,21 @@
                 newLot = new LotDto();
             }
         }
-        else
+    }
+
+    private void LoadLotForEdit()
+    {
+        if (user.Role != ExtendedRole.MODERATOR && user.Role != ExtendedRole.ADMIN)
         {
-            newLot = new LotDto();
+            NavigationManager.NavigateTo("/NewLot");
+        }
+
+        newLot = LotService.GetById(Id.Value);
+        if (newLot != null)
+        {
+            imageLink = newLot.ImageLink;
+            parentCategory = newLot.Categories.FirstOrDefault()?.Parent?.Id.ToString() ?? "0";
+            selectedCategory = newLot.Categories.FirstOrDefault()?.Id.ToString() ?? "0";
         }
     }
 
@@ -371,7 +404,7 @@
     {
         newLot.Price = value;
 
-        // определим, какой подходит ценовой диапазон 
+        // определим, какой подходит ценовой диапазон
         // отобразим строку товаров именно по этому диапазону
         actualRangeredLots = actualLots.GroupBy(x => x.PriceRange)
             .FirstOrDefault(x => x.Key.Minimum <= newLot.PuzzlePrice && newLot.PuzzlePrice <= x.Key.Maximum)
@@ -412,6 +445,9 @@
 
     private void PresaveLot()
     {
+        if (EditMode)
+            return;
+
         LotDto presave = newLot;
         presave.ImageLink = imageLink;
 
@@ -434,12 +470,21 @@
 
         newLot.ImageLink = imageLink;
 
-        OperationResult result = LotService.CreateLot(newLot, user, new List<int>() { int.Parse(selectedCategory) });
+        OperationResult result = null;
+
+        if (EditMode)
+        {
+            result = LotService.UpdateLot(Id.Value, newLot, user, new List<int>() { int.Parse(selectedCategory) });
+        }
+        else
+        {
+            result = LotService.CreateLot(newLot, user, new List<int>() { int.Parse(selectedCategory) });
+        }
 
         if (result.Success)
         {
             LotPresaveService.ClearPresaveLot(user);
-            NavigationManager.NavigateTo("/MyLots");
+            NavigationManager.NavigateTo(EditMode ? "/NewLotModerateList" : "/ MyLots");
         }
         else
         {

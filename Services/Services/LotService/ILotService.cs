@@ -21,6 +21,8 @@ namespace Services.Services.LotService
 
         OperationResult CreateLot(LotDto lot, ExtendedUserDto creator, List<int> categoriesId);
 
+        OperationResult UpdateLot(int id, LotDto lot, ExtendedUserDto editor, List<int> categoriesId);
+
         List<LotDto> GetBuyerField();
 
         int GetNextBuyerFieldNumber();
