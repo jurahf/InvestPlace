@@ -31,7 +31,7 @@
                 <div class="input-group-prepend">
                     <span class="input-group-text" id="basic-addon1"><i class="fas fa-search"></i></span>
                 </div>
-                <InputText type="text" class="form-control" placeholder="Email или ФИО пользователя" aria-label="Search" aria-describedby="basic-addon1" Value="@searchParams.Text" ValueExpression="() => searchParams.Text" ValueChanged="(string s) => SearchTextChanged(s)" />
+                <InputText type="text" class="form-control" placeholder="Email, телефон или ФИО пользователя" aria-label="Search" aria-describedby="basic-addon1" Value="@searchParams.Text" ValueExpression="() => searchParams.Text" ValueChanged="(string s) => SearchTextChanged(s)" />
             </div>
         </div>
     </div>
@@ -152,6 +152,7 @@
                 {
                     currentFilter = currentFilter.Where(x =>
                         x.Email?.StartsWith(searchParams.Text) == true
+                        || x.PhoneNumber?.StartsWith(searchParams.Text) == true
                         || x.InnerName?.StartsWith(searchParams.Text) == true
                         || x.Patronymic?.StartsWith(searchParams.Text) == true
                         || x.Surname?.StartsWith(searchParams.Text) == true);

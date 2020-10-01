@@ -11,6 +11,7 @@ namespace InvestPlaceDB
         {
             LotCategory = new HashSet<LotCategory>();
             Pazzle = new HashSet<Pazzle>();
+            QueryForExchange = new HashSet<QueryForExchange>();
         }
 
         [Key]
@@ -77,5 +78,8 @@ namespace InvestPlaceDB
 
         [InverseProperty("Lot")]
         public virtual ICollection<Pazzle> Pazzle { get; set; }
+
+        [InverseProperty(nameof(InvestPlaceDB.QueryForExchange.Lot))]
+        public virtual ICollection<QueryForExchange> QueryForExchange { get; set; }
     }
 }

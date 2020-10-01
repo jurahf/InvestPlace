@@ -25,6 +25,7 @@
                     <th style="width:20%;">Время создания</th>
                     <th>Пользователь</th>
                     <th>Товар</th>
+                    <th>Тип</th>
                 </tr>
             </thead>
             <tbody>
@@ -32,8 +33,9 @@
                 {
                     <tr @onclick="() => RowClicked(q.Id)">
                         <td>@q.Date.ToString("dd.MM.yyyy HH:mm")</td>
-                        <td>@(q.Puzzle.Buyer.InnerName ?? "") @(q.Puzzle.Buyer.Patronymic ?? "") @(q.Puzzle.Buyer.Surname ?? "") (@(q.Puzzle.Buyer.Email ?? ""))</td>
-                        <td>@q.Puzzle.Lot.Name</td>
+                        <td>@(GetUserInfoString(q.ExchangeType == ExchangeOnRealType.BuyerPuzzle ? q.Puzzle.Buyer : q.Lot.Seller))</td>
+                        <td>@(q.ExchangeType == ExchangeOnRealType.BuyerPuzzle ? q.Puzzle.Lot.Name : q.Lot.Name)</td>
+                        <td>@(q.ExchangeType == ExchangeOnRealType.BuyerPuzzle ? "Покупатель" : "Продавец")</td>
                     </tr>
                 }
             </tbody>
@@ -64,5 +66,10 @@
     private void RowClicked(int queryId)
     {
         NavigationManager.NavigateTo($"/ExchangeModerate/{queryId}");
+    }
+
+    private string GetUserInfoString(ExtendedUserDto user)
+    {
+        return $"{user.InnerName ?? ""} {user.Patronymic ?? ""} {user.Surname ?? ""} ({user.Email ?? ""})";
     }
 }

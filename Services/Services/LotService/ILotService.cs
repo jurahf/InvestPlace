@@ -39,7 +39,9 @@ namespace Services.Services.LotService
         List<LotDto> BuyedLots(ExtendedUserDto dto);
 
 
-        void ExchangeBySeller(ExtendedUserDto user, LotDto lot);
+        void ExchangeBySellerOnMoney(ExtendedUserDto user, LotDto lot);
+
+        void ExchangeBySellerOnReal(ExtendedUserDto user, LotDto lot);
 
         void ExchangeByBuyerOnMoney(ExtendedUserDto user, LotDto lot);
 

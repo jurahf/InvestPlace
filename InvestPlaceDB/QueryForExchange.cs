@@ -19,11 +19,24 @@ namespace InvestPlaceDB
 
         public bool? Moderate { get; set; }
 
-        public int PazzleId { get; set; }
+        /// <summary>
+        /// Должен быть заполнен или LotId или PazzleId
+        /// </summary>
+        public int? LotId { get; set; }
+
+        /// <summary>
+        /// Должен быть заполнен или LotId или PazzleId
+        /// </summary>
+        public int? PazzleId { get; set; }
 
         [ForeignKey(nameof(PazzleId))]
         [InverseProperty(nameof(InvestPlaceDB.Pazzle.QueryForExchange))]
         public virtual Pazzle Pazzle { get; set; }
+
+
+        [ForeignKey(nameof(LotId))]
+        [InverseProperty(nameof(InvestPlaceDB.Lot.QueryForExchange))]
+        public virtual Lot Lot { get; set; }
 
 
         public int? ExchangeModeratorId { get; set; }

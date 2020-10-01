@@ -31,6 +31,8 @@ namespace Services.Services.QueryExchangeService
         public List<QueryForExchangeDto> QueriesForModerate()
         {
             return db.QueryForExchange
+                .Include(x => x.Lot)
+                .ThenInclude(x => x.Seller)
                 .Include(x => x.Pazzle)
                 .ThenInclude(x => x.Buyer)
                 .Include(x => x.Pazzle)
@@ -59,6 +61,8 @@ namespace Services.Services.QueryExchangeService
                 throw new ArgumentNullException("Запрос не может быть пустым");
 
             QueryForExchange findedQuery = db.QueryForExchange
+                .Include(x => x.Lot)
+                .ThenInclude(x => x.Seller)
                 .Include(x => x.Pazzle)
                 .ThenInclude(x => x.Buyer)
                 .Include(x => x.Pazzle)
@@ -77,16 +81,31 @@ namespace Services.Services.QueryExchangeService
             if (!roles.Contains(ExtendedRole.MODERATOR) && !roles.Contains(ExtendedRole.ADMIN))
                 throw new ArgumentException("Нет прав для выполнения данной операции");
 
-            Lot lot = findedQuery.Pazzle.Lot;
+            if (findedQuery.Pazzle != null)
+            {
+                Lot lot = findedQuery.Pazzle.Lot;
 
-            if (lot.CompleteNumber == null)
-                throw new ArgumentException("Покупка товара еще не завершена");
+                if (lot.CompleteNumber == null)
+                    throw new ArgumentException("Покупка товара еще не завершена");
 
 
-            findedQuery.Moderate = solution;
-            findedQuery.ModerateDate = DateTime.Now;
-            findedQuery.ExchangeModerator = findedModerator;
-            findedQuery.Pazzle.Lot.ExchangeByBuyer = (solution == true);
+                findedQuery.Moderate = solution;
+                findedQuery.ModerateDate = DateTime.Now;
+                findedQuery.ExchangeModerator = findedModerator;
+                findedQuery.Pazzle.Lot.ExchangeByBuyer = (solution == true);
+            }
+            else if (findedQuery.Lot != null)
+            {
+                Lot lot = findedQuery.Lot;
+
+                if (lot.CompleteNumber == null)
+                    throw new ArgumentException("Покупка товара еще не завершена");
+
+                findedQuery.Moderate = solution;
+                findedQuery.ModerateDate = DateTime.Now;
+                findedQuery.ExchangeModerator = findedModerator;
+                findedQuery.Lot.ExchangeBySeller = (solution == true);
+            }
 
             db.SaveChanges();
         }

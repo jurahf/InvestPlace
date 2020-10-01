@@ -15,7 +15,11 @@ namespace Services.DTO
 
         public bool Moderate { get; set; }
 
+        public ExchangeOnRealType ExchangeType { get; set; }
+
         public PuzzleDto Puzzle { get; set; }
+
+        public LotDto Lot { get; set; }
 
         public ExtendedUserDto Moderator { get; set; }
 
@@ -31,8 +35,18 @@ namespace Services.DTO
                 Moderate = query.Moderate == true,
                 ModerateDate = query.ModerateDate,
                 Moderator = ExtendedUserDto.ConvertByUser(query.ExchangeModerator),
-                Puzzle = PuzzleDto.ConvertFromPuzzle(query.Pazzle)
+                Puzzle = PuzzleDto.ConvertFromPuzzle(query.Pazzle),
+                Lot = LotDto.ConvertFromLot(query.Lot),
+                ExchangeType = query.Pazzle == null ? ExchangeOnRealType.SellerLot : ExchangeOnRealType.BuyerPuzzle
             };
         }
     }
+
+
+    public enum ExchangeOnRealType
+    {
+        BuyerPuzzle,
+        SellerLot
+    }
+
 }

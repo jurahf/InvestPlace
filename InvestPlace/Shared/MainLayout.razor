@@ -64,61 +64,63 @@
 
 
             <ul class="navbar-nav float-right">
-                <li>
-                    <div class="dropdown">
-                        <a href="/Basket" class="dropright @(selectedPunkt == MainMenuPunkt.Basket ? "active" : "")" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <span class="fas fa-shopping-basket"></span>
-                            Корзина
-                            @if (inBasketCount > 0)
-                            {
-                                <span class="badge badge-danger">@inBasketCount</span>
-                            }
-                        </a>
+                <AuthorizeView Roles="Normal">
+                    <li>
+                        <div class="dropdown">
+                            <a href="/Basket" class="dropright @(selectedPunkt == MainMenuPunkt.Basket ? "active" : "")" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="fas fa-shopping-basket"></span>
+                                Корзина
+                                @if (inBasketCount > 0)
+                                {
+                                    <span class="badge badge-danger">@inBasketCount</span>
+                                }
+                            </a>
 
-                        <!-- всплывающее меню корзины -->
-                        <div class="dropdown-menu dropdown-form container">
-                            @foreach (var group in puzzles.GroupBy(x => x.Lot))
-                            {
-                                <div class="row">
-                                    <div class="col col-3">
-                                        <img class="img-full" src="@group.Key.ImageLink" />
+                            <!-- всплывающее меню корзины -->
+                            <div class="dropdown-menu dropdown-form container">
+                                @foreach (var group in puzzles.GroupBy(x => x.Lot))
+                                {
+                                    <div class="row">
+                                        <div class="col col-3">
+                                            <img class="img-full" src="@group.Key.ImageLink" />
+                                        </div>
+                                        <div class="col col-7">
+                                            <h6>@group.Key.Name</h6>
+                                            <h6 class="text-red">@(group.Key.PuzzlePrice * group.Count()) ₽</h6>
+                                        </div>
+                                        <div class="col col-2">
+                                            <button class="del-row-btn background-color-white" @onclick="() => DeleteRowFromBasket(user, group.Key)"></button>
+                                        </div>
                                     </div>
-                                    <div class="col col-7">
-                                        <h6>@group.Key.Name</h6>
-                                        <h6 class="text-red">@(group.Key.PuzzlePrice * group.Count()) ₽</h6>
+                                    <div class="row">
+                                        <div class="col col-12">
+                                            <hr />
+                                        </div>
                                     </div>
-                                    <div class="col col-2">
-                                        <button class="del-row-btn background-color-white" @onclick="() => DeleteRowFromBasket(user, group.Key)"></button>
+                                }
+
+                                <div class="row text-center">
+                                    <div class="col col-12">
+                                        <h5 class="text-gray inline">Подытог: </h5>
+                                        <h4 class="text-red inline">@puzzles.Sum(x => x.Lot.PuzzlePrice) ₽</h4>
                                     </div>
                                 </div>
+
                                 <div class="row">
                                     <div class="col col-12">
                                         <hr />
                                     </div>
                                 </div>
-                            }
 
-                            <div class="row text-center">
-                                <div class="col col-12">
-                                    <h5 class="text-gray inline">Подытог: </h5>
-                                    <h4 class="text-red inline">@puzzles.Sum(x => x.Lot.PuzzlePrice) ₽</h4>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col col-12">
-                                    <hr />
-                                </div>
-                            </div>
-
-                            <div class="row conteiner-for-centered text-center">
-                                <div class="col col-12">
-                                    <button class="btn btn-primary" @onclick="GoToBasket">Перейти в корзину</button>
+                                <div class="row conteiner-for-centered text-center">
+                                    <div class="col col-12">
+                                        <button class="btn btn-primary" @onclick="GoToBasket">Перейти в корзину</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </li>
+                    </li>
+                </AuthorizeView>
 
                 <li>
                     <a href="/Search" class="dropright @(selectedPunkt == MainMenuPunkt.Search ? "active" : "")"><span class="fas fa-search"></span> Поиск</a>
@@ -137,7 +139,48 @@
             </CascadingValue>
         </CascadingValue>
     </CascadingValue>
+
 </div>
+
+
+    <footer class="footer">
+        <div class="row container">
+            <div class="col col-4">
+                <a href="#"><img src="/images/logo_footer.png" /></a>
+            </div>
+            <div class="col col-5">
+                <div class="row margin-top-20">
+                    <div class="col col-8">
+                        <a class="black-link" href="#">Пользовательское соглашение</a>
+                    </div>
+                    <div class="col col-4">
+                        <a class="black-link" href="/MyPuzzles">Мои пазлы</a>
+                    </div>
+                </div>
+
+                <div class="row margin-top-20">
+                    <div class="col col-8">
+                        <a class="black-link" href="#">Видео-инструкция</a>
+                    </div>
+
+                    <div class="col col-4">
+                        <a class="black-link" href="#">Вопросы</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col col-3 float-right margin-top-40">
+                <a class="social-logo" href="@(Configuration.GetValue<string>("contacts:instagram"))" target="_blank"><img src="/images/social-networks/instagram-black.png" /></a>
+                <a class="social-logo" href="@(Configuration.GetValue<string>("contacts:youtube"))" target="_blank"><img src="/images/social-networks/youtube-black.png" /></a>
+                <a class="social-logo" href="@(Configuration.GetValue<string>("contacts:ok"))" target="_blank"><img src="/images/social-networks/ok-black.png" /></a>
+                <a class="social-logo" href="@(Configuration.GetValue<string>("contacts:facebook"))" target="_blank"><img src="/images/social-networks/facebook-black.png" /></a>
+                <a class="social-logo" href="@(Configuration.GetValue<string>("contacts:vk"))" target="_blank"><img src="/images/social-networks/vk-black.png" /></a>
+            </div>
+
+        </div>
+    </footer>
+
+
 
 
 @code {

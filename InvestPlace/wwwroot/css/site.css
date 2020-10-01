@@ -10,7 +10,6 @@ html {
 
 body {
     background-color: #ededed;
-    margin-bottom: 100px;
 }
 
 .background-color-body {
@@ -189,6 +188,30 @@ table.text-center td {
     line-height: 68px;
     font-size: 16px;
     text-align: center;
+}
+
+
+/*******************************/
+
+/******** футер *****************/
+app {
+    min-height: 100vh;
+}
+
+.footer {
+    min-height: 145px;
+    margin-top: 50px;
+    background-color: #9f9f9f;
+    padding-top: 1.1rem;
+}
+
+.footer > div {
+    padding-left: 10rem !important;
+    padding-right: 10rem !important;
+}
+
+.footer .container {
+    max-width: none;
 }
 
 
@@ -496,6 +519,12 @@ a.link-text-usual:hover {
     text-decoration: none;
 }
 
+a.black-link,
+a.black-link:hover,
+a.black-link:visited {
+    color: black;
+    text-decoration: underline;
+}
 
 
 .header {
@@ -675,7 +704,7 @@ a.link-text-usual:hover {
 
 @media (min-width: 768px) {
     app {
-        flex-direction: row;
+        flex-direction: column;
     }
 
     .sidebar {
@@ -738,6 +767,10 @@ a.link-text-usual:hover {
 
 .margin-top-20 {
     margin-top: 20px;
+}
+
+.margin-top-40 {
+    margin-top: 40px;
 }
 
 .margin-top-50 {
