@@ -386,16 +386,23 @@ td.field-cell h6 {
     background-color: rgba(0,0,0,.075);
 }
 
+.faq-header {
+    cursor: pointer;
+}
+
+
 
 /* это для списка лотов в размещении лота */
 .lot-my-img-sm {
     width: 123px !important;
     height: 100px !important;
+    border: 1px solid #c7c7c7;
 }
 
 .lot-my-img-xs {
     width: 60px !important;
     height: 50px !important;
+    border: 1px solid #c7c7c7;
 }
 
 .cursor-pointer {
@@ -407,6 +414,7 @@ td.field-cell h6 {
 .lot-my-img {
     width: 123px;
     height: 100px;
+    border: 1px solid #c7c7c7;
 }
 
 .lot-my-count {
@@ -443,6 +451,7 @@ td.field-cell h6 {
 .lot-list-img {
     width: 155px;
     height: 140px;
+    border: 1px solid #c7c7c7;
 }
 
 .lot-list-count {

@@ -311,6 +311,19 @@ namespace Services.Services.CashService
 
             lock (lockObject)
             {
+                if (findedUser.Cash == null)
+                {
+                    Cash cash = new Cash()
+                    {
+                        BonusSumm = 0,
+                        HelpingSumm = 0,
+                        Summ = 0
+                    };
+
+                    findedUser.Cash = cash;
+                    db.Add(cash);
+                }
+
                 if (toUserId.HasValue)
                 {
                     QueryForOperation relatedQuery = db.QueryForOperation

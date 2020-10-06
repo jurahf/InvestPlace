@@ -65,6 +65,21 @@ namespace InvestPlace.Pages.Account
             [Display(Name = "Подтверждение пароля")]
             [Compare("Password", ErrorMessage = "Пароль и его подтверждение не совпадают")]
             public string ConfirmPassword { get; set; }
+
+            //[Required]
+            [CustomValidation(typeof(OfertaValidation), "Validation")]
+            public bool AcceptOfertaAndPersonalData { get; set; }
+        }
+
+        public class OfertaValidation
+        {
+            public static ValidationResult Validation(string value)
+            {
+                if (bool.TryParse(value, out bool result) && result)
+                    return ValidationResult.Success;
+                else
+                    return new ValidationResult("Нужно принять публичную оферту и соглашение об обработке персональных данных");
+            }
         }
 
         public async Task OnGetAsync(string returnUrl = null)

@@ -151,6 +151,8 @@ namespace Services.Services.LotService
 
                     ExtendedUser user = db.Users
                         .Include(x => x.Cash)
+                        .Include(x => x.LotSeller)
+                        .ThenInclude(x => x.PriceRange)
                         .FirstOrDefault(x => x.Id == creator.Id);
 
                     if (user == null)
@@ -161,12 +163,17 @@ namespace Services.Services.LotService
                     if (priceRange == null)
                         return OperationResult.CreateFail("Не найден диапазон цены для товара");
 
-
-                    // TODO: проверяем, а оплатил ли он рекламный сбор
-
                     // проверить, нет ли лота с тем же названием
                     if (db.Lot.Any(x => x.Name.ToLower() == lot.Name.ToLower()))
                         return OperationResult.CreateFail("Товар с таким названием уже существует");
+
+                    // нельзя выставлять больше 1 лота в каждом диапазоне
+                    if (user.LotSeller.Any(x => x.CompleteDate == null 
+                        && x.CreateModerate != false // промодерирован или на модерации
+                        && x.PriceRange.Id == priceRange.Id))
+                    {
+                        throw new Exception("Нельзя иметь больше 1 активного лота в ценовом диапазоне");
+                    }
 
                     // хватает ли накопленной помощи
                     decimal helpingNeed = lot.Price * EpicSettings.HelpingSummForNewLotPercent / 100m;

@@ -53,7 +53,7 @@
                 </li>
 
                 <li>
-                    <a href="#" class="@(selectedPunkt == MainMenuPunkt.Faq ? "active" : "")">Частые вопросы</a>
+                    <a href="/Faq" class="@(selectedPunkt == MainMenuPunkt.Faq ? "active" : "")">Частые вопросы</a>
                 </li>
 
                 <li>
@@ -150,21 +150,20 @@
             </div>
             <div class="col col-5">
                 <div class="row margin-top-20">
-                    <div class="col col-8">
-                        <a class="black-link" href="#">Пользовательское соглашение</a>
+                    <div class="col col-7">
+                        <a class="black-link" href="/Oferta">Пользовательское соглашение</a>
                     </div>
-                    <div class="col col-4">
-                        <a class="black-link" href="/MyPuzzles">Мои пазлы</a>
+                    <div class="col col-5">
                     </div>
                 </div>
 
                 <div class="row margin-top-20">
-                    <div class="col col-8">
+                    <div class="col col-6">
                         <a class="black-link" href="#">Видео-инструкция</a>
                     </div>
 
-                    <div class="col col-4">
-                        <a class="black-link" href="#">Вопросы</a>
+                    <div class="col col-6">
+                        <a class="black-link" href="mailto:@(Configuration.GetValue<string>("contacts:email"))">@(Configuration.GetValue<string>("contacts:email"))</a>
                     </div>
                 </div>
             </div>
