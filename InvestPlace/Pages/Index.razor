@@ -13,13 +13,13 @@
 <!-- все товары -->
 <div class="row">
 
-    @foreach (var lot in allLots.OrderBy(x => x.Price))
+    @foreach (var lot in allLots.OrderByDescending(x => x.PuzzleCount).ThenBy(x => x.Price))
     {        
-    <div class="col col-2 margin-top-20">
+    <div class="col col-2 lot-list-col">
         <a class="link-text-usual" href="/lot/@lot.Id">
             <img class="lot-list-img" src="@lot.ImageLink" alt="" />
             <div class="lot-list-count">@lot.PuzzleCount</div>
-            <div class="lot-list-price">@lot.Price ₽</div>
+            <div class="lot-list-price">@lot.PuzzlePrice ₽</div>
 
             <div class="lot-list-label">@lot.Name</div>
         </a>

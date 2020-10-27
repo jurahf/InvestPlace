@@ -50,7 +50,7 @@
 
     protected override void OnInitialized()
     {
-        MainMenuPunktChanged.InvokeAsync(Services.MainMenuPunkt.Faq);
+        MainMenuPunktChanged.InvokeAsync(Services.MainMenuPunkt.Profile);
         allQuestions = faqService.GetAll().OrderBy(x => x.Order).ToList();
     }
 

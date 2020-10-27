@@ -58,15 +58,13 @@
             </div>
         </div>
 
-        <div class="row">
-            <div class="col col-12">
-                <a href="@editedLot.SourceLink">@editedLot.SourceLink</a>
-            </div>
-        </div>
 
-        <div class="row">
-            <div class="col col-12">
+        <div class="row margin-top-20">
+            <div class="col col-6">
                 <h3>@editedLot.Price</h3>
+            </div>
+            <div class="col col-6">
+                <a href="@editedLot.SourceLink" class="btn btn-secondary" target="_blank">Посмотреть в интернет-магазине</a>
             </div>
         </div>
 
@@ -85,7 +83,6 @@
                 <h5>Создатель: @editedLot.Seller?.InnerName @editedLot.Seller?.Patronymic @editedLot.Seller?.Surname (@editedLot.Seller?.Email)</h5>
                 <button class="btn btn-primary" @onclick="() => CreateModerate(true)">Подтвердить создание товара</button>
                 <button class="btn btn-primary" @onclick="() => CreateModerate(false)">Отклонить создание товара</button>
-                <button class="btn btn-primary" @onclick="StartEdit">Редактировать</button>
             }
             else
             {
@@ -93,6 +90,8 @@
                 <h5>Промодерирован пользоватлем @editedLot.CreateModerator.InnerName (@editedLot.CreateModerator.Email)</h5>
                 <h5>@editedLot.CreateModerateDate.Value.ToString("dd.MM.yyyy HH:mm")</h5>
             }
+
+            <button class="btn btn-primary" @onclick="StartEdit">Редактировать</button>
         </div>
     </div>
 </AuthorizeView>

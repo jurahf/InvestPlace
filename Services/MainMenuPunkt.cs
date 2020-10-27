@@ -10,7 +10,7 @@ namespace Services
         None,
         Main,
         Profile,
-        Faq,
+        Instruction,
         BuyerField,
         Basket,
         Search

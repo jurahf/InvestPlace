@@ -319,13 +319,14 @@ namespace Services.Services.LotService
 
         public List<LotDto> GetBuyerField()
         {
-            // завершенные на вчерашний день
+            // завершенные
             var allCompleted = db.Lot
                 .Include(x => x.PriceRange)
                 .Include(x => x.Pazzle)
                 .Where(x => x.CompleteDate != null)
                 .ToList()       // следующее предложение не транслируется в SQL
-                .Where(x => x.CompleteDate.Value.Date < DateTime.Today); 
+                //.Where(x => x.CompleteDate.Value.Date < DateTime.Today) // а решили не на следующий день, а сразу
+                ; 
 
             // каждые 300 - одно поле покупателей
             int mod = allCompleted.Count() % EpicSettings.LotPerBuyerField;
