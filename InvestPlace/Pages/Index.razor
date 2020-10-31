@@ -15,7 +15,7 @@
 
     @foreach (var lot in allLots.OrderByDescending(x => x.PuzzleCount).ThenBy(x => x.Price))
     {        
-    <div class="col col-2 lot-list-col">
+    <div class="col col-xl-2 offset-xl-1 col-lg-3 offset-lg-1 col-6 offset-0 lot-list-col">
         <a class="link-text-usual" href="/lot/@lot.Id">
             <img class="lot-list-img" src="@lot.ImageLink" alt="" />
             <div class="lot-list-count">@lot.PuzzleCount</div>
@@ -43,4 +43,7 @@
         MainMenuPunktChanged.InvokeAsync(MainMenuPunkt.Main);
         allLots = lotService.GetActual(true);
     }
+
+
+
 }

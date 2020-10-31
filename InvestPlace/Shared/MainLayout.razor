@@ -17,27 +17,46 @@
 
     <div class="header-wrapper">
         <div class="row header">
-            <div class="col col-6">
+            <div class="col col-md-6">
                 <a href="#"><img src="/images/logo.png" /></a>
             </div>
-            <div class="col col-6 float-right">
+            <div class="col col-md-6 float-right hide-md">
                 <a class="social-logo" href="@(Configuration.GetValue<string>("contacts:instagram"))" target="_blank"><img src="/images/social-networks/instagram-color.png" /></a>
                 <a class="social-logo" href="@(Configuration.GetValue<string>("contacts:youtube"))" target="_blank"><img src="/images/social-networks/youtube-color.png" /></a>
                 <a class="social-logo" href="@(Configuration.GetValue<string>("contacts:ok"))" target="_blank"><img src="/images/social-networks/ok-color.png" /></a>
                 <a class="social-logo" href="@(Configuration.GetValue<string>("contacts:facebook"))" target="_blank"><img src="/images/social-networks/facebook-color.png" /></a>
                 <a class="social-logo" href="@(Configuration.GetValue<string>("contacts:vk"))" target="_blank"><img src="/images/social-networks/vk-color.png" /></a>
             </div>
+
+
         </div>
+
+        <div class="row nav-row-mob margin-top-10 flex-md">
+            <div class="col col-1">
+                <a class="btn btn-light toggle-btn" href="#" id="navbarDropdownMob" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-th"></i>
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownMob">
+                    <AccountDropdownMenu></AccountDropdownMenu>
+                </div>
+            </div>
+
+            <div class="col col-10 offset-1 conteiner-for-centered @(selectedPunkt == MainMenuPunkt.Search ? "hidden" : "")">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1"><i class="fas fa-search"></i></span>
+                    </div>
+                    <input type="text" class="form-control" placeholder="Поиск" aria-label="Search" value="@searchText" @onchange="OnSearchTextChange" />
+                </div>
+            </div>
+        </div>
+
     </div>
 
 
-    <nav class="navbar navbar-expand-lg navbar-light nav-row">
+    <nav class="navbar navbar-expand-lg navbar-light nav-row hide-md">
 
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
                 <li class="">
                     <a href="#" class="@(selectedPunkt == MainMenuPunkt.Main ? "active" : "")">Главная</a>
@@ -143,7 +162,43 @@
 </div>
 
 
-    <footer class="footer">
+    <!-- футер для маленького экрана -->
+    <AuthorizeView Roles="Normal">
+    <footer class="footer-mob block-md padding-top-10">
+        <div class="row">
+            <div class="col col-3">                
+                <a href="/BuyerField" class="bottom-menu-btn">
+                    <img src="/images/bottom_menu_boxes.png" />
+                    <br />Склад товаров
+                </a>
+            </div>
+
+            <div class="col col-3">
+                <a href="/NewLot" class="bottom-menu-btn">
+                    <img src="/images/bottom_menu_plus.png" />
+                    <br />Разместить
+                </a>
+            </div>
+
+            <div class="col col-3">
+                <a href="/Basket" class="bottom-menu-btn">
+                    <img src="/images/bottom_menu_basket.png" />
+                    <br />Корзина
+                </a>
+            </div>
+
+            <div class="col col-3">
+                <a href="/ManageAccount" class="bottom-menu-btn">
+                    <img src="/images/bottom_menu_account.png" />
+                    <br />Личный кабинет
+                </a>
+            </div>
+        </div>
+    </footer>
+    </AuthorizeView>
+
+    <!-- футер для большого экрана -->
+    <footer class="footer hide-md">
         <div class="row container">
             <div class="col col-4">
                 <a href="#"><img src="/images/logo_footer.png" /></a>
@@ -182,100 +237,118 @@
 
 
 
-@code {
+    @code {
 
-    protected ExtendedUserDto user = null;
-    protected int inBasketCount = 0;
-    protected List<PuzzleDto> puzzles = new List<PuzzleDto>();
-    protected MainMenuPunkt selectedPunkt;
+        protected ExtendedUserDto user = null;
+        protected int inBasketCount = 0;
+        protected List<PuzzleDto> puzzles = new List<PuzzleDto>();
+        protected MainMenuPunkt selectedPunkt;
+        protected string searchText = "";
 
-    protected override void OnInitialized()
-    {
-        user = FindUser().Result;
-        UpdateBasket();
-
-        base.OnInitialized();
-    }
-
-    private async Task<ExtendedUserDto> FindUser()
-    {
-        ExtendedUserDto result = null;
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        if (user.Identity.IsAuthenticated)
+        protected override void OnInitialized()
         {
-            result = ExtendedUserService.GetByEmail(user.Identity.Name);
+            user = FindUser().Result;
+            UpdateBasket();
+
+            base.OnInitialized();
         }
 
-        return result;
-    }
-
-    // для выделения пунктов меню
-    EventCallback mainMenuPunktChanged = EventCallback.Empty;
-    EventCallback MainMenuPunktChanged
-    {
-        get
+        private async Task<ExtendedUserDto> FindUser()
         {
-            if (mainMenuPunktChanged.Equals(EventCallback.Empty))
-                mainMenuPunktChanged = EventCallback.Factory.Create(this, (s) => OnMainMenuPunktChanged((MainMenuPunkt)s));
-            return mainMenuPunktChanged;
+            ExtendedUserDto result = null;
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user.Identity.IsAuthenticated)
+            {
+                result = ExtendedUserService.GetByEmail(user.Identity.Name);
+            }
+
+            return result;
         }
-    }
 
-    private void OnMainMenuPunktChanged(MainMenuPunkt punkt)
-    {
-        selectedPunkt = punkt;
-    }
-
-
-    // это чтобы можно было обновить корзину с конкретных страниц
-    EventCallback _BasketCountChange = EventCallback.Empty;
-    EventCallback BasketCountChange
-    {
-        get
+        // для выделения пунктов меню
+        EventCallback mainMenuPunktChanged = EventCallback.Empty;
+        EventCallback MainMenuPunktChanged
         {
-            if (_BasketCountChange.Equals(EventCallback.Empty))
-                _BasketCountChange = EventCallback.Factory.Create(this, UpdateBasket);
-            return _BasketCountChange;
+            get
+            {
+                if (mainMenuPunktChanged.Equals(EventCallback.Empty))
+                    mainMenuPunktChanged = EventCallback.Factory.Create(this, (s) => OnMainMenuPunktChanged((MainMenuPunkt)s));
+                return mainMenuPunktChanged;
+            }
         }
-    }
 
-    private void UpdateBasket()
-    {
-        puzzles = GetBasketPuzzles(user);
-        inBasketCount = puzzles.GroupBy(x => x.Lot).Count();
-    }
 
-    private List<PuzzleDto> GetBasketPuzzles(ExtendedUserDto user)
-    {
-        if (user == null)
-            return new List<PuzzleDto>();
-
-        BasketDto basket = BasketService.GetBasketByUser(user);
-        if (basket == null || !basket.Puzzles.Any())
-            return new List<PuzzleDto>();
-
-        return basket.Puzzles.ToList();
-    }
-
-    private void GoToBasket()
-    {
-        NavigationManager.NavigateTo("/Basket");
-    }
-
-    private void DeleteRowFromBasket(ExtendedUserDto user, LotDto lot)
-    {
-        try
+        private void OnMainMenuPunktChanged(MainMenuPunkt punkt)
         {
-            BasketService.RemoveFromBasket(user, lot, true);
-
-            // обновим бейджик у корзины
-            BasketCountChange.InvokeAsync(null);
+            selectedPunkt = punkt;
         }
-        catch (Exception ex)
+
+
+        // это чтобы можно было обновить корзину с конкретных страниц
+        EventCallback _BasketCountChange = EventCallback.Empty;
+        EventCallback BasketCountChange
         {
+            get
+            {
+                if (_BasketCountChange.Equals(EventCallback.Empty))
+                    _BasketCountChange = EventCallback.Factory.Create(this, UpdateBasket);
+                return _BasketCountChange;
+            }
         }
-    }
 
-}
+        private void UpdateBasket()
+        {
+            puzzles = GetBasketPuzzles(user);
+            inBasketCount = puzzles.GroupBy(x => x.Lot).Count();
+        }
+
+        private List<PuzzleDto> GetBasketPuzzles(ExtendedUserDto user)
+        {
+            if (user == null)
+                return new List<PuzzleDto>();
+
+            BasketDto basket = BasketService.GetBasketByUser(user);
+            if (basket == null || !basket.Puzzles.Any())
+                return new List<PuzzleDto>();
+
+            return basket.Puzzles.ToList();
+        }
+
+        private void GoToBasket()
+        {
+            NavigationManager.NavigateTo("/Basket");
+        }
+
+        private void DeleteRowFromBasket(ExtendedUserDto user, LotDto lot)
+        {
+            try
+            {
+                BasketService.RemoveFromBasket(user, lot, true);
+
+                // обновим бейджик у корзины
+                BasketCountChange.InvokeAsync(null);
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+
+        private void OnSearchTextChange(ChangeEventArgs e)
+        {
+            searchText = e.Value.ToString();
+
+            if (string.IsNullOrEmpty(searchText))
+            {
+                NavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                StateHasChanged();
+                NavigationManager.NavigateTo("/Search/" + searchText);
+                searchText = "";
+            }
+        }
+
+    }

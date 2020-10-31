@@ -205,9 +205,27 @@ app {
     padding-top: 1.1rem;
 }
 
-.footer > div {
-    padding-left: 10rem !important;
-    padding-right: 10rem !important;
+.footer-mob {
+    background-color: #ffffff;
+    border-top: 2px solid #76180f;
+    padding-bottom: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    text-align: center;
+}
+
+@media (min-width: 992px) {
+    .footer > div {
+        padding-left: 10rem !important;
+        padding-right: 10rem !important;
+    }
+}
+
+@media (max-width: 992px) {
+    .footer > div {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
 }
 
 .footer .container {
@@ -447,14 +465,13 @@ td.field-cell h6 {
 /***********************/
 
 /* лоты на главной */
-
 .lot-list-col {
-    margin-right: 40px;
+/*    margin-right: 70px;*/
     margin-top: 20px;
 }
 
 .lot-list-img {
-    width: 155px;
+    width: 100%;
     height: 140px;
     border: 1px solid #c7c7c7;
     object-fit: scale-down;
@@ -493,6 +510,38 @@ td.field-cell h6 {
     height: 3em;
     width: 155px;
     white-space: nowrap;
+}
+
+
+@media screen and (min-width: 1200px) {
+    .lot-list-col {
+/*        margin-right: 40px;*/
+    }
+}
+
+@media (max-width: 992px) {
+    .lot-list-price {
+        position: unset;
+        top: unset;
+        left: unset;
+        margin-top: 5px;
+        max-width: 50%;
+        font-size: 12px;
+    }
+
+    .lot-list-count {
+        top: 115px;
+        left: unset;
+        right: 0px;
+        font-size: 14px;
+        width: 60px;
+        height: 50px;
+        line-height: 50px;
+    }
+
+    .lot-list-label {
+        margin-top: 5px;
+    }
 }
 
 /*******************************************/
@@ -546,6 +595,7 @@ a.black-link:visited {
     height: 78px;
 }
 
+/**************** навбар и раскрывающийся список в меню ****************************************/
 .nav-row {
     background-color: #141414;
     padding-top: 1px;
@@ -556,6 +606,19 @@ a.black-link:visited {
     margin-right: 0px;
 }
 
+.nav-row-mob .dropdown-menu {
+    position: fixed !important;
+    transform: none !important;
+    height: 100vh;
+    width: 70vw;
+    left: 0;
+    top: 0;
+    border-radius: unset;
+
+}
+
+.nav-row-mob li,
+.nav-row-mob a,
 .nav-row li,
 .nav-row a {
     color: white;
@@ -567,6 +630,13 @@ a.black-link:visited {
     font-weight: 100;
 }
 
+.nav-row-mob a.toggle-btn {
+    color: black;
+    padding-top: 7px;
+    padding-bottom: 7px;
+}
+
+
 .nav-row ul li:first-child,
 .nav-row ul li:first-child a,
 .nav-row a:first-child {
@@ -574,33 +644,68 @@ a.black-link:visited {
 }
 
 
+.nav-row-mob a:hover, 
 .nav-row a:hover {
     color: white;
     text-decoration: none;
 }
 
+.nav-row-mob a.active,
+.nav-row-mob li > a:hover,
 .nav-row a.active,
-.nav-row li>a:hover {
+.nav-row li > a:hover {
     border-top: 3px solid #7f0000;
 }
 
 
 
+.nav-row-mob .dropdown-menu,
 .nav-row .dropdown-menu {
     background-color: #959ea4;
 }
 
+.nav-row-mob .dropdown-item:active,
 .nav-row .dropdown-item:active {
     background-color: #7d858a;
 }
 
+.nav-row-mob a.dropdown-item,
 .nav-row a.dropdown-item {
-    margin: 0;
+margin: 0;
 }
 
+.nav-row-mob a.dropdown-item:hover, 
 .nav-row a.dropdown-item:hover {
     background-color: #7d858a;
 }
+
+.nav-row-mob .nav-link {
+    color: rgba(0,0,0,.5);
+}
+/***********************************************************/
+
+
+
+/*********** нижнее меню **********************/
+
+a.bottom-menu-btn {
+    color: black;
+    text-align: center;
+    font-size: 14px;
+}
+
+a:hover.bottom-menu-btn {
+    color: black;
+    text-decoration: unset;
+}
+
+.bottom-menu-btn img {
+    width: 50%;
+    max-width: 60px;
+}
+
+/************************************************/
+
 
 
 .main .top-row > a, .main .top-row .btn-link {
@@ -613,56 +718,15 @@ a.black-link:visited {
     text-overflow: ellipsis;
 }
 
-.sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+
+
+
+/* Style page content - use this if you want to push the page content to the right when you open the side navigation */
+#main {
+    transition: margin-left .5s; /* If you want a transition effect */
+    padding: 20px;
 }
 
-    .sidebar .top-row {
-        background-color: rgba(0,0,0,0.4);
-    }
-
-    .sidebar .navbar-brand {
-        font-size: 1.1rem;
-    }
-
-    .sidebar .oi {
-        width: 2rem;
-        font-size: 1.1rem;
-        vertical-align: text-top;
-        top: -2px;
-    }
-
-    .sidebar .nav-item {
-        font-size: 0.9rem;
-        padding-bottom: 0.5rem;
-    }
-
-        .sidebar .nav-item:first-of-type {
-            padding-top: 1rem;
-        }
-
-        .sidebar .nav-item:last-of-type {
-            padding-bottom: 1rem;
-        }
-
-        .sidebar .nav-item a {
-            color: #d7d7d7;
-            border-radius: 4px;
-            height: 3rem;
-            display: flex;
-            align-items: center;
-            line-height: 3rem;
-        }
-
-            .sidebar .nav-item a.active {
-                background-color: rgba(255,255,255,0.25);
-                color: white;
-            }
-
-            .sidebar .nav-item a:hover {
-                background-color: rgba(255,255,255,0.1);
-                color: white;
-            }
 
 .content {
     padding-top: 1.1rem;
@@ -717,16 +781,16 @@ a.black-link:visited {
     }
 }
 
+@media (max-width: 768px) {
+    .main > div {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+}
+
 @media (min-width: 768px) {
     app {
         flex-direction: column;
-    }
-
-    .sidebar {
-        width: 250px;
-        height: 100vh;
-        position: sticky;
-        top: 0;
     }
 
     .main .top-row {
@@ -743,10 +807,7 @@ a.black-link:visited {
         display: none;
     }
 
-    .sidebar .collapse {
-        /* Never collapse the sidebar for wide screens */
-        display: block;
-    }
+
 }
 
 
@@ -801,6 +862,9 @@ a.black-link:visited {
     padding-top: 120px;
 }
 
+.padding-top-10 {
+    padding-top: 10px;
+}
 
 
 /******** slider *********************/
@@ -834,3 +898,25 @@ a.black-link:visited {
 }
 
 /*******************************/
+
+.flex-md,
+.block-md {
+    display: none;
+}
+
+
+@media (max-width: 992px) {
+    .hide-md {
+        display: none;
+    }
+
+    .block-md {
+        display: block;
+    }
+
+    .flex-md {
+        display: flex;
+    }
+}
+
+

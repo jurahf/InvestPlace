@@ -1,4 +1,6 @@
 ﻿@page "/Search"
+@page "/Search/{searchInitText}"
+
 
 @using Services;
 @using Services.DTO;
@@ -110,6 +112,9 @@
 
 @code {
 
+    [Parameter]
+    public string SearchInitText { get; set; }
+
     [CascadingParameter(Name = "MainMenuPunktChanged")]
     protected EventCallback MainMenuPunktChanged { get; set; }
 
@@ -131,7 +136,10 @@
         searchParams.MinPrice = (int)allLots.Min(x => x.PriceRange.Minimum);
         searchParams.MaxPrice = (int)allLots.Max(x => x.PriceRange.Maximum);
 
-        searchedLots = allLots.Select(x => x).ToList();
+        if (!string.IsNullOrEmpty(SearchInitText))
+            searchParams.Text = SearchInitText;
+
+        DoSearch();  //searchedLots = allLots.Select(x => x).ToList();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
