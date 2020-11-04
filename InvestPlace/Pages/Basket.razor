@@ -27,13 +27,13 @@
 
 
     <div class="row">
-        <div class="col col-8">
+        <div class="col col-xl-8 col-12">
 
             <!-- таблица с лотами в корзине -->
             <table class="table margin-top-50 text-center">
                 <thead>
                     <tr>
-                        <th scope="col" colspan="3">Товар</th>
+                        <th scope="col" colspan="2">Товар</th>
                         <th scope="col">Цена</th>
                         <th scope="col">Количество</th>
                         <th scope="col">Итого</th>
@@ -45,8 +45,7 @@
                     {
                         <tr class="">
                             <td><button class="del-row-btn" @onclick="() => DeleteRow(user, group.Key)"></button></td>
-                            <td><img src="@group.Key.ImageLink" width="124" height="100" /></td>
-                            <td>@group.Key.Name</td>
+                            <td><img src="@group.Key.ImageLink" class="basket-img" /></td>
                             <td class="text-red">@group.Key.PuzzlePrice ₽</td>
                             <td>
                                 <div class="basket-count-wrapper">
@@ -59,13 +58,17 @@
                             </td>
                             <td class="text-red">@(group.Key.PuzzlePrice * group.Count()) ₽</td>
                         </tr>
+                        <tr>
+                            <td class="td-caption">&nbsp;</td>
+                            <td colspan="4" class="td-caption">@group.Key.Name</td>
+                        </tr>
                     }
                 </tbody>
             </table>
         </div>
 
         <!-- оформление заказа -->
-        <div class="col col-4 margin-top-50 text-center">
+        <div class="col col-xl-4 col-12 margin-top-50 text-center">
             <h4>Сумма заказов</h4>
             <hr />
             <h2 class="text-red">@(summ.ToString("N2")) ₽</h2>
@@ -81,7 +84,7 @@
 
 
     <!-- продолжить покупки -->
-    <div class="row margin-top-120">
+    <div class="row margin-top-120 text-center">
         <div class="col col-12">
             <button class="btn btn-primary" @onclick="GoBack">&lt; Продолжить покупки</button>
         </div>

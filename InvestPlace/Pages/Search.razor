@@ -21,7 +21,7 @@
 <EditForm Model="searchParams">
 
     <div class="row">
-        <div class="col col-6">
+        <div class="col col-12 col-lg-6">
             <div class="form-group">
                 <label class="label">Категория</label>
                 <InputSelect class="form-control" Value="@searchParams.ParentCategoryId" ValueExpression="() => searchParams.ParentCategoryId" ValueChanged="(string s) => ParentCategoryChanged(s)">
@@ -33,7 +33,7 @@
                 </InputSelect>
             </div>
         </div>
-        <div class="col col-6">
+        <div class="col col-12 col-lg-6">
             <div class="form-group">
                 <label class="label">Подкатегория</label>
                 <InputSelect class="form-control" Value="@searchParams.SelectedCategoryId" ValueExpression="() => searchParams.SelectedCategoryId" ValueChanged="(string s) => SelectedCategoryChanged(s)">
@@ -61,29 +61,29 @@
 
 
     <div class="row">
-        <div class="col col-5">
+        <div class="col col-12 col-lg-5">
             <form class="form-inline slider-wrapper" id="slider-wrapper">
 
-                <div class="form-group">
+                <div class="form-group for-slider-left">
                     <!-- на самом деле bind здесь не работает. Значение в инпуте меняется через js (от слайдера) и потом отправляется в MinValChanged -->
                     <InputNumber type="number" class="form-control input-min" id="inputMin" disabled @bind-Value="searchParams.MinPrice" />
                 </div>
 
-                <div class="form-group mx-sm-3 mb-2">
+                <div class="form-group mx-sm-3 mb-2 slider-container">
                     <input id="ex2" type="text" class="span2" value="" data-slider-min="@searchParams.MinPrice" data-slider-max="@searchParams.MaxPrice" data-slider-step="10" data-slider-value="[@searchParams.MinPrice,@searchParams.MaxPrice]" data-slider-handle="square" />
                 </div>
 
-                <div class="form-group">
+                <div class="form-group for-slider-right">
                     <input type="number" class="form-control input-max" id="inputMax" disabled @bind-value="searchParams.MaxPrice">
                 </div>
 
             </form>
         </div>
 
-        <div class="col col-7">
+        <div class="col col-12 col-lg-7">
             @foreach (var lot in searchedLots)
             {
-                <div class="row">
+                <div class="row margin-top-10">
                     <div class="col col-4">
                         <div class="search-card">
                             <a href="/lot/@lot.Id">

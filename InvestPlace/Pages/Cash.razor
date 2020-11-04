@@ -18,23 +18,21 @@
 
         <div class="row">
             <div class="col col-2 offset-1 text-center">
-                <img class="" src="/images/icon-cash.png" alt="cash" />
+                <img class="" src="/images/icon-cash.png" width="100%" alt="cash" />
                 <h4 class="text-red text-center margin-top-20">КОШЕЛЁК</h4>
             </div>
 
             <div class="col col-6 offset-3">
+                <!-- баланс -->
+                <h4 class="inline">Баланс: </h4><h2 class="inline">@(cash?.Summ ?? 0)</h2><h4 class="inline"> руб</h4>
+                <br />
+                <h5 class="d-inline-block margin-top-20">Накоплено оказанной</h5><br/>
+                <h5 class="d-inline-block">помощи:&nbsp;</h5><h3 class="d-inline-block"> @(cash?.HelpingSumm ?? 0)</h3><h5 class="d-inline-block">&nbsp;руб</h5>
 
-                <div class="row">
-                    <div class="col col-12">
-                        <!-- баланс -->
-                        <h4 class="inline">Баланс: </h4><h2 class="inline">@(cash?.Summ ?? 0)</h2><h4 class="inline"> руб</h4>
-                        <br />
-                        <h5 class="d-inline-block margin-top-20">Накоплено оказанной</h5><br/>
-                        <h5 class="d-inline-block">помощи:&nbsp;</h5><h3 class="d-inline-block"> @(cash?.HelpingSumm ?? 0)</h3><h5 class="d-inline-block">&nbsp;руб</h5>
+                @*<h4 class="inline">Бонусы: </h4><h2 class="inline">@(cash?.BonusSumm ?? 0)</h2><h4 class="inline"> руб</h4>*@
+            </div>
 
-                        @*<h4 class="inline">Бонусы: </h4><h2 class="inline">@(cash?.BonusSumm ?? 0)</h2><h4 class="inline"> руб</h4>*@
-                    </div>
-                </div>
+            <div class="col col-lg-6 offset-lg-6 col-12">
 
                 <div class="row margin-top-120">
                     <div class="col col-12">
@@ -46,7 +44,7 @@
                                 <label class="label">Введите, какую сумму хотите вывести</label>
 
                                 <form class="form-inline slider-wrapper" id="slider-wrapper-out">
-                                    <div class="form-group mx-sm-3 mb-2">
+                                    <div class="form-group mx-sm-3 mb-2 slider-container">
                                         <input id="sliderOutput" type="text" class="span2" value="" data-slider-min="500" data-slider-max="20000" data-slider-step="500" data-slider-value="@outputCashArgs.Summ" data-slider-handle="square" />
                                     </div>
 
@@ -85,7 +83,7 @@
                                 <label class="label">Введите, на какую сумму хотите пополнить кошелек</label>
 
                                 <form class="form-inline slider-wrapper" id="slider-wrapper-in">
-                                    <div class="form-group mx-sm-3 mb-2">
+                                    <div class="form-group mx-sm-3 mb-2 slider-container">
                                         <input id="sliderInput" type="text" class="span2" value="" data-slider-min="500" data-slider-max="20000" data-slider-step="500" data-slider-value="@inputCashArgs.Summ" data-slider-handle="square" />
                                     </div>
 
@@ -122,7 +120,7 @@
         </div>
 
         <div class="row">
-            <div class="col col-6">
+            <div class="col col-lg-6 col-12">
                 <h6 class="text-danger">@errorText</h6>
                 <h6 class="text-success">@successText</h6>
             </div>
@@ -130,28 +128,28 @@
 
         <!-- пополнения счетов других пользователей, которые обещал сделать -->
         <div class="row margin-top-50">
-            <div class="col col-6 @(processByMe.Any() ? "" : "hidden")">
+            <div class="col col-lg-6 col-12 @(processByMe.Any() ? "" : "hidden")">
                 <h5>Требуются действия</h5>
                 <table class="table table-sm">
                     <thead>
                         <tr>
+                            <th></th>
                             <th>Дата</th>
                             <th>Сумма</th>
                             <th>Операция</th>
-                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var q in processByMe.OrderByDescending(x => x.Date))
                         {
                             <tr>
-                                <td>@q.Date</td>
-                                <td>@q.Summ</td>
-                                <td>Для пополнения кошелька переведите сумму по номеру телефона @q.User.PhoneNumber</td>
                                 <td>
                                     <a class="text-red" @onclick="() => ProcessOutput(q.User.Id, q.User.PhoneNumber, q.Summ)">Подтвердить</a>
                                     <a class="text-red" @onclick="() => DeclainOutput(q)">Отказаться</a>
                                 </td>
+                                <td>@q.Date</td>
+                                <td>@q.Summ</td>
+                                <td>Для пополнения кошелька переведите сумму по номеру телефона @q.User.PhoneNumber</td>
                             </tr>
                         }
                     </tbody>
@@ -161,32 +159,32 @@
 
         <!-- активные запросы -->
         <div class="row margin-top-20">
-            <div class="col col-6">
+            <div class="col col-lg-6 col-12">
                 <h5>Активные запросы</h5>
                 <table class="table table-sm">
                     <thead>
                         <tr>
+                            <th></th>
                             <th>Дата</th>
                             <th>Сумма</th>
                             <th>Операция</th>
                             <th>Статус</th>
-                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var q in myQueries.Where(x => x.Moderate == null).OrderByDescending(x => x.Date))
                         {
                             <tr>
-                                <td>@q.Date</td>
-                                <td>@q.Summ</td>
-                                <td>@(q.IsOutput ? "Вывод денег" : "Пополнение кошелька")</td>
-                                <td>@q.Status</td>
                                 <td>
                                     @if (q.StatusInt == 2)
                                     {
                                         <a class="btn btn-secondary text-white" @onclick="() => ConfirmGetMoney(q)">Подтвердить получение денег</a>
                                     }
                                 </td>
+                                <td>@q.Date</td>
+                                <td>@q.Summ</td>
+                                <td>@(q.IsOutput ? "Вывод денег" : "Пополнение кошелька")</td>
+                                <td>@q.Status</td>
                             </tr>
                         }
                     </tbody>
@@ -196,7 +194,7 @@
 
         <!-- выполненные запросы -->
         <div class="row margin-top-20">
-            <div class="col col-6">
+            <div class="col col-lg-6 col-12">
                 <h5>Выполненные запросы</h5>
                 <table class="table table-sm">
                     <thead>
@@ -262,15 +260,10 @@
     protected override void OnInitialized()
     {
         MainMenuPunktChanged.InvokeAsync(MainMenuPunkt.Profile);
-        cash = FindUserCash(user);
         outputCashArgs = new CashArgs() { Summ = 500 };
         inputCashArgs = new CashArgs() { Summ = 500 };
 
-        if (user != null)
-        {
-            myQueries = CashService.QueriesCashByUser(user);
-            processByMe = CashService.ProcessOutputsByUser(user);
-        }
+        ReInit();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -322,6 +315,19 @@
         phoneForSendActivated = false;
     }
 
+    private void ReInit()
+    {
+        cash = FindUserCash(user);
+
+        if (user != null)
+        {
+            myQueries = CashService.QueriesCashByUser(user);
+            processByMe = CashService.ProcessOutputsByUser(user);
+        }
+        this.StateHasChanged();
+    }
+
+
 
     private void ValidOutputCash()
     {
@@ -332,7 +338,7 @@
             CashService.CreateOutputOperationRequest(user, outputCashArgs.Summ);
             successTextOutput = "Заявка на вывод денег успешно сформирована!";
             outputButtonDisabled = true;
-            this.StateHasChanged();
+            ReInit();
         }
         catch (Exception ex)
         {
@@ -349,7 +355,7 @@
             sendMoneyParams = CashService.GetPhoneForInputMoney(user, inputCashArgs.Summ);
             inCashActivated = false;
             phoneForSendActivated = true;
-            this.StateHasChanged();
+            ReInit();
         }
         catch (Exception ex)
         {
@@ -366,7 +372,7 @@
             CashService.ConfirmSendMoney(user, sendMoneyParams.UserId, sendMoneyParams.Phone, inputCashArgs.Summ);
             successTextInput = "В ближайшее время деньги будут зачислены на ваш кошелек!";
             inputButtonDisabled = true;
-            this.StateHasChanged();
+            ReInit();
         }
         catch (Exception ex)
         {
@@ -381,12 +387,8 @@
             errorText = "";
             successText = "";
             CashService.ConfirmGetMoney(user, query);
-
-            cash = FindUserCash(user);
-            myQueries = CashService.QueriesCashByUser(user);
-            processByMe = CashService.ProcessOutputsByUser(user);
             successText = "Операция успешно завершена!";
-            this.StateHasChanged();
+            ReInit();
         }
         catch (Exception ex)
         {
@@ -401,9 +403,8 @@
             errorText = "";
             successText = "";
             CashService.ConfirmSendMoney(user, userId, phone, summ);
-            processByMe = CashService.ProcessOutputsByUser(user);
             successText = "Деньги поступят на ваш кошелек в ближайшее время";
-            this.StateHasChanged();
+            ReInit();
         }
         catch (Exception ex)
         {
@@ -418,9 +419,8 @@
             errorText = "";
             successText = "";
             CashService.DeclainProcessOutput(user, query);
-            processByMe = CashService.ProcessOutputsByUser(user);
             successText = "Пополнение кошелька отменено";
-            this.StateHasChanged();
+            ReInit();
         }
         catch (Exception ex)
         {

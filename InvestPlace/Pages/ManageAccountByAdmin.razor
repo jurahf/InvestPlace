@@ -14,7 +14,7 @@
     <div class="margin-top-50"></div>
 
     <div class="row">
-        <div class="col col-2 offset-1 text-center">
+        <div class="col col-lg-2 offset-lg-1 text-center">
             @if (string.IsNullOrEmpty(avatarLink))
             {
                 <img class="avatar" src="/images/icon-profile.png" alt="profile" />
@@ -26,7 +26,7 @@
             <h4 class="text-red text-center margin-top-20">@editedUser.InnerName</h4>
         </div>
 
-        <div class="col col-9">
+        <div class="col col-12 col-lg-9">
 
             <EditForm Model="@editedUser">
                 <DataAnnotationsValidator />
@@ -34,7 +34,7 @@
 
                 <!-- фамилия -->
                 <div class="row">
-                    <div class="col col-6">
+                    <div class="col col-12 col-md-6">
                         <div class="form-group">
                             <label class="label">Фамилия</label>
                             <input class="form-control" value="@editedUser.Surname" disabled />
@@ -44,13 +44,13 @@
 
                 <!-- имя отчество -->
                 <div class="row">
-                    <div class="col col-6">
+                    <div class="col col-12 col-md-6">
                         <div class="form-group">
                             <label class="label">Имя</label>
                             <input class="form-control" value="@editedUser.InnerName" disabled />
                         </div>
                     </div>
-                    <div class="col col-6">
+                    <div class="col col-12 col-md-6">
                         <div class="form-group">
                             <label class="label">Отчетво</label>
                             <input class="form-control" value="@editedUser.Patronymic" disabled />
@@ -60,13 +60,13 @@
 
                 <!-- телефон Email -->
                 <div class="row">
-                    <div class="col col-6">
+                    <div class="col col-12 col-md-6">
                         <div class="form-group">
                             <label class="label">Телефон</label>
                             <input class="form-control" value="@editedUser.PhoneNumber" disabled />
                         </div>
                     </div>
-                    <div class="col col-6">
+                    <div class="col col-12 col-md-6">
                         <div class="form-group">
                             <label class="label">E-mail</label>
                             <input class="form-control" value="@editedUser.Email" type="email" disabled />
@@ -84,13 +84,13 @@
 
                 <!-- Номер счета Корр.счет -->
                 <div class="row">
-                    <div class="col col-6">
+                    <div class="col col-12 col-md-6">
                         <div class="form-group">
                             <label class="label">Номер счёта</label>
                             <input class="form-control" value="@editedUser.SchetNumber" disabled />
                         </div>
                     </div>
-                    <div class="col col-6">
+                    <div class="col col-12 col-md-6">
                         <div class="form-group">
                             <label class="label">Корр. счёт</label>
                             <input class="form-control" value="@editedUser.CorrSchet" disabled />
@@ -100,13 +100,13 @@
 
                 <!-- Банк получателя ИНН -->
                 <div class="row">
-                    <div class="col col-6">
+                    <div class="col col-12 col-md-6">
                         <div class="form-group">
                             <label class="label">Банк получателя</label>
                             <input class="form-control" value="@editedUser.Bank" disabled />
                         </div>
                     </div>
-                    <div class="col col-6">
+                    <div class="col col-12 col-md-6">
                         <div class="form-group">
                             <label class="label">ИНН</label>
                             <input class="form-control" value="@editedUser.INN" disabled />
@@ -116,13 +116,13 @@
 
                 <!-- БИК КПП -->
                 <div class="row">
-                    <div class="col col-6">
+                    <div class="col col-12 col-md-6">
                         <div class="form-group">
                             <label class="label">БИК</label>
                             <input class="form-control" value="@editedUser.BIK" disabled />
                         </div>
                     </div>
-                    <div class="col col-6">
+                    <div class="col col-12 col-md-6">
                         <div class="form-group">
                             <label class="label">КПП</label>
                             <input class="form-control" value="@editedUser.KPP" disabled />

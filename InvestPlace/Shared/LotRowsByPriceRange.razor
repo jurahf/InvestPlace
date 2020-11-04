@@ -10,9 +10,9 @@
             <h6 class="text-center text-red">@gr.Key.Minimum - @gr.Key.Maximum руб</h6>
         </div>
 
-        @foreach (var lot in gr.Take(5))
+        @foreach (var lot in gr.Take(FirstLineCount))
         {
-            <div class="col col-2">
+            <div class="col col-xl-2 col-lg-3 col-6">
                 <a class="link-text-usual" href="/lot/@lot.Id">
                     <img class="lot-my-img" src="@lot.ImageLink" alt="" />
                     <div class="lot-my-count">@lot.PuzzleCount</div>
@@ -40,9 +40,9 @@
             <div class="collapse" id="collapseGroup_@gr.Key.Id">
                 <div class="card card-body background-color-body">
                     <div class="row">
-                        @foreach (var lot in gr.Skip(5))
+                        @foreach (var lot in gr.Skip(FirstLineCount))
                         {
-                            <div class="col col-2">
+                            <div class="col col-lg-3 col-6">
                                 <a class="link-text-usual" href="/lot/@lot.Id">
                                     <img class="lot-my-img" src="@lot.ImageLink" alt="" />
                                     <div class="lot-my-count">@lot.PuzzleCount</div>
@@ -69,4 +69,5 @@
     [Parameter]
     public List<LotDto> Lots { get; set; }
 
+    protected int FirstLineCount = 5; // TODO: по идее, должно меняться в зависимости от разрешения экрана/размера окна
 }

@@ -174,6 +174,7 @@ table.text-center td {
 }
 
 .basket-count-wrapper {
+    min-width: 122px;
     position: relative;
 }
 
@@ -188,6 +189,18 @@ table.text-center td {
     line-height: 68px;
     font-size: 16px;
     text-align: center;
+}
+
+.basket-img {
+    width: 124px;
+    height: 100px;
+}
+
+@media (max-width: 992px) {
+    .basket-img {
+        width: 60px;
+        height: 60px;
+    }
 }
 
 
@@ -236,8 +249,9 @@ app {
 /*******************************/
 
 .avatar {
-    height: 144px;
-    width: 144px;
+/*    height: 144px;
+    width: 144px;*/
+    width: 100%;
 }
 
 
@@ -296,6 +310,11 @@ app {
 
 /***********************************************/
 
+.td-caption {
+    border: none !important;
+    text-align: left !important;
+}
+
 .header-wrapper {
     background-color: white;
     padding-top: 15px;
@@ -328,8 +347,9 @@ app {
 
 /* страница поиска */
 .search-card img {
-    width: 167px;
+    width: 100%;
     height: 127px;
+    object-fit: scale-down;
     margin-bottom: 20px;
 }
 
@@ -556,6 +576,16 @@ td.field-cell h6 {
     line-height: 85px;
     font-size: 20px;
     text-align: center;
+    background-size: contain;
+}
+
+@media (max-width: 1200px) {
+    .lot-edit-count {
+        width: 63px;
+        height: 55px;
+        line-height: 55px;
+        font-size: 16px;
+    }
 }
 
 .lot-edit-count-btn {
