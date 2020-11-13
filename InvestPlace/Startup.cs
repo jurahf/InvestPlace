@@ -23,6 +23,8 @@ using Services.Services.QueryExchangeService;
 using Services.Services.PuzzlePaintService;
 using Services.Services.LotPresaveService;
 using Services.Services.FaqService;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Services.Services.EmailSender;
 
 namespace InvestPlace
 {
@@ -48,7 +50,7 @@ namespace InvestPlace
             services.AddDbContext<InvestPlaceContext>(options => options.UseSqlServer(connectionString));
             services.AddDefaultIdentity<ExtendedUser>(options =>
                 {
-                    options.SignIn.RequireConfirmedAccount = false;
+                    options.SignIn.RequireConfirmedAccount = true;
                     options.Password.RequiredLength = 6;
                     options.Password.RequireDigit = true;
                     options.Password.RequireUppercase = false;
@@ -75,6 +77,8 @@ namespace InvestPlace
             services.AddScoped<IPuzzlePaintService, PuzzlePaintService>();
             services.AddScoped<ILotPresaveService, LotPresaveService>();
             services.AddScoped<IFaqService, FaqService>();
+
+            services.AddTransient<IEmailSender, EmailSender>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

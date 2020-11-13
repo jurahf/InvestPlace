@@ -373,15 +373,17 @@ app {
 .field-cell img {
     width: 70px;
     height: 55px;
+    object-fit: contain;
 }
 
-td.field-cell {
+.field-cell {
     height: 55px;
     width: 70px;
     padding: 0;
+    display: inline-table;
 }
 
-td.field-cell h6 {
+.field-cell h6 {
     color: #c9b1b1;
     text-shadow: 2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 1px 1px #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
     font-size: 18px;
