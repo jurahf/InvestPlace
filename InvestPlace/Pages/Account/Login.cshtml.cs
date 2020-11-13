@@ -44,7 +44,7 @@ namespace InvestPlace.Pages.Account
         public class InputModel
         {
             [Required(ErrorMessage = "Электронная почта обязательна")]
-            [EmailAddress]
+            [EmailAddress(ErrorMessage = "Неверный формат электронной почты")]
             public string Email { get; set; }
 
             [Required(ErrorMessage = "Пароль обязателен")]
