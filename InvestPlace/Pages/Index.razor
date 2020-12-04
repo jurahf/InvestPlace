@@ -15,13 +15,14 @@
 
     @foreach (var lot in allLots.OrderByDescending(x => x.PuzzleCount).ThenBy(x => x.Price))
     {        
-    <div class="col col-xl-2 offset-xl-1 col-lg-3 offset-lg-1 col-6 offset-0 lot-list-col">
+    <div class="col col-xl-2 offset-xl-1 col-lg-3 offset-lg-1 col-sm-6 col-12 offset-0 lot-list-col">
         <a class="link-text-usual" href="/lot/@lot.Id">
             <img class="lot-list-img" src="@lot.ImageLink" alt="" />
             <div class="lot-list-count">@lot.PuzzleCount</div>
-            <div class="lot-list-price">@lot.PuzzlePrice ₽</div>
+            <div class="lot-list-price">@lot.PuzzlePrice&nbsp;₽</div>
 
             <div class="lot-list-label">@lot.Name</div>
+            <div class="lot-list-full-price">@lot.Price&nbsp;₽</div>
         </a>
     </div>
     }

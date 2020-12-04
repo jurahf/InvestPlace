@@ -13,6 +13,8 @@ namespace Services.Services.BasketService
 
         BasketDto RemoveFromBasket(ExtendedUserDto user, LotDto lot, bool removeAllPuzzleOfLot);
 
+        BasketDto ChangeLotCount(ExtendedUserDto user, LotDto lot, int changeNumber);
+
         void Buy(ExtendedUserDto user);
     }
 }

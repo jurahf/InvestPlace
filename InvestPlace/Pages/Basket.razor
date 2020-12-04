@@ -51,7 +51,9 @@
                                 <div class="basket-count-wrapper">
                                     <button class="row-btn-minus" @onclick="() => DeletePuzzle(user, group.Key)"></button>
                                     <div class="basket-count">
-                                        <span>@group.Count()</span>
+                                        @*<span>@group.Count()</span>*@
+                                        <input type="text" @onchange="(x) => ChangePuzzleCount(user, group.Key, (string)x.Value)" value="@group.Count()" />
+                                        <h6 class="text-danger">@inputNumberError</h6>
                                     </div>
                                     <button class="row-btn-plus" @onclick="() => AddPuzzle(user, group.Key)"></button>
                                 </div>
@@ -110,6 +112,7 @@
     decimal summ;
     string errorText = "";
     string sucessText = "";
+    string inputNumberError = "";
 
 
     protected override void OnInitialized()
@@ -147,6 +150,26 @@
     {
         DoServiceAction(s => s.AddToBasket(user, lot));
     }
+
+    private void ChangePuzzleCount(ExtendedUserDto user, LotDto lot, string newValStr)
+    {
+        inputNumberError = "";
+
+        if (!int.TryParse(newValStr, out int newVal) || newVal < 0)
+        {
+            // TODO: все равно значение не обновляется
+            inputNumberError = "Введите целое число";
+            puzzles = FindPuzzles(user);
+            StateHasChanged();
+
+            return;
+        }
+
+        int oldVal = puzzles.Count(x => x.LotId == lot.Id);
+
+        DoServiceAction(s => s.ChangeLotCount(user, lot, newVal - oldVal));
+    }
+
 
     private void DeletePuzzle(ExtendedUserDto user, LotDto lot)
     {

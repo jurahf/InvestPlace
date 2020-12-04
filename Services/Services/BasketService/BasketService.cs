@@ -39,6 +39,31 @@ namespace Services.Services.BasketService
             return BasketDto.ConvertFromBasket(basket);
         }
 
+        public BasketDto ChangeLotCount(ExtendedUserDto user, LotDto lot, int changeNumber)
+        {
+            try
+            {
+                // TODO: это расточительно, так как в методах каждый раз ищутся пользователь и лот в базе.
+                // Плюс, блокировка только внутри каждого добавления, а не на все сразу
+                BasketDto temp = null;
+                if (changeNumber > 0)
+                {
+                    for (int i = 0; i < changeNumber; i++)
+                        temp = AddToBasket(user, lot);
+                }
+                else
+                {
+                    for (int i = 0; i < -changeNumber; i++)
+                        temp = RemoveFromBasket(user, lot, false);
+                }
+
+                return temp;
+            }
+            catch
+            {
+                throw;
+            }
+        }
 
         public BasketDto AddToBasket(ExtendedUserDto userDto, LotDto lotDto)
         {

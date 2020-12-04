@@ -25,13 +25,14 @@
 
         <!-- купить пазл, цена пазла, сколько уже куплено -->
         <div class="row margin-top-10">
-            <div class="col col-3">
-                <button class="btn btn-primary" @onclick="Buy">Купить пазл</button>
-                <h6 class="text-danger">@((MarkupString)buyErrorText)</h6>
-            </div>
-
-            <div class="col col-4 text-center">
-                <h5 class="text-red">@editedLot.PuzzlePrice руб</h5>
+            <div class="col col-9">
+                <h5 class="text-red">@editedLot.PuzzlePrice&nbsp;руб</h5>
+                <AuthorizeView Roles="Moderator, Admin">
+                    <NotAuthorized>
+                        <button class="btn btn-primary" @onclick="Buy">Купить&nbsp;пазл</button>
+                        <h6 class="text-danger">@((MarkupString)buyErrorText)</h6>
+                    </NotAuthorized>
+                </AuthorizeView>
             </div>
 
             <div class="col col-3">
