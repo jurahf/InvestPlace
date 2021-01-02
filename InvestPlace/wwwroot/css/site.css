@@ -130,6 +130,10 @@ app {
     z-index: -1;
 }
 
+.navbar-nav.landing-nav-bar {
+    flex-direction: row;
+}
+
 .carousel {
     max-height: 55vh;
 }
