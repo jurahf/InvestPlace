@@ -120,6 +120,7 @@ app {
     color: #d7d7d7 !important;
 }
 
+/*************** лендинг ***********************/
 .landing-background {
     background-image: url('../images/Background.png');
     width: 100vw;
@@ -128,6 +129,47 @@ app {
     position: absolute;
     z-index: -1;
 }
+
+.carousel {
+    max-height: 55vh;
+}
+
+.carousel-img {
+    max-height: 55vh;
+}
+
+.nav-row.landing-menu {
+    background-color: #f6f6f6;
+    padding: 0;
+}
+
+.landing-menu .navbar-nav {
+    margin: auto;
+}
+
+.nav-row.landing-menu a:hover,
+.nav-row.landing-menu a {
+    color: #5a5a5a;
+}
+
+.nav-row.landing-menu a {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.nav-row-mob.landing-menu a.active,
+.nav-row-mob.landing-menu li > a:hover,
+.nav-row.landing-menu a.active,
+.nav-row.landing-menu li > a:hover {
+    border-top: none;
+    border-bottom: 3px solid #888787;
+    background-color: white;
+}
+
+.landing-menu {
+    margin-top: 35vh;
+}
+/****************************************************/
 
 
 /*********  таблица в корзине *********************/

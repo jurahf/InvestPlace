@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Carousel\Components.csproj" />
     <ProjectReference Include="..\Services\Services.csproj" />
   </ItemGroup>
 

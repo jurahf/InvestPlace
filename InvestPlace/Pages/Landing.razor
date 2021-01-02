@@ -1,14 +1,38 @@
 ﻿@page "/landing"
-
 @layout EmptyLayout
 
+@using Components;
 
 <div class="landing-background">
     &nbsp;
 </div>
 
-<h3>Текст</h3>
+<div class="col col-8 offset-2">
+    <div class="navbar navbar-expand-lg navbar-light nav-row hide-md landing-menu">
+        <ul class="navbar-nav mr-auto">
+            <li><a href="/landing" class="active">Главная</a></li>
+            <li><a href="#">Магазин</a></li>
+            @*<li><a href="#">Контакты</a></li>*@
+        </ul>
+    </div>
+</div>
+
+<Carousel imageset="@AssetImages" CssClass="col col-8 carousel" ImageClass="carousel-img" AutoScrollInterval="5" ShowArrows="false">
+
+</Carousel>
+
+
+
 
 @code {
+    private List<ImageFile> AssetImages = new List<ImageFile>();
 
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        AssetImages.Add(new ImageFile() { Url = "images/landing/carousel-1.png" });
+        AssetImages.Add(new ImageFile() { Url = "images/landing/carousel-2.png" });
+        AssetImages.Add(new ImageFile() { Url = "images/landing/carousel-3.png" });
+    }
 }
