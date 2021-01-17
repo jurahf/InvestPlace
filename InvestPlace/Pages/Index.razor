@@ -1,20 +1,35 @@
-﻿@page "/"
+﻿@page "/shop"
 
 @using Services;
 @using Services.DTO;
 
 @inject Services.Services.LotService.ILotService lotService
 
-<!-- реклама -->
+
+<!-- кнопки пагинации -->
+<div class="row justify-content-center">
+    <div class="btn-group" role="group" aria-label="">
+
+        <button type="button" class="btn btn-primary btn-pg @(selectedRange == 0 ? "disable" : "")" @onclick="() => RangePrev()"><i class="fas fa-arrow-left"></i></button>
+        @foreach (var range in rangesForSelect)
+        {
+        <button type="button" class="btn btn-primary btn-pg @(range.Order == selectedRange ? "my-active" : "")" @onclick="() => SelectRange(range)">@(range.Order + 1)</button>
+        }
+        <button type="button" class="btn btn-primary btn-pg @(selectedRange == rangesForSelect.Count - 1 ? "disable" : "")" @onclick="() => RangeNext()"><i class="fas fa-arrow-right"></i></button>
+
+    </div>
+</div>
 
 
-<!-- слайдер карусели -->
 
 <!-- все товары -->
 <div class="row">
 
-    @foreach (var lot in allLots.OrderByDescending(x => x.PuzzleCount).ThenBy(x => x.Price))
-    {        
+    @foreach (var lot in allLots
+        .Where(x => x.Price >= rangesForSelect[selectedRange].Minimum && x.Price <= rangesForSelect[selectedRange].Maximum)
+        .OrderByDescending(x => x.PuzzleCount)
+        .ThenBy(x => x.Price))
+    {
     <div class="col col-xl-2 offset-xl-1 col-lg-3 offset-lg-1 col-sm-6 col-12 offset-0 lot-list-col">
         <a class="link-text-usual" href="/lot/@lot.Id">
             <img class="lot-list-img" src="@lot.ImageLink" alt="" />
@@ -26,25 +41,75 @@
         </a>
     </div>
     }
+
 </div>
 
+<!-- кнопки пагинации -->
+<div class="row justify-content-center">
+    <div class="btn-group" role="group" aria-label="">
+
+        <button type="button" class="btn btn-primary btn-pg @(selectedRange == 0 ? "disable" : "")" @onclick="() => RangePrev()"><i class="fas fa-arrow-left"></i></button>
+        @foreach (var range in rangesForSelect)
+        {
+        <button type="button" class="btn btn-primary btn-pg @(range.Order == selectedRange ? "my-active" : "")" @onclick="() => SelectRange(range)">@(range.Order + 1)</button>
+        }
+        <button type="button" class="btn btn-primary btn-pg @(selectedRange == rangesForSelect.Count - 1 ? "disable" : "")" @onclick="() => RangeNext()"><i class="fas fa-arrow-right"></i></button>
+
+    </div>
+</div>
+
+<!-- кнопка "наверх" -->
+<button type="button" id="btn-up" class="btn btn-primary float-right" onclick="window.scroll({top: 0, behavior: 'smooth'});">
+    <i class="fas fa-arrow-up"></i>
+</button>
 
 
 
+@code {
 
+        [CascadingParameter(Name = "MainMenuPunktChanged")]
+        protected EventCallback MainMenuPunktChanged { get; set; }
 
-@code { 
-    [CascadingParameter(Name = "MainMenuPunktChanged")]
-    protected EventCallback MainMenuPunktChanged { get; set; }
+        List<LotDto> allLots = new List<LotDto>();
 
-    List<LotDto> allLots = new List<LotDto>();
+        int selectedRange = 0;
+        List<SelectedRange> rangesForSelect = new List<SelectedRange>()
+    {
+        new SelectedRange() { Order = 0, Minimum = 0, Maximum = 500_000 },
+        new SelectedRange() { Order = 1, Minimum = 500_001, Maximum = 1_000_000 },
+        new SelectedRange() { Order = 2, Minimum = 1_000_001, Maximum = 1_500_000 },
+        new SelectedRange() { Order = 3, Minimum = 1_500_001, Maximum = 2_000_000 },
+    };
 
     protected override void OnInitialized()
     {
         MainMenuPunktChanged.InvokeAsync(MainMenuPunkt.Main);
         allLots = lotService.GetActual(true);
+        selectedRange = 0;
     }
 
 
+    private void SelectRange(SelectedRange range)
+    {
+        selectedRange = range.Order;
+    }
 
+    private void RangePrev()
+    {
+        if (selectedRange > 0)
+            selectedRange--;
+    }
+
+    private void RangeNext()
+    {
+        if (selectedRange < rangesForSelect.Count - 1)
+            selectedRange++;
+    }
+
+    private class SelectedRange
+    {
+        public int Order { get; set; }
+        public decimal Minimum { get; set; }
+        public decimal Maximum { get; set; }
+    }
 }

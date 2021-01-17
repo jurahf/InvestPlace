@@ -18,7 +18,7 @@
     <div class="header-wrapper">
         <div class="row header">
             <div class="col col-md-6">
-                <a href="#"><img src="/images/logo.png" /></a>
+                <a href="/shop"><img src="/images/logo.png" /></a>
             </div>
             <div class="col col-md-6 float-right hide-md">
                 <a class="social-logo" href="@(Configuration.GetValue<string>("contacts:instagram"))" target="_blank"><img src="/images/social-networks/instagram-color.png" /></a>
@@ -33,7 +33,7 @@
 
         <div class="row nav-row-mob margin-top-10 flex-md">
             <div class="col col-1" style="padding-left:0">
-                <a class="btn btn-light toggle-btn" href="#" id="navbarDropdownMob" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <a class="btn btn-light toggle-btn" href="/shop" id="navbarDropdownMob" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <i class="fas fa-th"></i>
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdownMob">
@@ -59,7 +59,7 @@
         <div class="navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
                 <li class="">
-                    <a href="#" class="@(selectedPunkt == MainMenuPunkt.Main ? "active" : "")">Главная</a>
+                    <a href="/shop" class="@(selectedPunkt == MainMenuPunkt.Main ? "active" : "")">Главная</a>
                 </li>
 
                 <li class=" dropdown">
@@ -159,6 +159,8 @@
         </CascadingValue>
     </CascadingValue>
 
+    @*@RenderSection("ContainerOut", required: false)*@ 
+
 </div>
 
 
@@ -201,21 +203,18 @@
     <footer class="footer hide-md">
         <div class="row container">
             <div class="col col-4">
-                <a href="#"><img src="/images/logo_footer.png" /></a>
+                <a href="/shop"><img src="/images/logo_footer.png" /></a>
             </div>
             <div class="col col-5">
                 <div class="row margin-top-20">
                     <div class="col col-7">
                         <a class="black-link" href="/Oferta">Пользовательское соглашение</a>
                     </div>
-                    <div class="col col-5">
-                        <a class="black-link" href="/NewLot">Разместить товар</a>
-                    </div>
                 </div>
 
                 <div class="row margin-top-20">
                     <div class="col col-6">
-                        <a class="black-link" href="#">Видео-инструкция</a>
+                        <a class="black-link" href="/shop">Видео-инструкция</a>
                     </div>
 
                     <div class="col col-6">
@@ -239,6 +238,9 @@
 
 
     @code {
+
+            [Parameter]
+            public RenderFragment OutBody { get; set; }
 
         protected ExtendedUserDto user = null;
         protected int inBasketCount = 0;
@@ -342,7 +344,7 @@
 
             if (string.IsNullOrEmpty(searchText))
             {
-                NavigationManager.NavigateTo("/");
+                NavigationManager.NavigateTo("/shop");
             }
             else
             {

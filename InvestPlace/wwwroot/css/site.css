@@ -44,6 +44,10 @@ a, .btn-link {
     color: #0366d6;
 }
 
+.btn-pg.my-active {
+    background-color: #ff0000 !important;
+}
+
 .btn-primary {
     text-transform: uppercase;
 }
@@ -120,6 +124,16 @@ app {
     color: #d7d7d7 !important;
 }
 
+#btn-up {
+    position: sticky;
+    bottom: 10px;
+    border-radius: 100%;
+    width: 40px;
+    height: 40px;
+    box-shadow: 0.1rem 0.1rem 0.1rem 0.05rem rgba(0,0,0,0.2);
+    left: 90%;
+}
+
 /*************** лендинг ***********************/
 .landing-background {
     background-image: url('../images/Background.png');
@@ -132,6 +146,7 @@ app {
 
 .navbar-nav.landing-nav-bar {
     flex-direction: row;
+    letter-spacing: 3px;
 }
 
 .carousel {

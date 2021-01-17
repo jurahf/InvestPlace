@@ -89,7 +89,7 @@
             {
                 // TODO: а что делать, если промодерировали неправильно?
                 <h5>Промодерирован пользоватлем @editedLot.CreateModerator.InnerName (@editedLot.CreateModerator.Email)</h5>
-                <h5>@editedLot.CreateModerateDate.Value.ToString("dd.MM.yyyy HH:mm")</h5>
+                <h5>@editedLot.CreateModerateDate?.ToString("dd.MM.yyyy HH:mm")</h5>
             }
 
             <button class="btn btn-primary" @onclick="StartEdit">Редактировать</button>

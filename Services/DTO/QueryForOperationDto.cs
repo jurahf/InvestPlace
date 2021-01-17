@@ -49,7 +49,7 @@ namespace Services.DTO
             switch (status)
             {
                 case CashQueryStatus.None:
-                    return "Может быть обработан модератором";
+                    return "Обрабатывается модератором";
                 case CashQueryStatus.ProcessByUser:
                     return "Обрабатывается пользователем";
                 case CashQueryStatus.SendConfirm:

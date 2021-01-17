@@ -1,4 +1,4 @@
-﻿@page "/landing"
+﻿@page "/"
 @layout EmptyLayout
 
 @using Components;
@@ -7,13 +7,22 @@
     &nbsp;
 </div>
 
-<div class="col col-8 offset-2">
-    <div class="navbar navbar-expand-lg navbar-light nav-row landing-menu">
-        <ul class="navbar-nav mr-auto landing-nav-bar">
-            <li><a href="/landing" class="active">Главная</a></li>
-            <li><a href="#">Магазин</a></li>
-            @*<li><a href="#">Контакты</a></li>*@
-        </ul>
+@*<div class="row">
+    <div class="col col-12">
+        <h6>Drop shipping</h6>
+    </div>
+</div>*@
+
+
+<div class="row">
+    <div class="col col-8 offset-2">
+        <div class="navbar navbar-expand-lg navbar-light nav-row landing-menu">
+            <ul class="navbar-nav mr-auto landing-nav-bar">
+                <li><a href="/Account/Register">Регистрация</a></li>
+                <li><a href="/Shop">Магазин</a></li>
+                <li><a href="/Instruction">Инструкция</a></li>
+            </ul>
+        </div>
     </div>
 </div>
 
